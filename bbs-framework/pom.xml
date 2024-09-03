@@ -14,8 +14,10 @@
     <description>自定义启动项</description>
     <modules>
         <module>common</module>
+        <module>bbs-spring-boot-starter-jackson</module>
     </modules>
     <dependencies>
+
 
     </dependencies>
 </project>
