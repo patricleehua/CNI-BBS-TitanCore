@@ -14,11 +14,6 @@
     <name>bbs-spring-boot-starter-jackson</name>
     <description>自定义 Jackson 配置: 支持 Java 8 新的日期 API，如 LocalDateTime、LocalDate 等等</description>
 
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.titancore</groupId>

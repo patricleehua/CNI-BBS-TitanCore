@@ -1,4 +1,7 @@
 package com.titancore.exception;
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotRoleException;
+import cn.dev33.satoken.exception.SaTokenException;
 import com.titancore.enums.ResponseCodeEnum;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.common.response.Response;
@@ -72,7 +75,23 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ Exception.class })
     @ResponseBody
     public Response<Object> handleOtherException(HttpServletRequest request, Exception e) {
-        log.error("{} request error, ", request.getRequestURI(), e);
+        log.error("其他类型异常捕获:URL:{},Error: ", request.getRequestURI(), e);
         return Response.fail(ResponseCodeEnum.SYSTEM_ERROR);
     }
+
+    /**
+     * saToken全局异常捕获
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(SaTokenException.class)
+    @ResponseBody
+    public Response<Object> handleSaTokenException(HttpServletRequest request, SaTokenException e) {
+        String message = e.getMessage();
+        String code =String.valueOf(e.getCode());
+        log.error("saToken全局异常捕获:URL:{},Error:{} ", request.getRequestURI(),message);
+        return Response.fail(code,message);
+    }
+
+
 }

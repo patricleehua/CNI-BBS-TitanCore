@@ -16,21 +16,6 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
-    @Select("select * from user")
-    User getall();
-
-    /**
-     * 按用户名查找具有角色的用户
-     * @param username
-     * @return
-     */
-
-    User findUserWithRolesByUserName(String username);
-    IPage<User> serachUser(Page<User> page,
-                         String KeyWords);
-  int updateUser(User user);
-
-    int deleteUser(Long userid);
 
 }
 

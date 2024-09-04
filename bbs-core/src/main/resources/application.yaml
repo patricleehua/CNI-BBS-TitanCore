@@ -56,6 +56,9 @@ spring:
 titan:
   md5:
     salt: shumei:)
+  #AESKEY
+  aes:
+    secretKey: eW1awsJiSLH7CGnmPGvBQZyPmACHTQYImNJPAu34fzs
 # MyBatis配置
 mybatis-plus:
   # 搜索指定包别名

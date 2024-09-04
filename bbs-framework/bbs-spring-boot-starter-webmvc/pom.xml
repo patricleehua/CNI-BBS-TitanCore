@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.titancore</groupId>
+        <artifactId>bbs-framework</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <groupId>com.titancore.framework.webmvc</groupId>
+    <artifactId>bbs-spring-boot-starter-webmvc</artifactId>
+    <packaging>jar</packaging>
+
+    <name>bbs-spring-boot-starter-webmvc</name>
+    <description>webmvc拦截过滤器启动项</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.titancore</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- Sa-Token 整合 Redis （使用 jackson 序列化方式） -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-redis-jackson</artifactId>
+        </dependency>
+        <!-- Sa-Token 权限认证 -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot3-starter</artifactId>
+        </dependency>
+    </dependencies>
+</project>

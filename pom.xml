@@ -69,6 +69,17 @@
         <artifactId>bbs-spring-boot-starter-jackson</artifactId>
         <version>${revision}</version>
       </dependency>
+      <dependency>
+        <groupId>com.titancore.framework.webmvc</groupId>
+        <artifactId>bbs-spring-boot-starter-webmvc</artifactId>
+        <version>${revision}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.titancore.framework.biz.operationlog</groupId>
+        <artifactId>bbs-spring-boot-starter-biz-operationlog</artifactId>
+        <version>${revision}</version>
+      </dependency>
+
       <!-- Sa-Token 整合 Redis （使用 jackson 序列化方式） -->
       <dependency>
         <groupId>cn.dev33</groupId>

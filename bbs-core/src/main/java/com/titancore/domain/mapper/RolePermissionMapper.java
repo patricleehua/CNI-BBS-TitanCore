@@ -1,19 +1,22 @@
 package com.titancore.domain.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.titancore.domain.entity.Permission;
 import com.titancore.domain.entity.RolePermission;
 import org.apache.ibatis.annotations.Mapper;
 
-/**
- * (RolePermission)表数据库访问层
- *
- * @author makejava
- * @since 2024-03-14 19:37:08
- */
+import java.util.List;
+
+
 @Mapper
 public interface RolePermissionMapper  extends BaseMapper<RolePermission> {
 
-
+    /**
+     * 根据角色Id查询所有的权限
+     * @param roleId
+     * @return
+     */
+    List<Permission> queryPermissionByRoleId(Long roleId);
 
 }
 

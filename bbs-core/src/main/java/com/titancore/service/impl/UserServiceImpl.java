@@ -13,6 +13,7 @@ import com.titancore.enums.StatusEnum;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.common.properties.Md5Salt;
 import com.titancore.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import java.util.List;
  * @since 2023-11-22 18:16:49
  */
 @Service
+@Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
 
@@ -72,14 +74,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
        //登入成功创建jwt令牌
         String token = tokenInfo.getTokenValue();
-        //查询权限
+        // 获取：当前账号所拥有的角色集合
         List<String> roleList = StpUtil.getRoleList();
+        log.info("roleList：{}",roleList);
+        // 获取：当前账号所拥有的权限集合
+        List<String> permissionList = StpUtil.getPermissionList();
+        log.info("permissionList：{}",permissionList);
         return UserLoginVo.builder()
                 .id(user.getUserId())
                 .username(user.getUserName())
                 .token(token)
                 .avatar(user.getAvatar())
-                .role(roleList)
+                .roles(roleList)
                 .build();
     }
 

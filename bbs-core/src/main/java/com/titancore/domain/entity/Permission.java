@@ -1,28 +1,21 @@
 package com.titancore.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Set;
-
-
+import java.util.Date;
+import lombok.Data;
 
 /**
- * 角色表
- * @TableName t_role
+ * 权限表
+ * @TableName t_permission
  */
+@TableName(value ="permission")
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@TableName(value ="role")
-public class Role {
+public class Permission {
     /**
      * 主键ID
      */
@@ -30,19 +23,29 @@ public class Role {
     private Long id;
 
     /**
-     * 角色名
+     * 父ID
      */
-    private String roleName;
+    private Long parentId;
 
     /**
-     * 角色唯一标识
+     * 权限名称
      */
-    private String roleKey;
+    private String name;
 
     /**
-     * 状态(0：启用 1：禁用)
+     * 类型(1：目录 2：菜单 3：按钮)
      */
-    private Integer status;
+    private Integer type;
+
+    /**
+     * 菜单路由
+     */
+    private String menuUrl;
+
+    /**
+     * 菜单图标
+     */
+    private String menuIcon;
 
     /**
      * 管理系统中的显示顺序
@@ -50,9 +53,14 @@ public class Role {
     private Integer sort;
 
     /**
-     * 备注
+     * 权限标识
      */
-    private String remark;
+    private String permissionKey;
+
+    /**
+     * 状态(0：启用；1：禁用)
+     */
+    private Integer status;
 
     /**
      * 创建时间
@@ -60,7 +68,7 @@ public class Role {
     private LocalDateTime createTime;
 
     /**
-     * 最后一次更新时间
+     * 更新时间
      */
     private LocalDateTime updateTime;
 
@@ -70,4 +78,3 @@ public class Role {
     private Boolean isDeleted;
 
 }
-
