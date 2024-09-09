@@ -9,4 +9,6 @@ import java.time.LocalDateTime;
 public class UserLoginDTO implements Serializable {
     private String username;
     private String password;
+    private String rememberMe;
+    private String loginType;
 }

@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
      * @param e
      * @return
      */
-    @ExceptionHandler(SaTokenException.class)
+    @ExceptionHandler({SaTokenException.class,NotLoginException.class})
     @ResponseBody
     public Response<Object> handleSaTokenException(HttpServletRequest request, SaTokenException e) {
         String message = e.getMessage();

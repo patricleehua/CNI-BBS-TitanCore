@@ -112,7 +112,7 @@
 //    public static void main(String[] args) {
 //        try {
 //            // Base64 解码 IV
-//            String ivBase64 = "7S7tmPZNZjBgfWEgE8l_kg";
+//            String ivBase64 = "eCV9XNIF7JcdpwBpoejhIw";
 //            byte[] iv = Base64.getDecoder().decode(Base64UrlUtils.base64UrlToBase64(ivBase64));
 //
 //            // Base64 解码密钥
@@ -120,7 +120,7 @@
 //            byte[] key = Base64.getDecoder().decode(secretKey);
 //
 //            // Base64 解码加密数据
-//            String encryptedBase64 = "lzgd12QMG71ReWHi85Rn8vTykMPkh9RHEDOXTrh6SPcNQQZbNLR63lLPQn87KoE7ddjTEEBqbMXepyvK6ejlglD5HMSAd3lPpHrL70-hoCTazh4gUtLdeSH2YTRGESvOZMAKEZbrdJS1DPXdEsDWVK2GBAkhkY_T-R_l2_nDFJNk5umlR9nWDMhuf2iv9qGPkYJ1yH9Q7-8Y_k2FPh_fxAPv-QA2DpP2szbVomMe2azlKduXavD0ucHfU_mqU1qNhC16X_Hqb_6RDk7zRurxmC4H1oAH2P3lyPoTtZyBI2LFx8cyCPAwHb9avSAHwEN8zKSENP35tw7ou5S3iWS5sUdw";
+//            String encryptedBase64 = "KVfRQ8Dlx_053j7SFxlX66ieDIH7H71pdM4a0f6IFsI6nalCkoKOnZucFNxs6zC2nVBstVrIyR7BtcVHM3W4I2Csewf9aPV4BZFXlxXlF1vthZLAkQ";
 //            byte[] encryptedData = Base64.getDecoder().decode(Base64UrlUtils.base64UrlToBase64(encryptedBase64));
 //
 //            // 解密

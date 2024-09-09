@@ -1,6 +1,7 @@
 server:
   port: 8080
 spring:
+
   profiles:
     active: dev
   datasource:
@@ -59,6 +60,34 @@ titan:
   #AESKEY
   aes:
     secretKey: eW1awsJiSLH7CGnmPGvBQZyPmACHTQYImNJPAu34fzs
+  cloud:
+    provider: aliyun
+    maxSize: 1000000     #上传文件大小10MB
+    aliyun:
+      aoss:
+        endpoint: ${titan.cloud.aliyun.oss.endpoint}
+        access-key-id: ${titan.cloud.aliyun.oss.access-key-id}
+        access-key-secret: ${titan.cloud.aliyun.oss.access-key-secret}
+        bucket-name: ${titan.cloud.aliyun.oss.bucket-name}
+      asms:
+        region-id: ${titan.cloud.aliyun.sms.region-id}
+        access-key-id: ${titan.cloud.aliyun.sms.access-key-id}
+        access-key-secret: ${titan.cloud.aliyun.sms.secret}
+        template-code: ${titan.cloud.aliyun.sms.template-code}
+        sign-name: ${titan.cloud.aliyun.sms.sign-name}
+
+    qiniu:
+      access-key: "your-access-key"
+      secret-key: "your-secret-key"
+      bucket-name: "your-bucket-name"
+      domain: "your-domain"
+    tencent:
+      secret-id: "your-secret-id"
+      secret-key: "your-secret-key"
+      region: "ap-guangzhou"
+      bucket-name: "your-bucket-name"
+
+
 # MyBatis配置
 mybatis-plus:
   # 搜索指定包别名
@@ -74,8 +103,8 @@ mybatis-plus:
 sa-token:
   # token 名称（同时也是 cookie 名称）
   token-name: token
-  # token 有效期（单位：秒） 默认30天，-1 代表永久有效  172800 48小时
-  timeout:  172800
+  # token 有效期（单位：秒） 默认30天，-1 代表永久有效  259200 72小时
+  timeout:  259200
   # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
   active-timeout: -1
   # 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）

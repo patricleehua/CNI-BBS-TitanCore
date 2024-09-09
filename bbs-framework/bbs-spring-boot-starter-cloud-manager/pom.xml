@@ -7,34 +7,31 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>com.titancore.framework.biz.operationlog</groupId>
-    <artifactId>bbs-spring-boot-starter-biz-operationlog</artifactId>
+    <groupId>com.titancore.framework.cloud.manager</groupId>
+    <artifactId>bbs-spring-boot-starter-cloud-manager</artifactId>
     <packaging>jar</packaging>
 
-    <name>bbs-spring-boot-starter-biz-operationlog</name>
-    <url>http://maven.apache.org</url>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
+    <name>bbs-spring-boot-starter-cloud-manager</name>
+    <description>云服务商逻辑启动类</description>
     <dependencies>
-
         <dependency>
             <groupId>com.titancore</groupId>
             <artifactId>common</artifactId>
         </dependency>
 
+        <!--aliyunoss -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.17.4</version>
         </dependency>
-
-        <!-- AOP 切面 -->
+        <!--aliyunsms-->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-            <version>3.1.5</version>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
+            <version>2.2.1</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
+
 </project>

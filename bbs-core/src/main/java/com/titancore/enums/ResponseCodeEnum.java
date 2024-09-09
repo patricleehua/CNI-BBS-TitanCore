@@ -16,6 +16,9 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     ACCOUNT_DELETE("AUTH-30001","账号已被删除,请联系管理员！"),
     PASSWORD_ERROR("AUTH-30002","密码错误"),
     ACCOUNT_LOCKED("AUTH-30003","账号被锁定"),
+    ACCOUNT_VERIFICATION_TYPE_ISNULL("AUTH-30004","登入验证类型不能为空"),
+
+    UPLOAD_BIG("AUTH-40001","上传的文件过大"),
     ;
 
     // ----------- 业务异常状态码 -----------

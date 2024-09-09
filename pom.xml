@@ -67,6 +67,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.titancore.framework.cloud.manager</groupId>
+        <artifactId>bbs-spring-boot-starter-cloud-manager</artifactId>
+        <version>${revision}</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.titancore.framework.jackson</groupId>
         <artifactId>bbs-spring-boot-starter-jackson</artifactId>
         <version>${revision}</version>

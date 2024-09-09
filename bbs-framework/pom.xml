@@ -17,6 +17,7 @@
         <module>bbs-spring-boot-starter-jackson</module>
         <module>bbs-spring-boot-starter-webmvc</module>
         <module>bbs-spring-boot-starter-biz-operationlog</module>
+        <module>bbs-spring-boot-starter-cloud-manager</module>
     </modules>
     <dependencies>
 

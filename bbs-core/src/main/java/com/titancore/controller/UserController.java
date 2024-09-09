@@ -20,6 +20,7 @@ public class UserController {
     @Autowired
     private UserService userService;
     @PostMapping("/login")
+    @ApiOperationLog
     public Response<?> login(@RequestBody UserLoginDTO userLoginDTO){
         log.info("login:"+userLoginDTO);
         UserLoginVo userLoginVo = userService.login(userLoginDTO);

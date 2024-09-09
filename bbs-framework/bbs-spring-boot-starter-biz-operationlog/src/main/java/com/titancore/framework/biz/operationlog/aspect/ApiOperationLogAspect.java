@@ -1,12 +1,16 @@
 package com.titancore.framework.biz.operationlog.aspect;
 
 import com.titancore.framework.common.util.JsonUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -35,10 +39,17 @@ public class ApiOperationLogAspect {
 
         // 功能描述信息
         String description = getApiOperationLogDescription(joinPoint);
+        //获取浏览器请求信息
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        String ipAddress = request.getHeader("x-Forwarded-For");
+        if(StringUtils.isEmpty(ipAddress)){
+            ipAddress = request.getRemoteAddr();
+        }
+        String userAgent = request.getHeader("User-Agent");
 
         // 打印请求相关参数
-        log.info("====== 请求开始: [{}], 入参: {}, 请求类: {}, 请求方法: {} =================================== ",
-                description, argsJsonStr, className, methodName);
+        log.info("======请求来源:{} 设备型号:{}, 请求开始: [{}], 入参: {}, 请求类: {}, 请求方法: {} =================================== ",
+                ipAddress,userAgent,description, argsJsonStr, className, methodName);
         // 执行切点方法
         Object result = joinPoint.proceed();
 
@@ -46,8 +57,8 @@ public class ApiOperationLogAspect {
         long executionTime = System.currentTimeMillis() - startTime;
 
         // 打印出参等相关信息
-        log.info("====== 请求结束: [{}], 耗时: {}ms, 出参: {} =================================== ",
-                description, executionTime, JsonUtils.toJsonString(result));
+        log.info("======请求来源:{} 设备型号:{}, 请求结束: [{}], 耗时: {}ms, 出参: {} =================================== ",
+                ipAddress,userAgent,description, executionTime, JsonUtils.toJsonString(result));
 
         return result;
     }
