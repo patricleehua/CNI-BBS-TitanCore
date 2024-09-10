@@ -3,26 +3,29 @@ package com.titancore.service.impl;
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.titancore.domain.dto.UserLoginDTO;
 import com.titancore.domain.entity.User;
 import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.vo.UserLoginVo;
+import com.titancore.enums.CapchaEnum;
 import com.titancore.enums.LoginEnum;
 import com.titancore.enums.ResponseCodeEnum;
 import com.titancore.enums.StatusEnum;
+import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.common.properties.Md5Salt;
 import com.titancore.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.util.List;
-
 
 @Service
 @Slf4j
@@ -40,18 +43,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LoginEnum loginType = LoginEnum.valueOfAll(userLoginDto.getLoginType());
         User user = null;
         if (loginType != null) {
-            switch(loginType) {
+            switch (loginType) {
                 case PASSWORD -> {
-                    //   构造查询
-                    QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-                    queryWrapper.and(wrapper1 -> wrapper1
-                            .eq("login_name", userLoginDto.getUsername())
+
+                    LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
+                            .eq(User::getLoginName, userLoginDto.getUsername())
                             .or()
-                            .eq("phonenumber", userLoginDto.getUsername())  // 添加手机号等于用户名的条件
-                            .eq("del_flag","0")
-                    );
-                     user = getOne(queryWrapper);
-                    //账号删除
+                            .eq(User::getPhonenumber, userLoginDto.getPhoneNumber())
+                            .or()
+                            .eq(User::getEmail, userLoginDto.getEmailNumber())
+                            .eq(User::getDelFlag, "0");
+                    user = userMapper.selectOne(queryWrapper);
+                    //账号异常
                     if (user == null) {
                         throw new BizException(ResponseCodeEnum.ACCOUNT_DELETE);
                     }
@@ -70,17 +73,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     }
                 }
                 case VERIFICATION_CODE -> {
-                    //todo 接入三方接码平台
-                    return null;
+                    String code = getCaptchaRedisCache(userLoginDto);
+                    if (!code.equals(userLoginDto.getCaptchaCode())) {
+                        throw new BizException(ResponseCodeEnum.APTCHACODE_ISNOTSAME);
+                    }
+
+                    user = getOne(new LambdaQueryWrapper<User>()
+                            .eq(User::getPhonenumber, userLoginDto.getPhoneNumber())
+                            .or()
+                            .eq(User::getEmail, userLoginDto.getEmailNumber())
+                            .eq(User::getDelFlag, "0"));
                 }
             }
-        }else{
+        } else {
             throw new BizException(ResponseCodeEnum.ACCOUNT_VERIFICATION_TYPE_ISNULL);
         }
 
-
         //todo
-
         if (user != null) {
             //登入成功创建saToken
             LoginEnum rememberMe = LoginEnum.valueOfAll(userLoginDto.getRememberMe());
@@ -90,28 +99,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     case REMEMBERME -> StpUtil.login(user.getUserId(),
                             new SaLoginModel()
                                     .setIsLastingCookie(true)
-                                    .setTimeout(60 * 60 * 24 * 7)
+                                    .setTimeout(60 * 60 * 24 * 7)//7 days
                                     .setIsWriteHeader(true));
-                    case NOTREMEMBERME -> StpUtil.login(user.getUserId(),new SaLoginModel()
+                    case NOTREMEMBERME -> StpUtil.login(user.getUserId(), new SaLoginModel()
                             .setIsLastingCookie(false)
-                            .setTimeout(60 * 60 )
+                            .setTimeout(60 * 60)//1 hour
                             .setIsWriteHeader(true));
                 }
             }
+            delCaptchaRedisCache(userLoginDto);
         }
-
-
-
-
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
-       //登入成功创建jwt令牌
+        //登入成功创建jwt令牌
         String token = tokenInfo.getTokenValue();
         // 获取：当前账号所拥有的角色集合
         List<String> roleList = StpUtil.getRoleList();
-        log.info("roleList：{}",roleList);
+        log.info("roleList：{}", roleList);
         // 获取：当前账号所拥有的权限集合
         List<String> permissionList = StpUtil.getPermissionList();
-        log.info("permissionList：{}",permissionList);
+        log.info("permissionList：{}", permissionList);
         return UserLoginVo.builder()
                 .id(user.getUserId())
                 .username(user.getUserName())
@@ -121,5 +127,43 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .build();
     }
 
+    /**
+     * 提取redis缓存的的验证码比对
+     * @param userLoginDto
+     * @return 是否已发送
+     */
+    private String getCaptchaRedisCache(UserLoginDTO userLoginDto) {
+        CapchaEnum capchaType = CapchaEnum.valueOfAll(userLoginDto.getCaptchaType());
+        String res = null;
+        if (capchaType != null) {
+            String redisKey = null;
+            switch (capchaType) {
+                case CAPTCHA_TYPE_PHONE -> redisKey = RedisConstant.PHONE_PRIX + userLoginDto.getPhoneNumber();
+                case CAPTCHA_TYPE_EMAIL -> redisKey = RedisConstant.EMAIL_PRIX + userLoginDto.getEmailNumber();
+            }
+             res = stringRedisTemplate.opsForValue().get(redisKey);
+            if (StringUtils.isEmpty(res)) {
+                throw new BizException(ResponseCodeEnum.APTCHACODE_ISNOTEXIST);
+            }
+            return res;
+        }
+        return res;
+    }
+    /**
+     * 使用后清除redis缓存的的验证码
+     * @param userLoginDto
+     * @return
+     */
+    private void delCaptchaRedisCache(UserLoginDTO userLoginDto) {
+        CapchaEnum capchaType = CapchaEnum.valueOfAll(userLoginDto.getCaptchaType());
+        if (capchaType != null) {
+            String redisKey = null;
+            switch (capchaType) {
+                case CAPTCHA_TYPE_PHONE -> redisKey = RedisConstant.PHONE_PRIX + userLoginDto.getPhoneNumber();
+                case CAPTCHA_TYPE_EMAIL -> redisKey = RedisConstant.EMAIL_PRIX + userLoginDto.getEmailNumber();
+            }
+            Boolean delete = stringRedisTemplate.delete(redisKey);
+        }
+    }
 }
 

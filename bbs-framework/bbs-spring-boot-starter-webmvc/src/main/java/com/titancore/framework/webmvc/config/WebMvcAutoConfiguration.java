@@ -46,7 +46,10 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
         // 注册路由拦截器，自定义认证规则
         registry.addInterceptor(new SaInterceptor(handler -> {
             SaRouter.match("/**")
-                    .notMatch("/user/login")
+                    .notMatch("/user/login",
+                            "/common/sendCode"
+
+                    )
                     .check(r -> {
                         StpUtil.checkLogin();
                         Object loginId = StpUtil.getLoginId();

@@ -54,6 +54,19 @@ spring:
           max-wait: -1ms # 连接池最大阻塞等待时间（使用负值表示没有限制）
           min-idle: 0 # 连接池中的最小空闲连接
           max-idle: 10 # 连接池中的最大空闲连接
+  mail:
+    host: ${titan.mail.host}
+    port: ${titan.mail.port}
+    username: ${titan.mail.username}
+    password: ${titan.mail.passowrd}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    protocol: smtp
+
 titan:
   md5:
     salt: shumei:)
@@ -65,16 +78,16 @@ titan:
     maxSize: 1000000     #上传文件大小10MB
     aliyun:
       aoss:
-        endpoint: ${titan.cloud.aliyun.oss.endpoint}
-        access-key-id: ${titan.cloud.aliyun.oss.access-key-id}
-        access-key-secret: ${titan.cloud.aliyun.oss.access-key-secret}
-        bucket-name: ${titan.cloud.aliyun.oss.bucket-name}
+        endpoint: ${titan.cloud.aliyun.aoss.endpoint}
+        access-key-id: ${titan.cloud.aliyun.aoss.access-key-id}
+        access-key-secret: ${titan.cloud.aliyun.aoss.access-key-secret}
+        bucket-name: ${titan.cloud.aliyun.aoss.bucket-name}
       asms:
-        region-id: ${titan.cloud.aliyun.sms.region-id}
-        access-key-id: ${titan.cloud.aliyun.sms.access-key-id}
-        access-key-secret: ${titan.cloud.aliyun.sms.secret}
-        template-code: ${titan.cloud.aliyun.sms.template-code}
-        sign-name: ${titan.cloud.aliyun.sms.sign-name}
+        region-id: ${titan.cloud.aliyun.asms.region-id}
+        access-key-id: ${titan.cloud.aliyun.asms.access-key-id}
+        access-key-secret: ${titan.cloud.aliyun.asms.access-key-secret}
+        template-code: ${titan.cloud.aliyun.asms.template-code}
+        sign-name: ${titan.cloud.aliyun.asms.sign-name}
 
     qiniu:
       access-key: "your-access-key"
