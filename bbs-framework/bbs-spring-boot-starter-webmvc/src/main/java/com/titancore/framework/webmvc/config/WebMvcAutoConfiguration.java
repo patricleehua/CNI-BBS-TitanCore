@@ -32,6 +32,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
                 .allowCredentials(true)
                 .allowedMethods("GET", "POST", "DELETE", "PUT", "OPTIONS")
                 .allowedHeaders("*")
+                .exposedHeaders("iv") // 添加此行以暴露 iv 响应头
                 .maxAge(3600);
     }
 
