@@ -128,3 +128,11 @@ sa-token:
   token-style: uuid
   # 是否输出操作日志
   is-log: true
+#公众号
+oauth2:
+  wechat:
+    app-id: wx80bab9f650999aa9
+    app-secret: 19786f25ded746f29bcc014652cedb6d
+    access-token-url: https://api.weixin.qq.com/cgi-bin/token
+    gzh-qrcode-create-url: https://api.weixin.qq.com/cgi-bin/qrcode/create
+    gzh-qrcode-url: https://mp.weixin.qq.com/cgi-bin/showqrcode

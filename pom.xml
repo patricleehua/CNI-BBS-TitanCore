@@ -131,7 +131,11 @@
         <artifactId>jackson-databind</artifactId>
         <version>${jackson.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>com.github.ipfs</groupId>
+        <artifactId>java-ipfs-http-client</artifactId>
+        <version>v1.4.4</version>
+      </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>

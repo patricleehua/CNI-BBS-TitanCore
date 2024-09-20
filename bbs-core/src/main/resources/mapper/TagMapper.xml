@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.titancore.domain.mapper.TagMapper">
+
+
+    <select id="queryTagListByPostId" resultType="com.titancore.domain.entity.Tag">
+        SELECT *
+        FROM tag
+        WHERE id IN (
+            SELECT tag_id
+            FROM post_tag_rel
+            WHERE post_id = #{post_id}
+        )
+    </select>
+
+</mapper>
+
