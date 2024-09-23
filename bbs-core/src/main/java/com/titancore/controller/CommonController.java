@@ -4,6 +4,8 @@ import com.titancore.domain.dto.CaptchaCodeDTO;
 import com.titancore.domain.dto.UserLoginDTO;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.CommonService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequestMapping("/common")
+@Tag(name = "公共模块")
 public class CommonController {
 
     @Autowired
@@ -23,7 +26,8 @@ public class CommonController {
      * @param captchaCodeDTO
      * @return
      */
-    @PostMapping("/sendCode")
+    @PostMapping("/open/sendCode")
+    @Operation(summary = "发送验证码",description = "可发送邮箱/手机验证码")
     public Response<?> sendCode(@RequestBody CaptchaCodeDTO captchaCodeDTO){
         log.info("发送验证码:{}",captchaCodeDTO);
         return commonService.sendCaptchaCode(captchaCodeDTO);

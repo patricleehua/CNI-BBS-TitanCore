@@ -2,12 +2,14 @@ package com.titancore.controller;
 
 import com.titancore.framework.cloud.manager.config.CloudServiceFactory;
 import com.titancore.framework.cloud.manager.domain.dto.FileDelDTO;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
 @RestController
+@Tag(name = "测试")
 public class TestController {
     @Resource
     private CloudServiceFactory factory;

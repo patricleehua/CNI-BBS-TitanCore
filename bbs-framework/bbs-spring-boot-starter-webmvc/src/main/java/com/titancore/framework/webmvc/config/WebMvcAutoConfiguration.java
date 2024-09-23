@@ -47,9 +47,10 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
         // 注册路由拦截器，自定义认证规则
         registry.addInterceptor(new SaInterceptor(handler -> {
             SaRouter.match("/**")
-                    .notMatch("/user/login",
-                            "/common/sendCode"
-
+                    .notMatch("/user/open/**",
+                            "/common/open/**",
+                            "/post/open/**",
+                            "/favicon.ico","/swagger-resources/**", "/webjars/**", "/v3/**", "/doc.html"
                     )
                     .check(r -> {
                         StpUtil.checkLogin();
@@ -60,15 +61,15 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
                     });
 
             // 登录校验 -- 拦截所有路由，并排除/user/doLogin 用于开放登录
-            SaRouter.match("/**")
-                    .notMatch("/user/login")
-                    .check(r ->{
-                        StpUtil.checkLogin();
-                        Object loginId = StpUtil.getLoginId();
-                        long userid = SaFoxUtil.getValueByType(loginId, long.class);
-                        BaseContext.setCurrentId(userid);
-                        BaseContext.getCurrentId();
-                    });
+//            SaRouter.match("/**")
+//                    .notMatch("/user/login")
+//                    .check(r ->{
+//                        StpUtil.checkLogin();
+//                        Object loginId = StpUtil.getLoginId();
+//                        long userid = SaFoxUtil.getValueByType(loginId, long.class);
+//                        BaseContext.setCurrentId(userid);
+//                        BaseContext.getCurrentId();
+//                    });
 
             // 角色校验 -- 拦截以 admin 开头的路由，必须具备 admin 角色或者 super-admin 角色才可以通过认证
 //            SaRouter.match("/admin/**", r -> StpUtil.checkRoleOr("admin", "super-admin"));
