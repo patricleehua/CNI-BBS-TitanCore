@@ -22,7 +22,7 @@ public class CategoryController {
 
     @Autowired
     private CategoryService categoryService;
-    @PostMapping("/list")
+    @PostMapping("/open/list")
     @Operation(summary = "获取分类列表" )
     public Response<?> queryList(@RequestBody CategoryParam categoryParam){
        PageResult pageResult =  categoryService.queryList(categoryParam);

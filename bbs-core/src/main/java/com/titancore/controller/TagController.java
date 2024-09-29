@@ -22,7 +22,7 @@ public class TagController {
 
     @Autowired
     private TagService tagService;
-    @PostMapping("/list")
+    @PostMapping("/open/list")
     @Operation(summary = "获取标签列表" )
     public Response<?> queryList(@RequestBody TagParam tagParam){
        PageResult pageResult =  tagService.queryList(tagParam);

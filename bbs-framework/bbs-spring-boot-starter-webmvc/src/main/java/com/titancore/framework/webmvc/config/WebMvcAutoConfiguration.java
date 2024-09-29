@@ -50,6 +50,11 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
                     .notMatch("/user/open/**",
                             "/common/open/**",
                             "/post/open/**",
+                            "/category/open/**",
+                            "/tag/open/**",
+                            "/ws/**",
+                            "/test/**",
+                            "/chatroom/**",
                             "/favicon.ico","/swagger-resources/**", "/webjars/**", "/v3/**", "/doc.html"
                     )
                     .check(r -> {
