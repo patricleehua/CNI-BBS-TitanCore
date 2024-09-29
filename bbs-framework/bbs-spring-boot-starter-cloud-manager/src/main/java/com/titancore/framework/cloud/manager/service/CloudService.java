@@ -1,13 +1,11 @@
 package com.titancore.framework.cloud.manager.service;
 
-import com.aliyun.oss.model.OSSObjectSummary;
 import com.titancore.framework.cloud.manager.domain.dto.FileDelDTO;
-import com.titancore.framework.cloud.manager.domain.dto.FileDowloadDTO;
+import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
 import com.titancore.framework.cloud.manager.domain.vo.FileListVo;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
+import java.io.InputStream;
+import java.util.Map;
 
 //云服务统一接口
 public interface CloudService {
@@ -73,10 +71,10 @@ public interface CloudService {
     /**
      * 下载指定路径下的文件
      *
-     * @param fileDowloadDTO
+     * @param fileDownloadDTO
      * @return 根据流返回
      */
-    byte[] exportOssFile(FileDowloadDTO fileDowloadDTO);
-
+    byte[] exportOssFile(FileDownloadDTO fileDownloadDTO);
+    Map<String, Object> exportOssFileInputStream (FileDownloadDTO fileDownloadDTO);
 
 }

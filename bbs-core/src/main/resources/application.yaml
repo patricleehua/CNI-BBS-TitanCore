@@ -66,7 +66,11 @@ spring:
           starttls:
             enable: true
     protocol: smtp
-
+  rabbitmq:
+    host: www.nbcpe.cn
+    port: 6000
+    username: user
+    password: 123456
 titan:
   md5:
     salt: shumei:)
@@ -99,6 +103,12 @@ titan:
       secret-key: "your-secret-key"
       region: "ap-guangzhou"
       bucket-name: "your-bucket-name"
+    # minio
+    minio:
+      endpoint: ${titan.cloud.minio.endpoint}
+      access-key-id: ${titan.cloud.minio.access-key-id}
+      access-key-secret: ${titan.cloud.minio.access-key-secret}
+      bucket-name: ${titan.cloud.minio.bucket-name}
 
 
 # MyBatis配置

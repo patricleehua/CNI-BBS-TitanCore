@@ -7,7 +7,7 @@ import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
 import com.titancore.framework.cloud.manager.domain.entity.File;
 import com.titancore.framework.cloud.manager.domain.vo.FileListVo;
 import com.titancore.framework.cloud.manager.properties.CloudProperties;
-import com.titancore.framework.cloud.manager.urils.AliyunOssUtil;
+import com.titancore.framework.cloud.manager.urils.AliyunOssUtilV2;
 import com.titancore.framework.cloud.manager.urils.AliyunSmsUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,14 +16,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 
 @Slf4j
-public class AliyunCloudStorageService implements CloudService {
+public class AliyunCloudStorageServiceV2 implements CloudService {
 
     private final CloudProperties cloudProperties;
-    public AliyunCloudStorageService(CloudProperties cloudProperties) {
+    public AliyunCloudStorageServiceV2(CloudProperties cloudProperties) {
         this.cloudProperties=cloudProperties;
     }
     @Value("${titan.cloud.maxSize}")
@@ -38,8 +37,8 @@ public class AliyunCloudStorageService implements CloudService {
                 cloudProperties.getAliyun().getAsms().getSignName()
         );
     }
-    private AliyunOssUtil initOss(){
-        return new  AliyunOssUtil(
+    private AliyunOssUtilV2 initOss(){
+        return new AliyunOssUtilV2(
                 cloudProperties.getAliyun().getAoss().getEndpoint(),
                 cloudProperties.getAliyun().getAoss().getAccessKeyId(),
                 cloudProperties.getAliyun().getAoss().getAccessKeySecret(),
@@ -59,60 +58,21 @@ public class AliyunCloudStorageService implements CloudService {
         return  initSms().sendMessage(phoneNumber, verificationCode);
     }
 
-
-    /**
-     * 上传用户头像
-     * 路径为 userid/avatar/xxx-xxx-xxx.jpg
-     *
-     * @param file 文件
-     * @param userId 用户id
-     * @return
-     */
     @Override
-    public String uploadAvatar(byte[]  file,Long userId) {
-//        double byteSize = file.length / (1024*1024);
-//        if (byteSize > maxSize) {
-//            throw new BizException(ResponseCodeEnum.UPLOAD_BIG);
-//        }
-        String extension = ".jpg";
-        String objectName = UUID.randomUUID()+ extension;
-        String folderName = userId + "/avatar";
-
-        return initOss().upload(file, folderName,objectName);
+    public String uploadAvatar(byte[] file, Long userId) {
+        return null;
     }
 
-    /**
-     * 上传文章封面背景
-     * 路径  userId/article/background/articleId/xxx-xxx-xxx.jpg
-     *
-     * @param file
-     * @param userId
-     * @param articleId
-     * @return
-     */
     @Override
     public String uploadBackground(byte[] file, Long userId, Long articleId) {
-        String extension = ".jpg";
-        String objectName = UUID.randomUUID()+ extension;
-
-        String folderName = userId + "/article/background/"+articleId;
-        return initOss().upload(file, folderName,objectName);
+        return null;
     }
 
-    /**
-     * 上传文件 （不限定格式）
-     * 路径 userId/file/xxx.zip
-     *
-     * @param file
-     * @param userId
-     * @param objectName
-     * @return
-     */
     @Override
-    public String uploadFile(byte[] file, Long userId,  String objectName) {
-        String folderName = userId + "/file";
-        return initOss().upload(file,folderName,objectName);
+    public String uploadFile(byte[] file, Long userId, String objectName) {
+        return null;
     }
+
 
     /**
      * 根据用户id查询用户上传的文件
@@ -123,7 +83,8 @@ public class AliyunCloudStorageService implements CloudService {
      */
     @Override
     public FileListVo queryFileListByUserId(long userId) {
-        List<OSSObjectSummary> ossObjectSummaries = initOss().queryFileListByUserId(userId);
+        String fileNamePath = userId+"/file";
+        List<OSSObjectSummary> ossObjectSummaries = initOss().queryFileListByFileNamePath(fileNamePath);
         List<File> files= new ArrayList<>();
         for (OSSObjectSummary file : ossObjectSummaries) {
             String fname=file.getKey();
@@ -173,13 +134,16 @@ public class AliyunCloudStorageService implements CloudService {
     @Override
     public byte[] exportOssFile(FileDownloadDTO fileDownloadDTO) {
         String Path= fileDownloadDTO.getUserId()+"/file/"+ fileDownloadDTO.getFileName();
-        return initOss().exportOssFile(Path);
+        return null;
     }
 
     @Override
     public Map<String, Object> exportOssFileInputStream(FileDownloadDTO fileDownloadDTO) {
-        return null;
+//        String Path= fileDownloadDTO.getUserId()+"/file/"+ fileDownloadDTO.getFileName();
+        String Path= "1/file/控件平台1.7版本安装包及说明.zip";
+        return initOss().exportOssFile(Path);
     }
+
 
 
 }

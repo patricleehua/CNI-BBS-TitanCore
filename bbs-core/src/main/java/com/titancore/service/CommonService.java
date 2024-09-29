@@ -5,8 +5,8 @@ import com.titancore.domain.dto.CaptchaCodeDTO;
 import com.titancore.domain.entity.Mail;
 import com.titancore.enums.CapchaEnum;
 import com.titancore.enums.ResponseCodeEnum;
-import com.titancore.enums.StatusEnum;
 import com.titancore.framework.cloud.manager.config.CloudServiceFactory;
+import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -180,6 +181,18 @@ public class CommonService {
         var cloudStorageService = factory.createService();
         return cloudStorageService.sendMessage(phoneNumber, code);
     }
+
+    /**
+     * 文件下载
+     * @param fileDownloadDTO
+     * @return
+     */
+    public Map<String, Object> downloadFile(FileDownloadDTO fileDownloadDTO){
+        var cloudStorageService = factory.createService();
+        return cloudStorageService.exportOssFileInputStream(fileDownloadDTO);
+
+    }
+
 
 }
 

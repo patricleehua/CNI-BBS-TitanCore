@@ -14,6 +14,7 @@ public class CloudProperties {
     private Aliyun aliyun;
     private Qiniu qiniu;
     private Tencent tencent;
+    private Minio minio;
 
     @Getter
     @Setter
@@ -56,6 +57,14 @@ public class CloudProperties {
         private String secretId;
         private String secretKey;
         private String region;
+        private String bucketName;
+    }
+    @Getter
+    @Setter
+    public static class Minio {
+        private String endpoint;
+        private String accessKeyId;
+        private String accessKeySecret;
         private String bucketName;
     }
 }
