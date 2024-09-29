@@ -1,10 +1,7 @@
 package com.titancore.controller;
 
-import cn.dev33.satoken.annotation.SaCheckLogin;
-import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.stp.StpUtil;
 import com.titancore.domain.dto.UserLoginDTO;
-import com.titancore.domain.entity.User;
 import com.titancore.domain.vo.UserLoginVo;
 import com.titancore.framework.biz.operationlog.aspect.ApiOperationLog;
 import com.titancore.framework.common.response.Response;
@@ -31,14 +28,20 @@ public class UserController {
         UserLoginVo userLoginVo = userService.login(userLoginDTO);
         return Response.success(userLoginVo);
     }
-    @GetMapping("/open/logout")
-    @SaCheckRole("normal_user")
+
+    @GetMapping("/open/logout/{userId}")
     @ApiOperationLog
     @Operation(summary = "用户退出")
-    public Response<?> logOut(){
-        log.info("logOut:");
-        //todo
-        StpUtil.logout();
+    public Response<?> logOut(@PathVariable String userId){
+        log.info("用户退出:{}",userId);
+        StpUtil.logout(userId);
         return Response.success();
+    }
+
+    @GetMapping("/checkUserStoresLive")
+    @Operation(summary = "检查用户本地存储信息状态")
+    public Response<?> checkUserStoresLive(){
+        StpUtil.checkLogin();
+        return Response.success(true);
     }
 }
