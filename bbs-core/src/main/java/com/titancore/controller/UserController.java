@@ -24,7 +24,7 @@ public class UserController {
     @ApiOperationLog
     @Operation(summary = "用户登入")
     public Response<?> login(@RequestBody UserLoginDTO userLoginDTO){
-        log.info("login:"+userLoginDTO);
+        log.info("login:{}", userLoginDTO);
         UserLoginVo userLoginVo = userService.login(userLoginDTO);
         return Response.success(userLoginVo);
     }

@@ -13,13 +13,10 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.URL;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -28,20 +25,30 @@ public class AliyunOssUtilV2 {
     private String endpoint;
     private String accessKeyId;
     private String accessSecret;
-    private String bucketName;
+    private String bucketNameOpen;
+    private String bucketNamePrivate;
 
     private OSS createOssClient(){
         return new OSSClientBuilder().build(endpoint,accessKeyId,accessSecret);
     }
     /**
-     *
+     * 2024.9.30 pass
      * @param file
      * @param folderName 路径/文件夹名
      * @return
      */
-    public String upload(MultipartFile file, String folderName){
+    public String upload(MultipartFile file, String folderName,boolean isPrivate){
+        //是否私有
+        String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        //如果是图片则重命名
+        String fileName;
+        if(FileUtil.isImage(file)){
+             fileName = FileUtil.renameFileToUUID(file);
+        }else{
+             fileName = file.getOriginalFilename();
+        }
         //上传指定文件夹：
-        String fullObjectName = folderName + "/" + file.getOriginalFilename();
+        String fullObjectName = folderName + "/" + fileName;
         //创建OSSClient实例
         OSS ossClient = createOssClient();
         try {
@@ -88,11 +95,13 @@ public class AliyunOssUtilV2 {
 
 
     /**
-     *  查询 路径 fileNamePath/ 下的文件
+     * 查询 路径 fileNamePath/ 下的文件
      * @param fileNamePath
      * @return
      */
-    public List<OSSObjectSummary> queryFileListByFileNamePath(String fileNamePath) {
+    public List<OSSObjectSummary> queryFileListByFileNamePath(String fileNamePath,boolean isPrivate) {
+        //是否私有
+        String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
         //创建OSSClient实例
         OSS ossClient = createOssClient();
         List<OSSObjectSummary> sums = null;
@@ -120,12 +129,15 @@ public class AliyunOssUtilV2 {
 
 
     /**
+     * 2024.9.30 pass
      * 删除指定单个文件
      * @param filePath
      * @return
      */
 
-    public boolean deleteFile(String filePath) {
+    public boolean deleteFile(String filePath,boolean isPrivate) {
+        //是否私有
+        String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
         OSS ossClient = createOssClient();
         try {
             ossClient.deleteObject(bucketName, filePath);
@@ -151,11 +163,14 @@ public class AliyunOssUtilV2 {
     }
 
     /**
+     * 2024.9.30 pass
      * 删除指定的整个目录
      * @param dirPath
      * @return
      */
-    public boolean deleteDirectory(String dirPath) {
+    public boolean deleteDirectory(String dirPath,boolean isPrivate) {
+        //是否私有
+        String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
         OSS ossClient = createOssClient();
         try {
             ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName)
@@ -189,12 +204,17 @@ public class AliyunOssUtilV2 {
     }
 
     /**
+     * 2024.9.30 不建议使用，仅供参考
+     * todo 问题: 在客户端执行取消后，阿里云OSS的流还是被继续访问，直到传完！这个一个非常严重的bug
      * @author gaojun
      * @desc 下载文件
      * 文档链接 https://help.aliyun.com/document_detail/84823.html?spm=a2c4g.11186623.2.7.37836e84ZIuZaC#concept-84823-zh
      * @email
      */
-    public Map<String, Object> exportOssFile(String Path) {
+    @Deprecated
+    public Map<String, Object> exportOssFile(String Path,boolean isPrivate) {
+        //是否私有
+        String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
         //创建OSSClient实例
         OSS ossClient = createOssClient();
         // ossObject包含文件所在的存储空间名称、文件名称、文件元信息以及一个输入流。
@@ -208,6 +228,40 @@ public class AliyunOssUtilV2 {
         result.put("inputStream", is);
         result.put("fileSize", fileSize);
         return result;
+    }
+
+    /**
+     * 2024.9.30 pass
+     * 获取指定路径文件的临时URL
+     * @param filePath
+     * @param expiresIn
+     * @param isPrivate
+     * @return
+     */
+    public String getTemplateUrl(String filePath,int expiresIn,boolean isPrivate) {
+        //是否私有
+        String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        OSS ossClient = createOssClient();
+        try {
+            Date expireTime = new Date(System.currentTimeMillis() + expiresIn * 3600 * 1000);
+            URL url = ossClient.generatePresignedUrl(bucketName, filePath, expireTime);
+            return url.toString();
+        }catch (ClientException ce){
+            log.error(
+                    """
+                    Caught an ClientException, which means your request made it to OSS,
+                    but was rejected with an error response for some reason.
+                    """
+            );
+            log.error("Error Message: {}", ce.getErrorMessage());
+            log.error("Error Code: {}", ce.getErrorCode());
+            log.error("Request ID: {}", ce.getRequestId());
+            return "";
+        }finally {
+            if (ossClient != null) {
+                ossClient.shutdown();
+            }
+        }
     }
 
 }

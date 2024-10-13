@@ -1,28 +1,36 @@
 package com.titancore.service;
 
 
+import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.lang.generator.SnowflakeGenerator;
+import cn.hutool.json.JSONUtil;
 import com.titancore.domain.dto.CaptchaCodeDTO;
 import com.titancore.domain.entity.Mail;
+import com.titancore.domain.entity.MediaUrl;
 import com.titancore.enums.CapchaEnum;
+import com.titancore.enums.LinkType;
 import com.titancore.enums.ResponseCodeEnum;
+import com.titancore.enums.RoleType;
 import com.titancore.framework.cloud.manager.config.CloudServiceFactory;
+import com.titancore.framework.cloud.manager.constant.CloudStorePath;
 import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
+import com.titancore.framework.cloud.manager.urils.FileUtil;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.common.response.Response;
 import com.titancore.framework.common.util.RegexUtils;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -34,6 +42,10 @@ public class CommonService {
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private MediaUrlService mediaUrlService;
+    @Value("${titan.cloud.maxSize}")
+    private int maxSize;
     /**
      * 通用验证码发送方法，支持短信/邮箱
      * @param captchaCodeDTO 包含验证码相关信息的DTO
@@ -44,7 +56,7 @@ public class CommonService {
             // 获取验证码类型
             CapchaEnum capchaType = CapchaEnum.valueOfAll(captchaCodeDTO.getCaptchaType());
             if (capchaType == null) {
-                return Response.fail(ResponseCodeEnum.CAPTCHACODE_ISERROR);
+                return Response.fail(ResponseCodeEnum.CAPTCHACODE_IS_ERROR);
             }
 
             // 获取是否为注册场景
@@ -85,7 +97,7 @@ public class CommonService {
      */
     private Response<?> handlePhoneCaptcha(String phoneNumber, String code, Integer isRegister) {
         if (RegexUtils.isPhoneInvalid(phoneNumber)) {
-            throw new BizException(ResponseCodeEnum.PHONE_NUMBER_ISERROR);
+            throw new BizException(ResponseCodeEnum.PHONE_NUMBER_IS_ERROR);
         }
 
         String redisKey = (isRegister == 0 ? RedisConstant.REGISTER_PHONE_PRIX : RedisConstant.PHONE_PRIX) + phoneNumber;
@@ -100,7 +112,7 @@ public class CommonService {
             log.info("手机验证码{}发送成功", code);
             return Response.success(isRegister == 0 ? CommonConstant.CaptchaCode_SEND_SUCCESS : CommonConstant.PHONE_SEND_SUCCESS);
         } else {
-            throw new BizException(ResponseCodeEnum.CAPTCHACODE_ISERROR);
+            throw new BizException(ResponseCodeEnum.CAPTCHACODE_IS_ERROR);
         }
     }
 
@@ -113,7 +125,7 @@ public class CommonService {
      */
     private Response<?> handleEmailCaptcha(String emailNumber, String code, Integer isRegister) {
         if (RegexUtils.isEmailInvalid(emailNumber)) {
-            throw new BizException(ResponseCodeEnum.EMAIL_NUMBER_ISERROR);
+            throw new BizException(ResponseCodeEnum.EMAIL_NUMBER_IS_ERROR);
         }
 
         String redisKey = (isRegister == 0 ? RedisConstant.REGISTER_EMAIL_PRIX : RedisConstant.EMAIL_PRIX) + emailNumber;
@@ -134,7 +146,7 @@ public class CommonService {
             storeCaptchaInRedis(redisKey, code, RedisConstant.EMAIL_TTL);
             return Response.success(CommonConstant.EMAIL_SEND_SUCCESS);
         }else{
-            throw new BizException(ResponseCodeEnum.CAPTCHACODE_ISERROR);
+            throw new BizException(ResponseCodeEnum.CAPTCHACODE_IS_ERROR);
         }
     }
 
@@ -178,7 +190,7 @@ public class CommonService {
      * @return 发送结果
      */
     private String sendSms(String phoneNumber, String code) {
-        var cloudStorageService = factory.createService();
+        var cloudStorageService = factory.createService("aliyun");
         return cloudStorageService.sendMessage(phoneNumber, code);
     }
 
@@ -187,12 +199,144 @@ public class CommonService {
      * @param fileDownloadDTO
      * @return
      */
+    @Operation
     public Map<String, Object> downloadFile(FileDownloadDTO fileDownloadDTO){
         var cloudStorageService = factory.createService();
         return cloudStorageService.exportOssFileInputStream(fileDownloadDTO);
 
     }
 
+    /**
+     * 文件上传
+     * @param file
+     * @param userId
+     * @return
+     */
+    public String uploadFile(MultipartFile file,String userId){
+        long size = file.getSize();
+        //校验用户
+        if(StringUtils.isEmpty(userId)){
+            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
+        }else{
+            if(!StpUtil.getLoginId().equals(userId)){
+                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
+                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
+                }
+            }
+        }
+        var cloudStorageService = factory.createService();
+        String folderName = CloudStorePath.BASE_PATH
+                + "/" + userId
+                + "/" + CloudStorePath.FOLDER_PATH;
+        return cloudStorageService.uploadFile(file,folderName,true);
+    }
+
+    /**
+     * 生成文件临时Url(供下载使用)
+     * @param fileDownloadDTO
+     * @return
+     */
+    public String createTemporaryUrl(FileDownloadDTO fileDownloadDTO) {
+        var cloudStorageService = factory.createService();
+        String folderName = CloudStorePath.BASE_PATH
+                + "/" + fileDownloadDTO.getUserId()
+                + "/" + CloudStorePath.FOLDER_PATH;
+        String filePath = folderName +"/"+ fileDownloadDTO.getFileName();
+        return cloudStorageService.createTemplateUrlOfFile(filePath,fileDownloadDTO.getExpiresIn(),fileDownloadDTO.getIsPrivate().equals("0"));
+    }
+
+    /**
+     * 上传 封面/背景/头像/未知
+     * @param file
+     * @param userId
+     * @param type
+     * @return
+     */
+    public String uploadMedia(MultipartFile file, String userId, String type) {
+        //校验用户
+        if(StringUtils.isEmpty(userId)){
+            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
+        }else{
+            if(!StpUtil.getLoginId().equals(userId)){
+                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
+                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
+                }
+            }
+        }
+        //校验媒体格式
+        LinkType linkType = LinkType.valueOfAll(type);
+        if (linkType!= null){
+            switch (linkType) {
+                case AVATAR,BACKGROUND -> {
+                    if (!FileUtil.isImage(file)) {
+                        throw new BizException(ResponseCodeEnum.FILE_IS_NOT_IMAGE);
+                    }
+                }
+                case VIDEO ->{
+                    if (!FileUtil.isVideo(file)) {
+                        throw new BizException(ResponseCodeEnum.FILE_IS_NOT_VIDEO);
+                    }
+                }
+                case COVER,TAG,CATEGORY -> {
+                    if (!FileUtil.isVideo(file) && !FileUtil.isImage(file)) {
+                        throw new BizException(ResponseCodeEnum.FILE_IS_NOT_SUPPORTED);
+                    }
+                }
+                case UNKNOWN ->{}
+                default -> throw new BizException(ResponseCodeEnum.FILE_IS_NOT_SUPPORTED);
+            }
+        }
+
+        var cloudStorageService = factory.createService();
+        String FOLDER_PATH = LinkType.UNKNOWN.getValue();
+        // 临时文章ID
+        String postsId = null;
+
+        // 处理头像类型
+        if (type.equals(LinkType.AVATAR.getValue())) {
+            FOLDER_PATH = type;
+        // 处理封面/背景/视频类型
+        } else if (type.equals(LinkType.BACKGROUND.getValue()) || type.equals(LinkType.COVER.getValue()) || type.equals(LinkType.VIDEO.getValue())) {
+            // 检查 Redis 中是否已有临时帖子ID
+            postsId = stringRedisTemplate.opsForValue().get(RedisConstant.TEMPORARYPOSTID_PRIX + userId);
+            FOLDER_PATH = type ;
+            if (postsId == null) {
+                // 生成新的临时帖子ID
+                SnowflakeGenerator snowflakeGenerator = new SnowflakeGenerator();
+                postsId = String.valueOf(snowflakeGenerator.next());
+                // 设置 Redis 中的临时帖子ID
+                stringRedisTemplate.opsForValue().set(RedisConstant.TEMPORARYPOSTID_PRIX + userId, postsId, RedisConstant.TEMPORARYPOSTID_TTL, TimeUnit.DAYS);
+                FOLDER_PATH = postsId + "/" + FOLDER_PATH;
+            }else{
+                FOLDER_PATH = postsId + "/" + FOLDER_PATH;
+            }
+        }
+        String folderName = CloudStorePath.BASE_PATH + "/" + userId + "/" + FOLDER_PATH;
+        if(type.equals(LinkType.TAG.getValue()) || type.equals(LinkType.CATEGORY.getValue())){
+            folderName = CloudStorePath.BASE_PATH + "/" + "common" + "/" + type;
+        }
+        String url = cloudStorageService.uploadImage(file, folderName, false);
+
+        if (type.equals(LinkType.BACKGROUND.getValue()) || type.equals(LinkType.COVER.getValue()) || type.equals(LinkType.VIDEO.getValue())) {
+            MediaUrl mediaUrl = new MediaUrl();
+            mediaUrl.setMediaUrl(url);
+            mediaUrl.setPostId(Long.valueOf(postsId));
+            mediaUrl.setMediaType(linkType);
+            //保存进数据库
+            boolean save = mediaUrlService.save(mediaUrl);
+
+            // 获取列表大小并进行非空检查
+            Long size = stringRedisTemplate.opsForList().size(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId);
+            // 如果列表不存在则设置过期时间
+            if (size == null || size == 0) {
+                stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, JSONUtil.toJsonStr(mediaUrl));
+                stringRedisTemplate.expire(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, RedisConstant.TEMPORARYPOSTMEDIA_TTL, TimeUnit.HOURS);
+            } else {
+                stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, JSONUtil.toJsonStr(mediaUrl));
+            }
+        }
+        return url;
+    }
 
 }
 

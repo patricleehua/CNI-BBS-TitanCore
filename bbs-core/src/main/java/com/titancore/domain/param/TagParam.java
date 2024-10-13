@@ -11,5 +11,7 @@ import lombok.EqualsAndHashCode;
 public class TagParam extends PageParams {
     @Schema(description = "帖子名称")
     private String tagName;
+    @Schema(description = "所属板块ID")
+    private String categoryId;
 
 }

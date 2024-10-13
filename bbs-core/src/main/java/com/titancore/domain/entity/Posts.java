@@ -23,7 +23,7 @@ public class Posts {
     /**
      * post标识
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
@@ -44,17 +44,17 @@ public class Posts {
     /**
      * 创建时间
      */
-    private LocalDateTime createDate;
+    private LocalDateTime createTime;
 
     /**
      * 评论时间
      */
-    private LocalDateTime commentDate;
+    private LocalDateTime commentTime;
 
     /**
      * 更新时间
      */
-    private LocalDateTime updateDate;
+    private LocalDateTime updateTime;
 
     /**
      * 浏览量
@@ -79,12 +79,12 @@ public class Posts {
     /**
      * 是否置顶，1为不置顶，0为置顶
      */
-    private Integer istop;
+    private Integer isTop;
 
     /**
      * 发布状态，0为发布，1为未发布
      */
-    private Integer ispublish;
+    private Integer isPublish;
 
     /**
      * 删除标志，0代表存在，1代表删除

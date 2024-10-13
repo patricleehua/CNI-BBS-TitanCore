@@ -1,19 +1,28 @@
 package com.titancore.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.*;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-@Schema(name = "分类DTO", description = "分类数据传输对象")
-public class CategoryDTO {
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(name = "板块DTO", description = "板块数据传输对象")
+public class CategoryDTO extends BaseDTO{
 
-    @Schema(description = "分类名")
+    @Schema(description = "板块Id")
+    private String categoryId;
+    @Schema(description = "板块名")
+    @NonNull
     private String categoryName;
-    @Schema(description = "分类图片url")
+    @Schema(description = "板块图片url")
+    @NonNull
     private String categoryUrl;
     @Schema(description = "描述")
+    @NonNull
     private String description;
     @Schema(description = "创建者Id")
+    @NonNull
     private String userId;
 
 }

@@ -1,26 +1,35 @@
 package com.titancore.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.generator.SnowflakeGenerator;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.titancore.domain.dto.PostDTO;
 import com.titancore.domain.entity.*;
-import com.titancore.domain.mapper.CategoryMapper;
-import com.titancore.domain.mapper.PostContentMapper;
-import com.titancore.domain.mapper.PostsMapper;
-import com.titancore.domain.mapper.UserMapper;
+import com.titancore.domain.mapper.*;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.*;
+import com.titancore.enums.LinkType;
+import com.titancore.enums.ResponseCodeEnum;
+import com.titancore.enums.RoleType;
+import com.titancore.framework.common.constant.CommonConstant;
+import com.titancore.framework.common.constant.RedisConstant;
+import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.CategoryService;
 import com.titancore.service.MediaUrlService;
 import com.titancore.service.PostsService;
 import com.titancore.service.TagService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.print.attribute.standard.Media;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,9 +46,14 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
     @Autowired
     private TagService tagService;
     @Autowired
+    private TagMapper tagMapper;
+    @Autowired
     private MediaUrlService mediaUrlService;
     @Autowired
     private PostContentMapper postContentMapper;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
     @Override
     public PageResult queryPostList(PostParam postParam) {
         Page<Posts> page = new Page<>(postParam.getPageNo(), postParam.getPageSize());
@@ -69,20 +83,114 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         PostVo postVo = PostsToPostVo(posts, true, true, true, true);
         return postVo;
     }
+    @Transactional
+    @Override
+    public DMLVo createPost(PostDTO postDTO) {
+        //当前作者是否与帖子作者一致
+        String authorId = postDTO.getAuthorId();
+        if(StringUtils.isEmpty(authorId)){
+            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
+        }else{
+            if(!StpUtil.getLoginId().equals(authorId)){
+                if(!StpUtil.hasRole(authorId, RoleType.SUPERPOWER_USER.getValue())){
+                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
+                }
+            }
+        }
+        //1、帖子主题 从redis获取
+        String temporalPostId = stringRedisTemplate.opsForValue().get(RedisConstant.TEMPORARYPOSTID_PRIX + authorId);
+        if(StringUtils.isEmpty(temporalPostId)){
+            // 生成新的临时文章ID
+            SnowflakeGenerator snowflakeGenerator = new SnowflakeGenerator();
+            temporalPostId = String.valueOf(snowflakeGenerator.next());
+        }
+        //2、帖子内容
+        PostContent postContent = new PostContent();
+        BeanUtil.copyProperties(postDTO,postContent);
+        postContent.setPostId(Long.valueOf(temporalPostId));
+        int first = postContentMapper.insert(postContent);
+
+        Posts posts = new Posts();
+        BeanUtil.copyProperties(postDTO,posts);
+        posts.setId(Long.valueOf(temporalPostId));
+        posts.setAuthorId(Long.valueOf(authorId));
+        posts.setCategoryId(Long.valueOf(postDTO.getCategoryId()));
+        posts.setContentId(postContent.getId());
+        int second = postMapper.insert(posts);
 
 
+        //3、帖子链接保存 异常处理可有可无我认为
+        boolean thired = false;
+        List<String> mediaUrls = stringRedisTemplate.opsForList().range(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + temporalPostId, 0, -1);
+        if(mediaUrls!=null && !mediaUrls.isEmpty()) {
+            List<MediaUrl> mediaUrlList = new ArrayList<>();
+            for (String mediaUrlJson : mediaUrls) {
+                JSONObject jsonObject = JSONUtil.parseObj(mediaUrlJson);
+                MediaUrl mediaUrl = new MediaUrl();
+                mediaUrl.setMediaUrl(jsonObject.getStr("mediaUrl"));
+                mediaUrl.setPostId(jsonObject.getLong("postId"));
+                mediaUrl.setMediaType(LinkType.fromValue(jsonObject.getStr("mediaType")));
+                mediaUrlList.add(mediaUrl);
+            }
+            long count = mediaUrlService.queryMediaUrlListByPostId(Long.valueOf(temporalPostId)).size();
+            if (mediaUrlList.size() > count){
+                mediaUrlService.remove(new LambdaQueryWrapper<MediaUrl>().eq(MediaUrl::getPostId, Long.valueOf(temporalPostId)));
+                thired = mediaUrlService.saveBatch(mediaUrlList);
+            }
+        }
+        //4、建立帖子标签
+        int fourth = 0;
+        if (!postDTO.getTagIds().isEmpty()){
+            List<Long> tagIds = postDTO.getTagIds().stream()
+                    .map(Long::valueOf)
+                    .collect(Collectors.toList());
+            fourth  = tagMapper.buildRelWithTagIds(Long.valueOf(temporalPostId), tagIds);
+        }
+
+        DMLVo dmlVo = new DMLVo();
+        if(first > 0 && second > 0){
+            dmlVo.setId(temporalPostId);
+            dmlVo.setStatus(true);
+            dmlVo.setMessage(CommonConstant.DML_CREATE_SUCCESS);
+            //删除redis缓存
+            stringRedisTemplate.delete(RedisConstant.TEMPORARYPOSTID_PRIX + authorId);
+            stringRedisTemplate.delete(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + temporalPostId);
+        }else{
+            dmlVo.setStatus(false);
+            dmlVo.setMessage(CommonConstant.DML_CREATE_ERROR);
+        }
+        return dmlVo;
+    }
+
+    /**
+     * 将帖子对象转换为帖子视图对象
+     * @param posts
+     * @param isAuthor
+     * @param isTag
+     * @param isCategory
+     * @param isUrl
+     * @return
+     */
     private PostViewVo PostsToPostViewVo (Posts posts,boolean isAuthor,boolean isTag,boolean isCategory,boolean isUrl){
         PostViewVo postViewVo = new PostViewVo();
         postViewVo.setPostId(posts.getId().toString());
         if(isAuthor){
             User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, posts.getAuthorId()));
-            postViewVo.setAuthorName(user.getUserName());
+            UserVo userVo = new UserVo();
+            //todo
+            userVo.setUserId(String.valueOf(user.getUserId()));
+            userVo.setUserName(user.getUserName());
+            userVo.setAvatar(user.getAvatar());
+            userVo.setBio("测试个人简介");
+            userVo.setFollowingCount("1");
+            userVo.setFansCount("10000");
+            postViewVo.setUserVo(userVo);
         }
         postViewVo.setTitle(posts.getTitle());
         postViewVo.setSummary(posts.getSummary());
-        postViewVo.setCreate_date(posts.getCreateDate());
-        postViewVo.setUpdate_date(posts.getUpdateDate());
-        postViewVo.setComment_date(posts.getCommentDate());
+        postViewVo.setCreateTime(posts.getCreateTime());
+        postViewVo.setUpdateTime(posts.getUpdateTime());
+        postViewVo.setCommentTime(posts.getCommentTime());
 
         if(isCategory){
             CategoryVo categoryVo = categoryService.queryCategoryById(posts.getCategoryId());
@@ -98,22 +206,39 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         }
         postViewVo.setType(posts.getType() != null ? posts.getType().toString() : null);
         postViewVo.setView_counts(posts.getViewCounts() != null ? posts.getViewCounts().toString() : null);
-        postViewVo.setIstop(posts.getIstop() != null ? posts.getIstop().toString() : null);
+        postViewVo.setIsTop(posts.getIsTop() != null ? posts.getIsTop().toString() : null);
     return postViewVo;
     }
 
+    /**
+     * 将帖子对象转换为帖子视图详细对象
+     * @param posts
+     * @param isAuthor
+     * @param isTag
+     * @param isCategory
+     * @param isUrl
+     * @return
+     */
     private PostVo PostsToPostVo (Posts posts,boolean isAuthor,boolean isTag,boolean isCategory,boolean isUrl){
         PostVo postVo = new PostVo();
         postVo.setPostId(posts.getId().toString());
         if(isAuthor){
             User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, posts.getAuthorId()));
-            postVo.setAuthorName(user.getUserName());
+            UserVo userVo = new UserVo();
+            //todo
+            userVo.setUserId(String.valueOf(user.getUserId()));
+            userVo.setUserName(user.getUserName());
+            userVo.setAvatar(user.getAvatar());
+            userVo.setBio("测试个人简介");
+            userVo.setFollowingCount("1");
+            userVo.setFansCount("10000");
+            postVo.setUserVo(userVo);
         }
         postVo.setTitle(posts.getTitle());
         postVo.setSummary(posts.getSummary());
-        postVo.setCreate_date(posts.getCreateDate());
-        postVo.setUpdate_date(posts.getUpdateDate());
-        postVo.setComment_date(posts.getCommentDate());
+        postVo.setCreateTime(posts.getCreateTime());
+        postVo.setUpdateTime(posts.getUpdateTime());
+        postVo.setCommentTime(posts.getCommentTime());
         PostContent postContent = postContentMapper.selectOne(new LambdaQueryWrapper<PostContent>().eq(PostContent::getId, posts.getContentId()));
         HashMap<String,String> posthashmap =  new HashMap<>();
         posthashmap.put("content",postContent.getContent());

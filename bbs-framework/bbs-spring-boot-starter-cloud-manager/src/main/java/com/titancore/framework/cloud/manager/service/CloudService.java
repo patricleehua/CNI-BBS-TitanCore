@@ -3,11 +3,13 @@ package com.titancore.framework.cloud.manager.service;
 import com.titancore.framework.cloud.manager.domain.dto.FileDelDTO;
 import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
 import com.titancore.framework.cloud.manager.domain.vo.FileListVo;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.util.Map;
 
-//云服务统一接口
+/**
+ * 云服务统一接口
+ */
 public interface CloudService {
 
     /**
@@ -18,38 +20,24 @@ public interface CloudService {
      */
     String sendMessage(String phoneNumber,String verificationCode);
 
-    /**
-     * 上传用户头像
-     * 路径为 userid/avatar/xxx-xxx-xxx.jpg
-     *
-     * @param file 文件
-     * @param userId 用户id
-     * @return
-     */
-     String uploadAvatar(byte[]  file,Long userId);
 
     /**
-     * 上传文章封面背景
-     * 路径  userId/article/background/articleId/xxx-xxx-xxx.jpg
-     *
+     * 上传图片
+     * 路径 userId/image/xxx/
      * @param file
-     * @param userId
-     * @param articleId
+     * @param folderName
      * @return
      */
-    String uploadBackground(byte[]  file,Long userId,Long articleId);
-
+     String uploadImage(MultipartFile file,String folderName,boolean isPrivate);
 
     /**
      * 上传文件 （不限定格式）
-     * 路径 userId/file/xxx.zip
-     *
+     * 路径 userId/file/ or 文件夹名
      * @param file
-     * @param userId
-     * @param objectName
+     * @param folderName
      * @return
      */
-    String uploadFile(byte[]  file,Long userId,String objectName);
+    String uploadFile(MultipartFile file,String folderName,boolean isPrivate);
 
     /**
      * 根据用户id查询用户上传的文件
@@ -58,7 +46,7 @@ public interface CloudService {
      * @param userId
      * @return
      */
-    FileListVo queryFileListByUserId(long userId);
+    FileListVo queryFileListByUserId(long userId,boolean isPrivate);
 
     /**
      * 删除指定路径下的文件/文件夹（包含子文件/文件夹）
@@ -66,15 +54,22 @@ public interface CloudService {
      * @param fileDelDTO 包含要删除的路径信息的DTO对象
      * @return 删除结果
      */
-    boolean deleteByPath(FileDelDTO fileDelDTO);
+    boolean deleteByPath(FileDelDTO fileDelDTO,boolean isPrivate);
 
     /**
+     * todo
      * 下载指定路径下的文件
-     *
      * @param fileDownloadDTO
-     * @return 根据流返回
+     * @return
      */
-    byte[] exportOssFile(FileDownloadDTO fileDownloadDTO);
+    @Deprecated
     Map<String, Object> exportOssFileInputStream (FileDownloadDTO fileDownloadDTO);
 
+    /**
+     * 创建文件临时访问URL
+     * @param filePath
+     * @param isPrivate
+     * @return
+     */
+    String createTemplateUrlOfFile(String filePath,int expiresIn,boolean isPrivate);
 }

@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @Schema(name = "帖子分类参数对象", description = "帖子分类参数对象")
 public class CategoryParam extends PageParams {
-    @Schema(description = "帖子名称")
+    @Schema(description = "分类名称")
     private String categoryName;
 
 }

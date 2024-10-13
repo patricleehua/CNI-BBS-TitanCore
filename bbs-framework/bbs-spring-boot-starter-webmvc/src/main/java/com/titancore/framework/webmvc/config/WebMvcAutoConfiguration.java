@@ -5,7 +5,7 @@ import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.util.SaFoxUtil;
-import com.titancore.framework.webmvc.context.BaseContext;
+//import com.titancore.framework.webmvc.context.BaseContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -61,8 +61,8 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
                         StpUtil.checkLogin();
                         Object loginId = StpUtil.getLoginId();
                         long userid = SaFoxUtil.getValueByType(loginId, long.class);
-                        BaseContext.setCurrentId(userid);
-                        BaseContext.getCurrentId();
+//                        BaseContext.setCurrentId(userid);
+//                        BaseContext.getCurrentId();
                     });
 
             // 登录校验 -- 拦截所有路由，并排除/user/doLogin 用于开放登录

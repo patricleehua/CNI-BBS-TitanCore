@@ -1,10 +1,8 @@
 package com.titancore.domain.vo;
 
 
-import com.titancore.domain.entity.MediaUrl;
 import lombok.Data;
 
-import javax.print.attribute.standard.Media;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,14 +11,14 @@ public class PostViewVo {
 
     private String postId;
 
-    private String authorName;
+    private UserVo userVo;
 
     private String title;
     private String summary;
 
-    private LocalDateTime create_date;
-    private LocalDateTime update_date;
-    private LocalDateTime comment_date;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
+    private LocalDateTime commentTime;
 
     private CategoryVo categoryVo;
     private List<TagVo> tagVos;
@@ -28,6 +26,7 @@ public class PostViewVo {
 
     private String type;
     private String view_counts;
-    private String istop;
+    private String isTop;
+
 
 }

@@ -1,6 +1,5 @@
 package com.titancore.domain.vo;
 
-import com.titancore.domain.entity.PostContent;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -12,15 +11,15 @@ public class PostVo {
 
     private String postId;
 
-    private String authorName;
+    private UserVo userVo;
 
     private String title;
     private String summary;
     private HashMap<String,String> postContent;
 
-    private LocalDateTime create_date;
-    private LocalDateTime update_date;
-    private LocalDateTime comment_date;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
+    private LocalDateTime commentTime;
 
     private CategoryVo categoryVo;
     private List<TagVo> tagVos;

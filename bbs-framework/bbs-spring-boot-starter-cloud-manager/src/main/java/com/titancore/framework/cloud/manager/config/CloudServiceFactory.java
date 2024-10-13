@@ -25,20 +25,21 @@ public class CloudServiceFactory {
         return switch (provider) {
             case "aliyun" -> {
                 log.info("=======阿里云服务载入=======");
-                yield new AliyunCloudStorageServiceV2(properties);
+                yield new AliyunCloudStorageService(properties);
             }
             case "qiniu" -> {
                 log.info("=======七牛云服务载入=======");
-                yield new QiniuCloudStorageService(properties);
+//                yield new QiniuCloudStorageService(properties);
+                yield null;
             }
             case "tencent" -> {
                 log.info("=======腾讯云服务载入=======");
-                yield new TencentCloudStorageService(properties);
+//                yield new TencentCloudStorageService(properties);
+                yield null;
             }
             case "minio" -> {
                 log.info("=======minio服务载入=======");
-                yield null;
-//                yield new MinioStorageService(properties);
+                yield new MinioStorageService(properties);
             }
             default -> throw new IllegalArgumentException("Unknown cloud storage provider: " + provider);
         };

@@ -27,6 +27,7 @@ public class MediaUrlServiceImpl extends ServiceImpl<MediaUrlMapper, MediaUrl> i
             MediaUrlVo mediaUrlVo = new MediaUrlVo();
             BeanUtils.copyProperties(mediaUrl, mediaUrlVo);
             mediaUrlVo.setMediaType(String.valueOf(mediaUrl.getMediaType()));
+            mediaUrlVo.setId(String.valueOf(mediaUrl.getId()));
             return mediaUrlVo;
         }).collect(Collectors.toList());
         return mediaUrlVos;

@@ -1,8 +1,9 @@
 package com.titancore.controller;
 
-import com.titancore.domain.entity.Posts;
+import com.titancore.domain.dto.PostDTO;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
+import com.titancore.domain.vo.DMLVo;
 import com.titancore.domain.vo.PostVo;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.PostsService;
@@ -33,6 +34,12 @@ public class PostController {
     public Response<?> queryPostDetaisById(@PathVariable("postId") String postId){
         PostVo postVo = postsService.queryPostDetaisById(postId);
         return Response.success(postVo);
+    }
+    @PostMapping("/createPost")
+    @Operation(summary ="创建帖子")
+    public Response<?> createPost(@RequestBody PostDTO postDTO){
+        DMLVo dmlVo = postsService.createPost(postDTO);
+        return Response.success(dmlVo);
     }
 
 }

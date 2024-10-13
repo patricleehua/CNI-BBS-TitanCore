@@ -28,7 +28,8 @@ public class CloudProperties {
             private String endpoint;
             private String accessKeyId;
             private String accessKeySecret;
-            private String bucketName;
+            private String bucketNameOpen;
+            private String bucketNamePrivate;
         }
 
         @Getter
@@ -65,6 +66,7 @@ public class CloudProperties {
         private String endpoint;
         private String accessKeyId;
         private String accessKeySecret;
-        private String bucketName;
+        private String bucketNameOpen;
+        private String bucketNamePrivate;
     }
 }

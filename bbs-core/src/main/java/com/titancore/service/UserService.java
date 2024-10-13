@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.titancore.domain.dto.UserLoginDTO;
 import com.titancore.domain.entity.User;
 import com.titancore.domain.vo.UserLoginVo;
-import com.titancore.domain.vo.UserVo;
 
 /**
  * 用户信息表(User)表服务接口

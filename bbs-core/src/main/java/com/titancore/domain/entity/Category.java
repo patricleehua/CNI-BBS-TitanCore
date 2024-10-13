@@ -3,9 +3,7 @@ package com.titancore.domain.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,24 +24,24 @@ public class Category{
     private Long id;
 
     /**
-     * 分类名称
+     * 板块名称
      */
     private String categoryName;
 
     /**
-     * 分类的 URL
+     * 板块的 URL
      */
     private String categoryUrl;
 
     /**
-     * 分类描述
+     * 板块描述
      */
     private String description;
 
     /**
      * 创建时间
      */
-    private LocalDateTime createDate;
+    private LocalDateTime createTime;
 
     /**
      * 创建者 ID
@@ -51,8 +49,13 @@ public class Category{
     private Long createdByUserId;
 
     /**
+     * 更新者 ID
+     */
+    private Long updateByUserId;
+
+    /**
      * 更新时间
      */
-    private LocalDateTime updateDate;
+    private LocalDateTime updateTime;
 
 }

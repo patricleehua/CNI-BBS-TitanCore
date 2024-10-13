@@ -3,6 +3,7 @@
 <mapper namespace="com.titancore.domain.mapper.TagMapper">
 
 
+
     <select id="queryTagListByPostId" resultType="com.titancore.domain.entity.Tag">
         SELECT *
         FROM tag
@@ -13,5 +14,12 @@
         )
     </select>
 
+    <insert id="buildRelWithTagIds" parameterType="map">
+        INSERT INTO post_tag_rel (post_id, tag_id) VALUES
+            <foreach collection="tagIds" item="tagId" separator=",">
+                (#{postId}, #{tagId})
+            </foreach>
+
+    </insert>
 </mapper>
 

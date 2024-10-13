@@ -2,6 +2,7 @@ package com.titancore.controller;
 
 import com.titancore.domain.dto.CaptchaCodeDTO;
 import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
+import com.titancore.framework.cloud.manager.urils.MinioUtil;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.CommonService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,12 +17,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+
+import static cn.hutool.poi.excel.sax.AttributeName.s;
 
 @RestController
 @Slf4j
@@ -46,7 +50,7 @@ public class CommonController {
         return commonService.sendCaptchaCode(captchaCodeDTO);
     }
 
-    @PostMapping("/open/file/download")
+/*    @PostMapping("/open/file/download")
     @Operation(summary = "文件下载",description = "根据文件路径下载文件")
     public ResponseEntity<InputStreamResource> download(@RequestBody FileDownloadDTO fileDownloadDTO){
        // todo
@@ -110,5 +114,22 @@ public class CommonController {
                 }
             }
         }
+    }*/
+    @PostMapping("/upload/media")
+    @Operation(summary = "媒体上传(图片/视频)")
+    public Response<?> uploadMedia(MultipartFile file,String userId,String type){
+        return Response.success(commonService.uploadMedia(file, userId, type));
+    }
+    @PostMapping("/upload/file")
+    @Operation(summary = "文件上传")
+    public Response<?> uploadFile(MultipartFile file,String userId){
+        return Response.success(commonService.uploadFile(file, userId));
+    }
+
+    @PostMapping("/file/createTemporaryUrl")
+    @Operation(summary = "生成文件临时Url(供下载使用)")
+    public Response<?> generateTemporaryUrl(@RequestBody FileDownloadDTO fileDownloadDTO){
+        String temporaryUrl = commonService.createTemporaryUrl(fileDownloadDTO);
+        return Response.success(temporaryUrl);
     }
 }

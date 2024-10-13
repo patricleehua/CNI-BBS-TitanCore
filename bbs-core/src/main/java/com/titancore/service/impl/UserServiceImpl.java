@@ -45,17 +45,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (loginType != null) {
             switch (loginType) {
                 case PASSWORD -> {
-
+                    //todo 注意bug
                     LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
-                            .eq(User::getLoginName, userLoginDto.getUsername())
-                            .or()
-                            .eq(User::getPhonenumber, userLoginDto.getPhoneNumber())
-                            .or()
-                            .eq(User::getEmail, userLoginDto.getEmailNumber())
-                            .eq(User::getDelFlag, "0");
+                            .eq(User::getDelFlag, "0")
+                            .and(w -> w.eq(User::getLoginName, userLoginDto.getUsername())
+                                    .or().eq(User::getPhoneNumber, userLoginDto.getPhoneNumber())
+                                    .or().eq(User::getEmail, userLoginDto.getEmailNumber()))
+                            .last("limit 1");
                     user = userMapper.selectOne(queryWrapper);
                     //账号异常
-                    if (user == null) {
+                    if (user == null ) {
                         throw new BizException(ResponseCodeEnum.ACCOUNT_DELETE);
                     }
                     //md5加密
@@ -79,7 +78,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     }
 
                     user = getOne(new LambdaQueryWrapper<User>()
-                            .eq(User::getPhonenumber, userLoginDto.getPhoneNumber())
+                            .eq(User::getPhoneNumber, userLoginDto.getPhoneNumber())
                             .or()
                             .eq(User::getEmail, userLoginDto.getEmailNumber())
                             .eq(User::getDelFlag, "0"));
@@ -143,7 +142,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
              res = stringRedisTemplate.opsForValue().get(redisKey);
             if (StringUtils.isEmpty(res)) {
-                throw new BizException(ResponseCodeEnum.APTCHACODE_ISNOTEXIST);
+                throw new BizException(ResponseCodeEnum.APTCHACODE_IS_NOT_EXIST);
             }
             return res;
         }

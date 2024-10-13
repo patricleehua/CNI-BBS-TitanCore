@@ -1,12 +1,9 @@
 package com.titancore.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Tag {
     /**
-     * tagid
+     * tagId
      */
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
@@ -42,9 +39,13 @@ public class Tag {
     private String description;
 
     /**
+     * 归属的板块 ID
+     */
+    private Long categoryId;
+    /**
      * 创建时间
      */
-    private LocalDateTime createDate;
+    private LocalDateTime createTime;
 
     /**
      * 创建者 ID
@@ -52,8 +53,13 @@ public class Tag {
     private Long createdByUserId;
 
     /**
+     * 更新者 ID
+     */
+    private Long updateByUserId;
+
+    /**
      * 更新时间
      */
-    private LocalDateTime updateDate;
+    private LocalDateTime updateTime;
 
 }

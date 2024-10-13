@@ -1,12 +1,12 @@
 package com.titancore.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
+import com.titancore.enums.LinkType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +22,7 @@ public class MediaUrl {
     /**
      * 主键
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
@@ -36,13 +36,14 @@ public class MediaUrl {
     private String mediaUrl;
 
     /**
-     * 链接类型
+     * 链接类型 封面、背景、视频、未知
      */
-    private int mediaType;
+    @TableField("`media_type`")
+    private LinkType mediaType;
 
     /**
      * 创建时间
      */
-    private LocalDateTime createDate;
+    private LocalDateTime createTime;
 
 }

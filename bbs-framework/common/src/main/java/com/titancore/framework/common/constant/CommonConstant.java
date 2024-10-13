@@ -10,4 +10,12 @@ public class CommonConstant {
     public static final String EMAIL_SEND_SUCCESS = "邮件发送成功!" ;
     public static final String EMAIL_SEND_ERROR = "邮件发送失败!" ;
     public static final String EMAIL_ALREADY_SEND = "email_repeat" ;
+
+
+    public static final String DML_CREATE_SUCCESS = "创建成功!" ;
+    public static final String DML_CREATE_ERROR = "创建失败!" ;
+    public static final String DML_UPDATE_SUCCESS = "更新成功!" ;
+    public static final String DML_UPDATE_ERROR = "更新失败!" ;
+    public static final String DML_DELETE_SUCCESS = "删除成功!" ;
+    public static final String DML_DELETE_ERROR = "删除失败!" ;
 }

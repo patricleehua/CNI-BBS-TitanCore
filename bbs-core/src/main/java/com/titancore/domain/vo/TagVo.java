@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 public class TagVo {
 
-    private Long id;
+    private String id;
 
     private String tagName;
 
@@ -17,8 +17,10 @@ public class TagVo {
 
     private String description;
 
-    private LocalDateTime createDate;
+    private String categoryId;
 
-    private LocalDateTime updateDate;
+    private LocalDateTime createTime;
+
+    private LocalDateTime updateTime;
 
 }

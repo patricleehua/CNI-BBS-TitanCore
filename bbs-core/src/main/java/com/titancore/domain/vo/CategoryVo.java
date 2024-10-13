@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 public class CategoryVo {
 
-    private Long id;
+    private String id;
 
     private String categoryName;
 
@@ -18,8 +18,8 @@ public class CategoryVo {
 
     private String description;
 
-    private LocalDateTime createDate;
+    private LocalDateTime createTime;
 
-    private LocalDateTime updateDate;
+    private LocalDateTime updateTime;
 
 }

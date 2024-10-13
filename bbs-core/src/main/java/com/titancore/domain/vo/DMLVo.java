@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Schema(description = "操纵对象结果返回对象")
-public class DDLVo {
+public class DMLVo {
 
     @Schema(description = "id")
     private String id;
