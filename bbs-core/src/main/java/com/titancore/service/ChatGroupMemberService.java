@@ -1,0 +1,47 @@
+package com.titancore.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.titancore.domain.dto.ChatMemberDTO;
+import com.titancore.domain.entity.ChatGroupMember;
+import com.titancore.domain.param.ChatMemberParam;
+import com.titancore.domain.param.PageResult;
+
+import java.util.List;
+
+
+public interface ChatGroupMemberService extends IService<ChatGroupMember> {
+    /**
+     * 根据聊天群号分组查询群成员列表
+     * @param chatMemberParam
+     * @return
+     */
+    PageResult memberList(ChatMemberParam chatMemberParam);
+
+    /**
+     * 根据用户Id建立聊天群-用户关系
+     * @param chatMemberDTO
+     * @return
+     */
+    boolean addMemberToGroupByGroupId(ChatMemberDTO chatMemberDTO);
+
+    /**
+     * 根据用户Ids建立聊天群-用户关系
+     * @param chatMemberDTO
+     * @return
+     */
+    boolean addMemberListToGroupByGroupId(ChatMemberDTO chatMemberDTO);
+
+    /**
+     * 根据群组Id解除聊天群-用户关系
+     * @param groupId
+     * @return
+     */
+    boolean deleteMemberByChatGroupId(String groupId);
+
+    /**
+     * 根据GroupId查询聊天群对应的成员关系列表
+     * @param groupId
+     * @return
+     */
+    List<ChatGroupMember> getGroupMemberByGroupId(String groupId);
+}
