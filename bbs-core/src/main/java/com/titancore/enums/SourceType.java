@@ -22,4 +22,16 @@ public enum SourceType implements IEnum<String> {
         }
         return null;
     }
+
+    public static SourceType fromValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        for (SourceType sourceType : SourceType.values()) {
+            if (sourceType.value.equalsIgnoreCase(value)) {
+                return sourceType;
+            }
+        }
+        return null;
+    }
 }

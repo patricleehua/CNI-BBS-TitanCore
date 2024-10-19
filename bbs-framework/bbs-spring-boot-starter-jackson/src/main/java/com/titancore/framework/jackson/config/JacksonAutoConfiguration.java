@@ -16,6 +16,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.YearMonthSerializer;
 import com.titancore.framework.common.constant.DateConstants;
 import com.titancore.framework.common.util.JsonUtils;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ import java.time.YearMonth;
 import java.util.TimeZone;
 
 @AutoConfiguration
+@ConditionalOnClass({ObjectMapper.class})
 public class JacksonAutoConfiguration {
 
     @Bean

@@ -3,7 +3,7 @@ package com.titancore.service;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.lang.generator.SnowflakeGenerator;
-import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
 import com.titancore.domain.dto.CaptchaCodeDTO;
 import com.titancore.domain.entity.Mail;
 import com.titancore.domain.entity.MediaUrl;
@@ -329,10 +329,10 @@ public class CommonService {
             Long size = stringRedisTemplate.opsForList().size(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId);
             // 如果列表不存在则设置过期时间
             if (size == null || size == 0) {
-                stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, JSONUtil.toJsonStr(mediaUrl));
+                stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, JSON.toJSONString(mediaUrl));
                 stringRedisTemplate.expire(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, RedisConstant.TEMPORARYPOSTMEDIA_TTL, TimeUnit.HOURS);
             } else {
-                stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, JSONUtil.toJsonStr(mediaUrl));
+                stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, JSON.toJSONString(mediaUrl));
             }
         }
         return url;

@@ -1,7 +1,8 @@
 server:
   port: 8080
 spring:
-
+  application:
+    name: core
   profiles:
     active: dev
   datasource:
@@ -71,10 +72,11 @@ spring:
             enable: true
     protocol: smtp
   rabbitmq:
-    host: www.nbcpe.cn
-    port: 6000
-    username: user
-    password: 123456
+    host: ${titan.rabbitmq.host}
+    port: ${titan.rabbitmq.port}
+    virtual-host: ${titan.rabbitmq.virtual-host}
+    username: ${titan.rabbitmq.username}
+    password: ${titan.rabbitmq.password}
     connection-timeout: 1s #设置MQ连接的超时时间
     template:
       retry:
@@ -82,16 +84,19 @@ spring:
         initial-interval: 1000ms #连接失败后等几秒在尝试连接
         multiplier: 2 #失败后下次等待的倍数  initial-interval*multiplier
         max-attempts: 3 #最大重试次数
-    publisher-confirm-type: correlated # 开启publisher confirm机制，并设置confirm类型 : MQ异步回调方式返回回执信息; simple: 同步阻塞等待MQ返回回执消息; none : 关闭confirm机制;
+    publisher-confirm-type: correlated # 开启publisher confirm机制，并设置confirm类型 correlated : MQ异步回调方式返回回执信息; simple: 同步阻塞等待MQ返回回执消息; none : 关闭confirm机制;
     publisher-returns: true # 开启publisher return机制
     listener:
       simple:
         retry:
           enabled: true # 开启消费者失败重试
           initial-interval: 1000ms # 初识的失败等待时长为1秒
-          multiplier: 1 # 失败的等待时长倍数，下次等待时长 = multiplier * last-interval
+          multiplier: 2 # 失败的等待时长倍数，下次等待时长 = multiplier * last-interval
           max-attempts: 3 # 最大重试次数
           stateless: true # true无状态；false有状态。如果业务中包含事务，这里改为false
+        acknowledge-mode: manual #默认情况下消息消费者是自动确认消息的，如果要手动确认消息则需要修改确认模式为manual
+        prefetch: 1 # 消费者每次从队列获取的消息数量。此属性当不设置时为：轮询分发，设置为1为：公平分发
+
 
 titan:
   md5:

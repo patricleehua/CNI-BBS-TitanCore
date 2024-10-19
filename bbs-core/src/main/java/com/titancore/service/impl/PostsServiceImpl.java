@@ -1,10 +1,12 @@
 package com.titancore.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
+
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.generator.SnowflakeGenerator;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import java.lang.reflect.Type;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -14,7 +16,6 @@ import com.titancore.domain.mapper.*;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.*;
-import com.titancore.enums.LinkType;
 import com.titancore.enums.ResponseCodeEnum;
 import com.titancore.enums.RoleType;
 import com.titancore.framework.common.constant.CommonConstant;
@@ -125,11 +126,8 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         if(mediaUrls!=null && !mediaUrls.isEmpty()) {
             List<MediaUrl> mediaUrlList = new ArrayList<>();
             for (String mediaUrlJson : mediaUrls) {
-                JSONObject jsonObject = JSONUtil.parseObj(mediaUrlJson);
-                MediaUrl mediaUrl = new MediaUrl();
-                mediaUrl.setMediaUrl(jsonObject.getStr("mediaUrl"));
-                mediaUrl.setPostId(jsonObject.getLong("postId"));
-                mediaUrl.setMediaType(LinkType.fromValue(jsonObject.getStr("mediaType")));
+                Type type = new TypeReference<MediaUrl>(){}.getType();
+                MediaUrl mediaUrl = JSON.parseObject(mediaUrlJson, type);
                 mediaUrlList.add(mediaUrl);
             }
             long count = mediaUrlService.queryMediaUrlListByPostId(Long.valueOf(temporalPostId)).size();
