@@ -42,6 +42,6 @@ public class UserController {
     @Operation(summary = "检查用户本地存储信息状态")
     public Response<?> checkUserStoresLive(){
         StpUtil.checkLogin();
-        return Response.success(true);
+        return Response.success(StpUtil.getLoginId().toString());
     }
 }
