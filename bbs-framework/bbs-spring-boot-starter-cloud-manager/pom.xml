@@ -12,7 +12,7 @@
     <packaging>jar</packaging>
 
     <name>bbs-spring-boot-starter-cloud-manager</name>
-    <description>云服务商逻辑启动类</description>
+    <description>云服务商服务逻辑启动类</description>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -25,12 +25,13 @@
         <dependency>
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
+            <version>${minio.version}</version>
         </dependency>
         <!--aliyunoss -->
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
-            <version>3.17.4</version>
+            <version>${aliyun.oss.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -42,8 +43,7 @@
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
-            <version>2.2.1</version>
-            <scope>compile</scope>
+            <version>${aliyun.sms.version}</version>
         </dependency>
     </dependencies>
 
