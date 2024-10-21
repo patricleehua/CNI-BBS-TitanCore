@@ -18,6 +18,7 @@
         <module>bbs-spring-boot-starter-webmvc</module>
         <module>bbs-spring-boot-starter-biz-operationlog</module>
         <module>bbs-spring-boot-starter-cloud-manager</module>
+        <module>bbs-spring-boot-starter-rabbitmq</module>
     </modules>
     <dependencies>
 
