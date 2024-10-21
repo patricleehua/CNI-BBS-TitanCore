@@ -1,6 +1,6 @@
 package com.titancore.service.impl;
 
-import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -62,7 +62,7 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
             chatListMapper.updateById(chatList);
             //更新自己的聊天列表
             LambdaUpdateWrapper<ChatList> updateWrapper = new LambdaUpdateWrapper<ChatList>()
-                    .set(ChatList::getLastMsgContent, JSONUtil.toJsonStr(chatMessageContent))
+                    .set(ChatList::getLastMsgContent, JSON.toJSONString(chatMessageContent))
                     .eq(ChatList::getFromId, fromId)
                     .eq(ChatList::getFromId, toId);
             chatListMapper.update(updateWrapper);

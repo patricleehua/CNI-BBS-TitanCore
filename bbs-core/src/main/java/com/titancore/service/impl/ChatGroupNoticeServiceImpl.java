@@ -1,7 +1,7 @@
 package com.titancore.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
-import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -72,8 +72,7 @@ public class ChatGroupNoticeServiceImpl extends ServiceImpl<ChatGroupNoticeMappe
         }
         int update = 0;
         if( result > 0 ){
-            String jsonStr = JSONUtil.toJsonStr(chatGroupNotice);
-            System.out.println(jsonStr);
+            String jsonStr = JSON.toJSONString(chatGroupNotice);
             update = chatGroupMapper.update(new LambdaUpdateWrapper<ChatGroup>()
                     .set(ChatGroup::getNotice, jsonStr)
                     .eq(ChatGroup::getId, chatGroupNotice.getChatGroupId()));
