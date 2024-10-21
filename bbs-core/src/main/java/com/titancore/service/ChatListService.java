@@ -12,13 +12,13 @@ import com.titancore.enums.SourceType;
 
 public interface ChatListService extends IService<ChatList> {
     /**
-     * 根据toUserId更新fromUserId用户相关的列表
-     * @param toUserId
-     * @param fromUserId
+     * 根据fromId会话ID更新相关的会话列表
+     * @param fromId
+     * @param toId
      * @param msgContent
      * @param sourceType
      */
-    void updateChatList(String toUserId, String fromUserId, ChatMessageContent msgContent, SourceType sourceType);
+    void updateChatList(String fromId, String toId, ChatMessageContent msgContent, SourceType sourceType);
 
     /**
      * 根据groupId更新群组在列表的展示

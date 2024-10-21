@@ -42,4 +42,8 @@ public class RedisConstant {
      * 临时帖子媒体url列表过期时间
      */
     public static final Long TEMPORARYPOSTMEDIA_TTL = 1L;
+    /**
+     * SaToken保存的toekn路径前缀
+     */
+    public static final String SATOKEN_LOGIN_PRIX = "token:login:token:";
 }

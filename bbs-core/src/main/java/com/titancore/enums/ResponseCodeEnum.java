@@ -38,7 +38,14 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     //Tag
     TAG_TAGID_CAN_NOT_BE_NULL("TAG-10001","标签ID不能为空!"),
     TAG_TAGNAME_IS_EXIST("TAG-10002","标签名称已存在!" ),
-    TAG_TAGID_IS_NOT_EXIST("TAG-10003","标签ID不存在!" );
+    TAG_TAGID_IS_NOT_EXIST("TAG-10003","标签ID不存在!" ),
+
+
+    //MessageQueue
+    MESSAGE_QUEUE_ERROR("MESSAGE-10001","消息队列异常"),
+    MESSAGE_QUEUE_SEND_MESSAGE_TO_USER_ERROR("MESSAGE-10002","发送用户消息到消息队列出错!"),
+
+    ;
 
     // ----------- 业务异常状态码 -----------
 

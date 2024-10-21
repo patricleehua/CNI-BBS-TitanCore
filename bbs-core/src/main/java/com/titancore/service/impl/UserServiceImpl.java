@@ -126,6 +126,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .build();
     }
 
+    @Override
+    public String onlineByToken(String token) {
+        String userId = stringRedisTemplate.opsForValue().get(RedisConstant.SATOKEN_LOGIN_PRIX + token);
+        if(userId !=null ){
+            //todo 更改用户在线状态
+            return userId;
+        }
+        return null;
+    }
+
     /**
      * 提取redis缓存的的验证码比对
      * @param userLoginDto

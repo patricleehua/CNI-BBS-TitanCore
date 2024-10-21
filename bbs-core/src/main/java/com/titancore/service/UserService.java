@@ -21,5 +21,6 @@ public interface UserService  extends IService<User> {
     UserLoginVo login(UserLoginDTO userLoginDto);
 
 
+    String onlineByToken(String token);
 }
 
