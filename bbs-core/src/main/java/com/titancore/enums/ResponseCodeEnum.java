@@ -40,6 +40,9 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     TAG_TAGNAME_IS_EXIST("TAG-10002","标签名称已存在!" ),
     TAG_TAGID_IS_NOT_EXIST("TAG-10003","标签ID不存在!" ),
 
+    //Follow
+    FOLLOW_STATUS_ERROR("FOLLOW-10001","关注状态有误！"),
+    FOLLOW_STRUCTURE_IS_EXIST("FOLLOW-10002","关注结构已存在!"),
 
     //MessageQueue
     MESSAGE_QUEUE_ERROR("MESSAGE-10001","消息队列异常"),

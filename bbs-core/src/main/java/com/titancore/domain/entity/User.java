@@ -37,6 +37,10 @@ public class User  {
      */
     private String userType;
     /**
+     * 用户类型（0私有账户 1公开账户）
+     */
+    private int isPrivate;
+    /**
      * 用户邮箱
      */
     private String email;
