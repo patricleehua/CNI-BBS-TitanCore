@@ -1,11 +1,9 @@
 package com.titancore.framework.webmvc.config;
 
-import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.context.SaHolder;
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpUtil;
-import cn.dev33.satoken.util.SaFoxUtil;
-//import com.titancore.framework.webmvc.context.BaseContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -21,7 +19,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
 
     /**
      * 解决跨域
-     * 这只解决了浏览器对跨域请求的限制,还要再controller配置
+     * 这只解决了浏览器对跨域请求的限制,还要在controller配置
      * @param registry
      */
     @Override
@@ -32,7 +30,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
                 .allowCredentials(true)
                 .allowedMethods("GET", "POST", "DELETE", "PUT", "OPTIONS")
                 .allowedHeaders("*")
-                .exposedHeaders("iv") // 添加此行以暴露 iv 响应头
+                .exposedHeaders("token","iv") // 添加此行以暴露 iv/token 响应头
                 .maxAge(3600);
     }
 
@@ -58,11 +56,10 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
                             "/favicon.ico","/swagger-resources/**", "/webjars/**", "/v3/**", "/doc.html"
                     )
                     .check(r -> {
-                        StpUtil.checkLogin();
-                        Object loginId = StpUtil.getLoginId();
-                        long userid = SaFoxUtil.getValueByType(loginId, long.class);
-//                        BaseContext.setCurrentId(userid);
-//                        BaseContext.getCurrentId();
+                        if (!"OPTIONS".equalsIgnoreCase(SaHolder.getRequest().getMethod())) {
+                            // 仅对非OPTIONS请求进行登录校验
+                            StpUtil.checkLogin();
+                        }
                     });
 
             // 登录校验 -- 拦截所有路由，并排除/user/doLogin 用于开放登录
