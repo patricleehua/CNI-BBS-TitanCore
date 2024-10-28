@@ -10,6 +10,7 @@ public class UserVo implements Serializable {
 
     private String userId;
     private String userName;
+    private String email;
     private String avatar;
     private String bio;
     private String followingCount;

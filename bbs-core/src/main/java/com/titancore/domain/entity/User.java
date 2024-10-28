@@ -97,6 +97,10 @@ public class User  {
      */
     private LocalDateTime updateTime;
     /**
+     * 个人简介
+     */
+    private String bio;
+    /**
      * 备注
      */
     private String remark;

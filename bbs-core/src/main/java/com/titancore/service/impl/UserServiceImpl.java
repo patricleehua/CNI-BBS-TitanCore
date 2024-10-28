@@ -4,12 +4,12 @@ import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.titancore.domain.dto.UserLoginDTO;
 import com.titancore.domain.entity.User;
 import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.vo.UserLoginVo;
+import com.titancore.domain.vo.UserVo;
 import com.titancore.enums.CapchaEnum;
 import com.titancore.enums.LoginEnum;
 import com.titancore.enums.ResponseCodeEnum;
@@ -17,9 +17,11 @@ import com.titancore.enums.StatusEnum;
 import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.common.properties.Md5Salt;
+import com.titancore.service.FollowService;
 import com.titancore.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserMapper userMapper;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private FollowService followService;
 
     public UserLoginVo login(UserLoginDTO userLoginDto) {
         LoginEnum loginType = LoginEnum.valueOfAll(userLoginDto.getLoginType());
@@ -136,6 +140,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return null;
     }
 
+    @Override
+    public List<UserVo> recommendedUserAll() {
+        //查找关注度最多的10个用户
+        List<Long> userIds = followService.highFollowedTop10();
+        List<User> userList =  userMapper.selectListByIds(userIds);
+        return userList.stream().map(user -> userToUserVo(user, true)).toList();
+    }
+
     /**
      * 提取redis缓存的的验证码比对
      * @param userLoginDto
@@ -173,6 +185,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
             Boolean delete = stringRedisTemplate.delete(redisKey);
         }
+    }
+
+    /**
+     * User对象转UserVo视图对象
+     * @param user
+     * @return
+     */
+    private UserVo userToUserVo(User user,boolean isFollowCount) {
+        UserVo userVo = new UserVo();
+        BeanUtils.copyProperties(user, userVo);
+        userVo.setUserId(String.valueOf(user.getUserId()));
+        if(isFollowCount){
+            userVo.setFansCount(String.valueOf(followService.followNumCount(user.getUserId(), true)));
+            userVo.setFollowingCount(String.valueOf(followService.followNumCount(user.getUserId(), false)));
+        }
+        return userVo;
     }
 }
 

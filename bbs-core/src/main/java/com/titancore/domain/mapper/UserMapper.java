@@ -1,11 +1,11 @@
 package com.titancore.domain.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.titancore.domain.entity.User;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 用户信息表(User)表数据库访问层
@@ -17,5 +17,6 @@ import org.apache.ibatis.annotations.Select;
 public interface UserMapper extends BaseMapper<User> {
 
 
+    List<User> selectListByIds(@Param("ids") List<Long> userIds);
 }
 

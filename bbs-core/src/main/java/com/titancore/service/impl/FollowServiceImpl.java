@@ -2,6 +2,7 @@ package com.titancore.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -226,6 +227,30 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
             dmlVo.setMessage(CommonConstant.DML_DELETE_ERROR);
         }
         return dmlVo;
+    }
+
+    @Override
+    public List<Long> highFollowedTop10() {
+        QueryWrapper<Follow> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("user_id")  // 选择 user_id 字段
+                .groupBy("user_id")  // 根据 user_id 分组
+                .orderByDesc("COUNT(follower_id)")  // 按 follower_id 的数量降序排列
+                .last("LIMIT 10");  // 限制为前 10 条
+
+        List<Follow> follows = followMapper.selectList(queryWrapper);
+        return follows.stream().map(Follow::getUserId).toList();
+
+    }
+
+    @Override
+    public int followNumCount(Long userId,boolean isfansCount) {
+        Long count ;
+        if(isfansCount){
+            count = followMapper.selectCount(new LambdaQueryWrapper<Follow>().eq(Follow::getUserId, userId));
+        }else{
+            count = followMapper.selectCount(new LambdaQueryWrapper<Follow>().eq(Follow::getFollowerId, userId));
+        }
+        return Math.toIntExact(count);
     }
 
     private List<FollowerVo> filterFollowListToFollowerVoList(List<Follow> follows, boolean isGroup,boolean isCheckFollower) {

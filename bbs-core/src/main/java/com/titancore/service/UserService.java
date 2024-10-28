@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.titancore.domain.dto.UserLoginDTO;
 import com.titancore.domain.entity.User;
 import com.titancore.domain.vo.UserLoginVo;
+import com.titancore.domain.vo.UserVo;
+
+import java.util.List;
 
 /**
  * 用户信息表(User)表服务接口
@@ -22,5 +25,11 @@ public interface UserService  extends IService<User> {
 
 
     String onlineByToken(String token);
+
+    /**
+     * 推荐用户
+     * @return
+     */
+    List<UserVo> recommendedUserAll();
 }
 

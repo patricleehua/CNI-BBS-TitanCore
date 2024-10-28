@@ -3,6 +3,7 @@ package com.titancore.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import com.titancore.domain.dto.UserLoginDTO;
 import com.titancore.domain.vo.UserLoginVo;
+import com.titancore.domain.vo.UserVo;
 import com.titancore.framework.biz.operationlog.aspect.ApiOperationLog;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.UserService;
@@ -12,6 +13,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -43,5 +47,19 @@ public class UserController {
     public Response<?> checkUserStoresLive(){
         StpUtil.checkLogin();
         return Response.success(StpUtil.getLoginId().toString());
+    }
+
+    @GetMapping({"/open/recommendedUser", "/open/recommendedUser/{userId}"})
+    @ApiOperationLog
+    @Operation(summary = "推荐关注用户（待改善推荐算法）")
+    public Response<?> recommendedUser(@PathVariable(required = false) String userId){
+        List<UserVo> userVos = new ArrayList<>();
+        if(userId == null){
+            userVos =  userService.recommendedUserAll();
+        }else{
+//            userVos =  userService.recommendedUserByUserId(userId);
+        }
+
+        return Response.success(userVos);
     }
 }

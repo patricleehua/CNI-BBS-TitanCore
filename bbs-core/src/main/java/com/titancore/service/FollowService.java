@@ -7,6 +7,8 @@ import com.titancore.domain.param.FollowParam;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.DMLVo;
 
+import java.util.List;
+
 
 public interface FollowService extends IService<Follow> {
 
@@ -19,4 +21,8 @@ public interface FollowService extends IService<Follow> {
     DMLVo changeBlockStatus(FollowDTO followDTO);
 
     DMLVo removeFollow(FollowDTO followDTO);
+
+    List<Long> highFollowedTop10();
+
+    int followNumCount(Long userId,boolean isfansCount);
 }
