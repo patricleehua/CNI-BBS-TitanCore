@@ -31,4 +31,11 @@ public interface ChatGroupService  extends IService<ChatGroup> {
      * @return
      */
     ChatGroupVo dissolveChatGroup(ChatGroupDTO chatGroupDTO);
+
+    /**
+     * 根据群号查询群组信息
+     * @param fromId
+     * @return
+     */
+    ChatGroup getGroupNameByGroupId(Long fromId);
 }

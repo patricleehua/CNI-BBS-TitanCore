@@ -129,6 +129,11 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         return chatGroupVo;
     }
 
+    @Override
+    public ChatGroup getGroupNameByGroupId(Long toId) {
+        return chatGroupMapper.selectById(toId);
+    }
+
     private ChatGroup copy(ChatGroupDTO chatGroupDTO) {
 
         ChatGroup chatGroup = new ChatGroup();

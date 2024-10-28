@@ -6,7 +6,7 @@ import com.titancore.domain.entity.ChatList;
 import com.titancore.domain.entity.ChatMessageContent;
 import com.titancore.domain.param.ChatListParam;
 import com.titancore.domain.param.PageResult;
-import com.titancore.domain.vo.ChatListVo;
+import com.titancore.domain.vo.ChatListDmlVo;
 import com.titancore.enums.SourceType;
 
 
@@ -40,11 +40,11 @@ public interface ChatListService extends IService<ChatList> {
      * @return
      */
 
-    ChatListVo createChatList(ChatListDTO chatListDTO);
+    ChatListDmlVo createChatList(ChatListDTO chatListDTO);
     /**
      * 删除聊天对话
      * @param chatListDTO
      * @return
      */
-    ChatListVo deleteChatList(ChatListDTO chatListDTO);
+    ChatListDmlVo deleteChatList(ChatListDTO chatListDTO);
 }

@@ -11,17 +11,20 @@ import com.titancore.domain.entity.ChatGroupMember;
 import com.titancore.domain.entity.ChatList;
 import com.titancore.domain.entity.ChatMessageContent;
 import com.titancore.domain.mapper.ChatListMapper;
+import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.param.ChatListParam;
 import com.titancore.domain.param.PageResult;
+import com.titancore.domain.vo.ChatListDmlVo;
 import com.titancore.domain.vo.ChatListVo;
-import com.titancore.enums.LevelType;
-import com.titancore.enums.MessageType;
 import com.titancore.enums.SourceType;
 import com.titancore.service.ChatGroupMemberService;
+import com.titancore.service.ChatGroupService;
 import com.titancore.service.ChatListService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,6 +33,8 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
 
     @Autowired
     private ChatListMapper chatListMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public void updateChatList(String fromId, String toId, ChatMessageContent chatMessageContent, SourceType sourceType) {
@@ -70,6 +75,8 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
     }
     @Autowired
     private ChatGroupMemberService chatGroupMemberService;
+    @Autowired
+    private ChatGroupService cacheGroupService;
     @Override
     public void updateChatListGroup(String groupId, ChatMessageContent chatMessageContent) {
         List<ChatGroupMember> members = chatGroupMemberService.getGroupMemberByGroupId(groupId);
@@ -84,15 +91,49 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
         Page<ChatList> page = new Page<>(chatListParam.getPageNo(), chatListParam.getPageSize());
         LambdaQueryWrapper<ChatList> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ChatList::getFromId, chatListParam.getFromId());
+        //群组
+        queryWrapper.or().eq(ChatList::getToId,chatListParam.getFromId()).eq(ChatList::getSourceType, SourceType.GROUP);
         Page<ChatList> chatListPage = chatListMapper.selectPage(page, queryWrapper);
         PageResult pageResult = new PageResult();
         pageResult.setTotal(chatListPage.getTotal());
-        pageResult.setRecords(chatListPage.getRecords());
+        List<ChatListVo> chatListVoListDml = filterChatListToChatListVo(chatListPage.getRecords());
+        pageResult.setRecords(chatListVoListDml);
         return pageResult;
     }
 
+    /**
+     * ChatLists 转 ChatListVos对象
+     * @param chatLists
+     * @return
+     */
+    private List<ChatListVo> filterChatListToChatListVo(List<ChatList> chatLists) {
+        return chatLists.stream().map(chatList -> {
+            ChatListVo chatListVo = new ChatListVo();
+            BeanUtils.copyProperties(chatList,chatListVo);
+            chatListVo.setId(String.valueOf(chatList.getId()));
+            chatListVo.setFromId(String.valueOf(chatList.getFromId()));
+            chatListVo.setToId(String.valueOf(chatList.getToId()));
+            SourceType sourceType = SourceType.valueOfAll(chatList.getSourceType().getValue());
+            if(sourceType!=null){
+                switch (sourceType) {
+                    case USER -> {
+                        chatListVo.setToName(userMapper.selectById(chatList.getToId()).getUserName());
+                    }
+                    case GROUP -> {
+                        chatListVo.setToName(cacheGroupService.getGroupNameByGroupId(chatList.getFromId()).getName());
+                    }
+                    case SYSTEM -> {
+                        chatListVo.setToName("系统消息");
+                    }
+                }
+                chatListVo.setSourceType(sourceType.getValue());
+            }
+            return chatListVo;
+        }).toList();
+    }
+
     @Override
-    public ChatListVo createChatList(ChatListDTO chatListDTO) {
+    public ChatListDmlVo createChatList(ChatListDTO chatListDTO) {
         //todo 登录鉴权 群组创建时/群友发送信息时，自动跟新  最后消息内容 完善异常处理
 
         ChatList chatList = new ChatList();
@@ -107,20 +148,20 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
         chatList.setFromId(Long.valueOf(chatListDTO.getFromId()));
         chatList.setToId(Long.valueOf(chatListDTO.getToId()));
         int result = chatListMapper.insert(chatList);
-        ChatListVo chatListVo = new ChatListVo();
+        ChatListDmlVo chatListDmlVo = new ChatListDmlVo();
         if(result >0 ){
-            chatListVo.setStatus(true);
-            chatListVo.setChatListId(String.valueOf(chatList.getId()));
-            chatListVo.setMessage("创建成功");
+            chatListDmlVo.setStatus(true);
+            chatListDmlVo.setChatListId(String.valueOf(chatList.getId()));
+            chatListDmlVo.setMessage("创建成功");
         }else{
-            chatListVo.setStatus(false);
-            chatListVo.setMessage("创建失败");
+            chatListDmlVo.setStatus(false);
+            chatListDmlVo.setMessage("创建失败");
         }
-        return chatListVo;
+        return chatListDmlVo;
     }
 
     @Override
-    public ChatListVo deleteChatList(ChatListDTO chatListDTO) {
+    public ChatListDmlVo deleteChatList(ChatListDTO chatListDTO) {
         //1、鉴权
         //2、删除类别
         SourceType sourceType = SourceType.valueOfAll(chatListDTO.getSource());

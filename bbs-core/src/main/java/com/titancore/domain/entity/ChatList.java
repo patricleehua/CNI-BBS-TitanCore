@@ -11,9 +11,9 @@ import lombok.Data;
  * 聊天列表
  * @TableName chat_list
  */
-@TableName(value ="chat_list")
+@TableName(value = "chat_list", autoResultMap = true)
 @Data
-public class ChatList{
+public class ChatList {
     /**
      * 主键
      */

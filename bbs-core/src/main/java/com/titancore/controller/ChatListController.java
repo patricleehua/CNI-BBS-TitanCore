@@ -3,7 +3,7 @@ package com.titancore.controller;
 import com.titancore.domain.dto.ChatListDTO;
 import com.titancore.domain.param.ChatListParam;
 import com.titancore.domain.param.PageResult;
-import com.titancore.domain.vo.ChatListVo;
+import com.titancore.domain.vo.ChatListDmlVo;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.ChatListService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,7 +38,7 @@ public class ChatListController {
     @PostMapping("/createChatList")
     @Operation(summary = "创建聊天会话")
     public Response<?> createChatList(@RequestBody ChatListDTO chatListDTO) {
-        ChatListVo result = chatListService.createChatList(chatListDTO);
+        ChatListDmlVo result = chatListService.createChatList(chatListDTO);
         return Response.success(result);
     }
 
@@ -50,7 +50,7 @@ public class ChatListController {
     @PostMapping("/deleteChatList")
     @Operation(summary = "删除聊天会话")
     public Response<?> deleteChatList(@RequestBody ChatListDTO chatListDTO) {
-        ChatListVo result = chatListService.deleteChatList(chatListDTO);
+        ChatListDmlVo result = chatListService.deleteChatList(chatListDTO);
         return Response.success(result);
     }
 
