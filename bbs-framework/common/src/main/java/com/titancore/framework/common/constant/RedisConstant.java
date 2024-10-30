@@ -46,4 +46,12 @@ public class RedisConstant {
      * SaToken保存的toekn路径前缀
      */
     public static final String SATOKEN_LOGIN_PRIX = "token:login:token:";
+    /**
+     * 用户注册分布式锁前缀
+     */
+    public static final String USER_REGISTER_LOCK_PRIX = "user_register_lock:";
+    /**
+     * 用户注册重要信息标识前缀
+     */
+    public static final String USER_REGISTER_INFO_PRIX = "user:register:info:";
 }

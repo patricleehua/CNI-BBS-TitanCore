@@ -1,6 +1,7 @@
 package com.titancore.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
+import com.titancore.domain.dto.RegisterUserDTO;
 import com.titancore.domain.dto.UserLoginDTO;
 import com.titancore.domain.vo.UserLoginVo;
 import com.titancore.domain.vo.UserVo;
@@ -49,7 +50,7 @@ public class UserController {
         return Response.success(StpUtil.getLoginId().toString());
     }
 
-    @GetMapping({"/open/recommendedUser", "/open/recommendedUser/{userId}"})
+    @GetMapping({"/open/recommendedUser", "/recommendedUser/{userId}"})
     @ApiOperationLog
     @Operation(summary = "推荐关注用户（待改善推荐算法）")
     public Response<?> recommendedUser(@PathVariable(required = false) String userId){
@@ -62,4 +63,10 @@ public class UserController {
 
         return Response.success(userVos);
     }
+    @PostMapping("/open/register")
+    @Operation(summary = "用户注册")
+    public Response<?> register(@RequestBody RegisterUserDTO registerUserDTO){
+        UserLoginVo userLoginVo = userService.register(registerUserDTO);
+        return Response.success(userLoginVo);
+        }
 }

@@ -26,6 +26,16 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     AUTH_ACCOUNT_IS_DIFFERENT("AUTH-30010","操作者与当前线程用户不一致!"),
     AUTH_ACCOUNT_IS_MISSED("AUTH-30011","操作者信息丢失或有误!"),
 
+    AUTH_ACCOUNT_LOGINNAME_IS_ALLERY_EXIST("AUTH-30012","用户登入名已存在,不能重复!"),
+    AUTH_ACCOUNT_USERNAME_IS_ALLERY_EXIST("AUTH-30012","用户名已存在,不能重复!"),
+    AUTH_ACCOUNT_EMAIL_IS_ALLERY_EXIST("AUTH-30013","用户邮箱已存在,不能重复!"),
+    AUTH_ACCOUNT_PHONE_IS_ALLERY_EXIST("AUTH-30014","用户手机号已存在,不能重复!"),
+
+    AUTH_ACCOUNT_REGISTER_FAIL("AUTH-30015","用户注册失败!" ),
+    AUTH_ACCOUNT_ROLE_REL_CREATE_FALL("AUTH-30016","用户角色关系构建失败!" ),
+    AUTH_ACCOUNT_INVITE_CREATE_FAIL("AUTH-30017","用户链接创建失败!" ),
+
+
     UPLOAD_FILE_IS_TOO_BIG("FILE-10001","上传的文件过大"),
     FILE_IS_NOT_IMAGE("FILE-10002", "上传的文件格式须为图片"),
     FILE_IS_NOT_VIDEO("FILE-10003", "上传的文件格式须为视频"),
@@ -46,9 +56,7 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
 
     //MessageQueue
     MESSAGE_QUEUE_ERROR("MESSAGE-10001","消息队列异常"),
-    MESSAGE_QUEUE_SEND_MESSAGE_TO_USER_ERROR("MESSAGE-10002","发送用户消息到消息队列出错!"),
-
-    ;
+    MESSAGE_QUEUE_SEND_MESSAGE_TO_USER_ERROR("MESSAGE-10002","发送用户消息到消息队列出错!");
 
     // ----------- 业务异常状态码 -----------
 

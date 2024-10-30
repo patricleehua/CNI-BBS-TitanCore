@@ -1,6 +1,7 @@
 package com.titancore.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.titancore.domain.dto.RegisterUserDTO;
 import com.titancore.domain.dto.UserLoginDTO;
 import com.titancore.domain.entity.User;
 import com.titancore.domain.vo.UserLoginVo;
@@ -31,5 +32,12 @@ public interface UserService  extends IService<User> {
      * @return
      */
     List<UserVo> recommendedUserAll();
+
+    /**
+     * 用户注册
+     * @param registerUserDTO
+     * @return
+     */
+    UserLoginVo register(RegisterUserDTO registerUserDTO);
 }
 

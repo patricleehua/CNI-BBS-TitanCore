@@ -17,5 +17,14 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
      * @return
      */
     List<Role> queryRoleByUserId(Long user_Id);
+
+    /**
+     * 构建用户权限关联关系
+     * @param id
+     * @param user_Id
+     * @param role_Id
+     * @return
+     */
+    int buildUserRoleRelByUserId(Long id,Long user_Id, Long role_Id);
 }
 
