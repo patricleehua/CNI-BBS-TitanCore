@@ -30,11 +30,14 @@ public class GlobalFilter implements Filter {
         WHITELIST_PATHS.add("/system/verif/gen/random");
         WHITELIST_PATHS.add("/system/verif/check3");
         WHITELIST_PATHS.add("/common/upload");
+        //swagger
         WHITELIST_PATHS.add("/favicon.ico");
         WHITELIST_PATHS.add("/swagger-resources/**");
         WHITELIST_PATHS.add("/webjars/**");
         WHITELIST_PATHS.add("/v3/**");
         WHITELIST_PATHS.add("/doc.html");
+        //第三方认证
+        WHITELIST_PATHS.add("/auth/**");
     }
 
     @Autowired

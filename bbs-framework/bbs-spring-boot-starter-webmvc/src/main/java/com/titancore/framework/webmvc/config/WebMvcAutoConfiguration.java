@@ -3,7 +3,10 @@ package com.titancore.framework.webmvc.config;
 import cn.dev33.satoken.context.SaHolder;
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.router.SaRouter;
+import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.dev33.satoken.util.SaFoxUtil;
+//import com.titancore.framework.webmvc.context.BaseContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -46,6 +49,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(new SaInterceptor(handler -> {
             SaRouter.match("/**")
                     .notMatch("/user/open/**",
+                            "/auth/**",
                             "/common/open/**",
                             "/post/open/**",
                             "/category/open/**",
@@ -59,6 +63,11 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
                         if (!"OPTIONS".equalsIgnoreCase(SaHolder.getRequest().getMethod())) {
                             // 仅对非OPTIONS请求进行登录校验
                             StpUtil.checkLogin();
+//                            Object loginId = StpUtil.getLoginId();
+//                            long userid = SaFoxUtil.getValueByType(loginId, long.class);
+//                            SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
+//                            log.info("当前用户id为：" + userid);
+//                            log.info("当前token信息为：" + tokenInfo);
                         }
                     });
 
