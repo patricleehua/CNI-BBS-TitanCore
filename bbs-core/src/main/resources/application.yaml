@@ -138,6 +138,20 @@ titan:
       access-key-secret: ${titan.cloud.minio.access-key-secret}
       bucket-name-open: ${titan.cloud.minio.bucket-name-open}
       bucket-name-private: ${titan.cloud.minio.bucket-name-private}
+  auth:
+    proxy:
+      host: ${titan.auth.proxy.host}
+      port: ${titan.auth.proxy.port}
+      timeout: 15000
+    gitee:
+      clientId: ${titan.auth.gitee.clientId}
+      clientSecret: ${titan.auth.gitee.clientSecret}
+      redirectUri: ${titan.auth.gitee.redirectUri}
+    google:
+      clientId: ${titan.auth.google.clientId}
+      clientSecret: ${titan.auth.google.clientSecret}
+      redirectUri: ${titan.auth.google.redirectUri}
+
 
 
 # MyBatis配置
