@@ -1,8 +1,10 @@
-package com.titancore.framework.common.properties;
+package com.titancore.framework.common.util;
 
 import lombok.SneakyThrows;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -41,6 +43,19 @@ public class AesUtils {
         Cipher cipher = Cipher.getInstance(CONTENT_CIPHER_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(iv));
         return cipher.doFinal(data);
+    }
+
+    /**
+     * 生成 AES 密钥
+     * @param keySize 可以设置密钥长度为128, 192, 或256（需要JCE权限策略文件支持）
+     * @return 生成的 AES 密钥字节数组
+     */
+    @SneakyThrows
+    public static byte[] generateAESKey(int keySize) {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(keySize);
+        SecretKey secretKey = keyGenerator.generateKey();
+        return secretKey.getEncoded();
     }
 
 }

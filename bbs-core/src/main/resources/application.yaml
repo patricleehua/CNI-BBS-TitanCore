@@ -100,10 +100,10 @@ spring:
 
 titan:
   md5:
-    salt: shumei:)
+    salt: ${titan.md5.salt} #默认数据库提供的为shumei:)
   #AESKEY
   aes:
-    secretKey: eW1awsJiSLH7CGnmPGvBQZyPmACHTQYImNJPAu34fzs
+    secretKey: ${titan.aes.secretKey} #默认系统提供的为 eW1awsJiSLH7CGnmPGvBQZyPmACHTQYImNJPAu34fzs
   cloud:
     provider: minio
     maxSize: 1000000     #上传文件大小10MB

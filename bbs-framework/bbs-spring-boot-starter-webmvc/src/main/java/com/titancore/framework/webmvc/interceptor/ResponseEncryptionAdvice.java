@@ -3,7 +3,7 @@ package com.titancore.framework.webmvc.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.titancore.framework.common.properties.AESKey;
-import com.titancore.framework.common.properties.AesUtils;
+import com.titancore.framework.common.util.AesUtils;
 import com.titancore.framework.common.util.Base64UrlUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;

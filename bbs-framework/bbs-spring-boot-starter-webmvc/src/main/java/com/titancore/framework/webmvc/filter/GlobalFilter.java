@@ -2,7 +2,7 @@ package com.titancore.framework.webmvc.filter;
 
 
 import com.titancore.framework.common.properties.AESKey;
-import com.titancore.framework.common.properties.AesUtils;
+import com.titancore.framework.common.util.AesUtils;
 import com.titancore.framework.common.util.Base64UrlUtils;
 import com.titancore.framework.webmvc.interceptor.ModifiedHttpServletRequestWrapper;
 import jakarta.servlet.*;
