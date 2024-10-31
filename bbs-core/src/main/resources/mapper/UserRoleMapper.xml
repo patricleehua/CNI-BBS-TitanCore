@@ -8,8 +8,8 @@
                  where urr.user_id  = #{userId};
     </select>
 
-    <insert id="buildUserRoleRelByUserId">
-        insert into user_role_rel(id,user_id,role_id) values(#{id},#{user_id},#{role_id})
+    <insert id="buildUserRoleRelByUserId" parameterType="map">
+        insert into user_role_rel(id,user_id,role_id) values(#{id},#{userId},#{roleId})
     </insert>
 </mapper>
 

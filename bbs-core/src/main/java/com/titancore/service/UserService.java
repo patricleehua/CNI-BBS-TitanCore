@@ -5,6 +5,7 @@ import com.titancore.domain.dto.RegisterUserDTO;
 import com.titancore.domain.dto.UserLoginDTO;
 import com.titancore.domain.entity.User;
 import com.titancore.domain.vo.UserLoginVo;
+import com.titancore.domain.vo.UserRegisterVo;
 import com.titancore.domain.vo.UserVo;
 
 import java.util.List;
@@ -38,6 +39,6 @@ public interface UserService  extends IService<User> {
      * @param registerUserDTO
      * @return
      */
-    UserLoginVo register(RegisterUserDTO registerUserDTO);
+    UserRegisterVo register(RegisterUserDTO registerUserDTO);
 }
 

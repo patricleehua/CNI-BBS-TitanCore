@@ -8,6 +8,7 @@ import cn.hutool.core.lang.generator.SnowflakeGenerator;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.titancore.domain.dto.PointsRecordDTO;
 import com.titancore.domain.dto.RegisterUserDTO;
 import com.titancore.domain.dto.UserLoginDTO;
 import com.titancore.domain.entity.User;
@@ -15,17 +16,15 @@ import com.titancore.domain.entity.UserInvite;
 import com.titancore.domain.mapper.UserInviteMapper;
 import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.mapper.UserRoleMapper;
+import com.titancore.domain.vo.PointsRuleVo;
 import com.titancore.domain.vo.UserLoginVo;
+import com.titancore.domain.vo.UserRegisterVo;
 import com.titancore.domain.vo.UserVo;
-import com.titancore.enums.CapchaEnum;
-import com.titancore.enums.LoginEnum;
-import com.titancore.enums.ResponseCodeEnum;
-import com.titancore.enums.StatusEnum;
+import com.titancore.enums.*;
 import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.common.properties.Md5Salt;
-import com.titancore.service.FollowService;
-import com.titancore.service.UserService;
+import com.titancore.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -55,6 +54,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserInviteMapper userInviteMapper;
     @Autowired
     private UserRoleMapper userRoleMapper;
+    @Autowired
+    private PointsRuleService pointsRuleService;
+    @Autowired
+    private PointsRecordService pointsRecordService;
+    @Autowired
+    private EmailService emailService;
 
     public UserLoginVo login(UserLoginDTO userLoginDto) {
         LoginEnum loginType = LoginEnum.valueOfAll(userLoginDto.getLoginType());
@@ -62,7 +67,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (loginType != null) {
             switch (loginType) {
                 case PASSWORD -> {
-                    //todo 注意bug
+                    //todo 注意bug!!!
                     LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
                             .eq(User::getDelFlag, "0")
                             .and(w -> w.eq(User::getLoginName, userLoginDto.getUsername())
@@ -165,7 +170,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
     @Transactional
     @Override
-    public UserLoginVo register(RegisterUserDTO registerUserDTO) {
+    public UserRegisterVo register(RegisterUserDTO registerUserDTO) {
 
         //判断账户 是否存在
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
@@ -174,13 +179,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(User::getPhoneNumber, registerUserDTO.getPhoneNumber()).or()
                 .eq(User::getEmail, registerUserDTO.getEmailNumber());
         List<User> existingUsers = userMapper.selectList(queryWrapper);
-        if(!existingUsers.isEmpty()){
+        if (!existingUsers.isEmpty()) {
             existingUsers.forEach(user -> {
-                if(user.getLoginName().equals(registerUserDTO.getLoginName())){
+                if (user.getLoginName().equals(registerUserDTO.getLoginName())) {
                     throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_LOGINNAME_IS_ALLERY_EXIST);
-                }else if (user.getUserName().equals(registerUserDTO.getUserName())){
+                } else if (user.getUserName().equals(registerUserDTO.getUserName())) {
                     throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_USERNAME_IS_ALLERY_EXIST);
-                }else if(user.getPhoneNumber().equals(registerUserDTO.getPhoneNumber())){
+                } else if (user.getPhoneNumber().equals(registerUserDTO.getPhoneNumber())) {
                     throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_PHONE_IS_ALLERY_EXIST);
                 } else if (user.getEmail().equals(registerUserDTO.getEmailNumber())) {
                     throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_EMAIL_IS_ALLERY_EXIST);
@@ -189,7 +194,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         //分布式锁
         String userRegisterRedisKey = RedisConstant.USER_REGISTER_INFO_PRIX + registerUserDTO.getLoginName();
-        String lockKey = RedisConstant.USER_REGISTER_LOCK_PRIX  + userRegisterRedisKey;
+        String lockKey = RedisConstant.USER_REGISTER_LOCK_PRIX + userRegisterRedisKey;
         String lockValue = UUID.randomUUID().toString();
         try {
             if (Boolean.TRUE.equals(stringRedisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, 1, TimeUnit.MINUTES))) {
@@ -203,46 +208,74 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 registerUser.setUserType("01");
                 registerUser.setDelFlag("0");
                 registerUser.setSex(String.valueOf(registerUserDTO.getSex()));
+                registerUser.setEmail(registerUserDTO.getEmailNumber());
                 registerUser.setAvatar("https://profile-avatar.csdnimg.cn/65578c9c4382408eaa4db3d67b4026c4_u010165006.jpg");
-                registerUser.setStatus("1");//停用，需要邮箱验证
+                registerUser.setStatus(StatusEnum.DISABLED.getValue().toString());//停用，需要邮箱验证
                 //写入数据库
                 int userResult = userMapper.insert(registerUser);
                 if (!(userResult > 0)) {
                     throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_REGISTER_FAIL);
                 }
                 //建立权限
-                // 生成新的临时帖子ID
-                SnowflakeGenerator snowflakeGenerator = new SnowflakeGenerator();
-                snowflakeGenerator.next();
-                int userRoleRelResult = userRoleMapper.buildUserRoleRelByUserId(snowflakeGenerator.next(), registerUser.getUserId(), 5L);
+                // 生成新的临时ID
+                int userRoleRelResult = userRoleMapper.buildUserRoleRelByUserId(new SnowflakeGenerator().next(), registerUser.getUserId(), 5L);
                 if (!(userRoleRelResult > 0)) {
                     throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_ROLE_REL_CREATE_FALL);
                 }
                 //邀请链接
-                if(StringUtils.isNotEmpty(registerUserDTO.getInviteUrl())){
+                UserInvite userInvite = null;
+                if (StringUtils.isNotEmpty(registerUserDTO.getInviteUrl())) {
                     //查询邀请链接
-                    UserInvite userInvite = userInviteMapper.selectOne(new LambdaQueryWrapper<UserInvite>().eq(UserInvite::getInviteLink, registerUserDTO.getInviteUrl()).last("LIMIT 1"));
-                    if(userInvite != null && userInvite.getUserId() != null){
-                        createLink(registerUser.getUserId(), registerUser.getUserId());
-                    }else{
+                    userInvite = userInviteMapper.selectOne(new LambdaQueryWrapper<UserInvite>().eq(UserInvite::getInviteLink, registerUserDTO.getInviteUrl()).last("LIMIT 1"));
+                    if (userInvite != null && userInvite.getUserId() != null) {
+                        createLink(userInvite.getUserId(), registerUser.getUserId());
+                    } else {
                         createLink(registerUser.getUserId());
                     }
-                }else{
+                } else {
                     createLink(registerUser.getUserId());
                 }
 
-                //todo 积分处理
+                //注册积分
+                PointsRuleVo userRegisterPointsRule = pointsRuleService.queryRuleByUniqueKey(PointsRuleUniqueKey.USER_REGISTER);
+                if (userRegisterPointsRule != null) {
+                    PointsRecordDTO userRegisterpointsRecordDTO = PointsRecordService.buildPointsRecordDTO(userRegisterPointsRule, String.valueOf(registerUser.getUserId()), PointsStatus.EARNED.getValue());
+                    pointsRecordService.addPointsRecord(userRegisterpointsRecordDTO);
+                }
+                //邀请积分
+                if (userInvite != null && userInvite.getUserId() != null) {
+                    PointsRuleVo userRegisterIncentive = pointsRuleService.queryRuleByUniqueKey(PointsRuleUniqueKey.USER_REGISTER_INCENTIVE);
+                    PointsRecordDTO userRegisterIncentivePointsRecordDTO = PointsRecordService.buildPointsRecordDTO(userRegisterIncentive, String.valueOf(userInvite.getUserId()), PointsStatus.EARNED.getValue());
+                    pointsRecordService.addPointsRecord(userRegisterIncentivePointsRecordDTO);
 
-                //邮件通知用户验证账户
+                    PointsRuleVo userFillsRegisterIncentive = pointsRuleService.queryRuleByUniqueKey(PointsRuleUniqueKey.USER_fILLS_REGISTER_INCENTIVE);
+                    PointsRecordDTO userFillsRegisterIncentivePointsRecordDTO = PointsRecordService.buildPointsRecordDTO(userFillsRegisterIncentive, String.valueOf(registerUser.getUserId()), PointsStatus.EARNED.getValue());
+                    pointsRecordService.addPointsRecord(userFillsRegisterIncentivePointsRecordDTO);
+                }
+                // todo 邮件通知用户验证账户
+                //emailService
 
+                UserRegisterVo userRegisterVo = new UserRegisterVo();
+                BeanUtils.copyProperties(registerUser, userRegisterVo);
+                userRegisterVo.setUserId(String.valueOf(registerUser.getUserId()));
+                return userRegisterVo;
+            } else {
+                //为获取到锁
+                Thread.sleep(100);
             }
-        }catch (Exception e){
-
-        }finally {
-            //todo 释放锁
+        } catch (InterruptedException e) {
+            throw new BizException(ResponseCodeEnum.REDIS_LOCK_KEY_FREE_ERROR);
+        } finally {
+            try {
+                String currentValue = stringRedisTemplate.opsForValue().get(lockKey);
+                if (!StringUtils.isEmpty(currentValue) && currentValue.equals(lockValue)) {
+                    stringRedisTemplate.delete(lockKey);
+                }
+            } catch (Exception e) {
+                throw new BizException(ResponseCodeEnum.REDIS_LOCK_KEY_FREE_ERROR);
+            }
         }
-
-        return null;
+        throw  new BizException(ResponseCodeEnum.AUTH_ACCOUNT_REGISTER_FAIL);
     }
 
     /**
@@ -335,5 +368,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_INVITE_CREATE_FAIL);
         }
     }
+
 }
 

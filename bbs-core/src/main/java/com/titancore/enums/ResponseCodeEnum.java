@@ -41,6 +41,9 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     FILE_IS_NOT_VIDEO("FILE-10003", "上传的文件格式须为视频"),
     FILE_IS_NOT_SUPPORTED("FILE-10004", "上传的文件格式不支持"),
 
+    //Redis
+    REDIS_LOCK_KEY_FREE_ERROR("REDIS-10001","分布式锁释放失败"),
+
     //Category
     CATEGORY_CATEGORYID_CAN_NOT_BE_NULL("CATEGORY-10001","板块ID不能为空!"),
     CATEGORY_CATEGORYNAME_IS_EXIST("CATEGORY-10002","板块名称已存在!" ),
@@ -53,6 +56,11 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     //Follow
     FOLLOW_STATUS_ERROR("FOLLOW-10001","关注状态有误！"),
     FOLLOW_STRUCTURE_IS_EXIST("FOLLOW-10002","关注结构已存在!"),
+
+    //Points
+    POINTS_RULE_IS_NULL("POINTS-10001", "查无此积分规则!"),
+    POINTS_RULE_IS_NOT_ACTIVE("POINTS-10002", "积分规则已失效!"),
+    POINTS_IS_NOT_MATCH("POINTS-10003", "积分数量与积分规则表不一致!"),
 
     //MessageQueue
     MESSAGE_QUEUE_ERROR("MESSAGE-10001","消息队列异常"),

@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.titancore.domain.dto.RegisterUserDTO;
 import com.titancore.domain.dto.UserLoginDTO;
 import com.titancore.domain.vo.UserLoginVo;
+import com.titancore.domain.vo.UserRegisterVo;
 import com.titancore.domain.vo.UserVo;
 import com.titancore.framework.biz.operationlog.aspect.ApiOperationLog;
 import com.titancore.framework.common.response.Response;
@@ -66,7 +67,7 @@ public class UserController {
     @PostMapping("/open/register")
     @Operation(summary = "用户注册")
     public Response<?> register(@RequestBody RegisterUserDTO registerUserDTO){
-        UserLoginVo userLoginVo = userService.register(registerUserDTO);
-        return Response.success(userLoginVo);
+        UserRegisterVo userRegisterVo = userService.register(registerUserDTO);
+        return Response.success(userRegisterVo);
         }
 }
