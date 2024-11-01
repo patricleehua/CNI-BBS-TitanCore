@@ -7,6 +7,7 @@ import cn.hutool.core.lang.UUID;
 import cn.hutool.core.lang.generator.SnowflakeGenerator;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.titancore.domain.dto.PointsRecordDTO;
 import com.titancore.domain.dto.RegisterUserDTO;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -156,6 +158,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return userId;
         }
         return null;
+    }
+    @Override
+    public void offline(String userId) {
+        if(userId!=null){
+            userMapper.update(new LambdaUpdateWrapper<User>().eq(User::getUserId,userId).set(User::getLoginTime, LocalDateTime.now()));
+        }
     }
 
     @Override

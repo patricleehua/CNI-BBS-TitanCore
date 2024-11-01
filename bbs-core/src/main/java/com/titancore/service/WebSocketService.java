@@ -2,6 +2,8 @@ package com.titancore.service;
 
 import com.alibaba.fastjson.JSON;
 import com.titancore.domain.entity.ChatGroupMember;
+import com.titancore.domain.entity.ChatMessage;
+import com.titancore.enums.SourceType;
 import com.titancore.enums.WebSocketContentType;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -13,6 +15,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,14 +35,30 @@ public class WebSocketService {
     @Resource
     private UserService userService;
 
-    public static final ConcurrentHashMap<String, Channel> Online_User = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, List<Channel>> Online_User = new ConcurrentHashMap<>();
     public static final ConcurrentHashMap<Channel, String> Online_Channel = new ConcurrentHashMap<>();
 
+    /**
+     * 用户上线
+     * @param channel
+     * @param token
+     */
     public void online(Channel channel, String token) {
         try {
             String userId = userService.onlineByToken(token);
-//            String loginUserId = StpUtil.getLoginId().toString();
-            Online_User.put(userId, channel);
+            // 获取当前用户的通道列表
+            List<Channel> channels = Online_User.getOrDefault(userId, new ArrayList<>());
+            // 添加新通道
+            channels.add(channel);
+            // 检查通道数量，超过2个时下线最旧的通道
+            if (channels.size() > 2) {
+                // 下线最旧的通道
+                Channel oldestChannel = channels.remove(0); // 移除最旧的通道
+                oldestChannel.close(); // 关闭最旧通道
+            }
+            // 更新在线用户的通道列表
+            Online_User.put(userId, channels);
+            // 维护频道与用户 ID 的映射
             Online_Channel.put(channel, userId);
         } catch (Exception e) {
             sendMsg(channel, "连接错误", WebSocketContentType.Msg);
@@ -47,15 +66,33 @@ public class WebSocketService {
         }
     }
 
+    /**
+     * 用户下线
+     * @param channel
+     */
     public void offline(Channel channel) {
         String userId = Online_Channel.get(channel);
         if (StringUtils.isNotBlank(userId)) {
-            Online_User.remove(userId);
+            List<Channel> channels = Online_User.get(userId);
+            if(channels != null){
+                channels.remove(channel);
+                if(channels.isEmpty()){
+                    Online_User.remove(userId);
+                    userService.offline(userId);
+                }else {
+                    Online_User.put(userId, channels);
+                }
+            }
             Online_Channel.remove(channel);
-//            userService.offline(userId);
         }
     }
 
+    /**
+     * 发送消息给指定用户
+     * @param channel
+     * @param msg
+     * @param type
+     */
     private void sendMsg(Channel channel, Object msg, String type) {
         WsContent wsContent = new WsContent();
         wsContent.setType(type);
@@ -63,55 +100,95 @@ public class WebSocketService {
         channel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(wsContent)));
     }
 
+    /**
+     * 发送消息给用户
+     * @param msg
+     * @param userId
+     */
     public void sendMsgToUser(Object msg, String userId) {
-        Channel channel = Online_User.get(userId);
-        if (channel != null) {
-            sendMsg(channel, msg, WebSocketContentType.Msg);
+        List<Channel> channels = Online_User.get(userId);
+        if (channels != null) {
+            channels.forEach(channel -> {
+                sendMsg(channel, msg, WebSocketContentType.Msg);
+            });
         }
     }
 
-//    public void sendMsgToGroup(Message message, String groupId) {
-//        List<ChatGroupMember> list = chatGroupMemberService.getGroupMember(groupId);
-//        for (ChatGroupMember member : list) {
-//            if (!message.getFromId().equals(member.getUserId()) || MsgType.System.equals(message.getType())) {
-//                sendMsgToUser(message, member.getUserId());
-//            }
-//        }
-//    }
-//
-//    public void sendMsgAll(Object msg) {
-//        Online_Channel.forEach((channel, ext) -> {
-//            sendMsg(channel, msg, WsContentType.Msg);
-//        });
-//    }
-//
-//    public void sendNotifyToUser(Object msg, String userId) {
-//        Channel channel = Online_User.get(userId);
-//        if (channel != null) {
-//            sendMsg(channel, msg, WsContentType.Notify);
-//        }
-//    }
+    /**
+     * 发送消息给群组成员
+     * @param chatMessage
+     * @param groupId
+     */
+    public void sendMsgToGroup(ChatMessage chatMessage, String groupId) {
+        //todo 待fix发送给自己的bug 可能需要修改查询代码
+        List<ChatGroupMember> list = chatGroupMemberService.getGroupMemberByGroupId(groupId);
+        for (ChatGroupMember member : list) {
+            if (!chatMessage.getFromId().equals(member.getUserId()) || SourceType.GROUP.equals(chatMessage.getSourceType())) {
+                sendMsgToUser(chatMessage, String.valueOf(member.getUserId()));
+            }
+        }
+    }
 
-//    public void sendNoticeToGroup(Message message, String groupId) {
-//        List<ChatGroupMember> list = chatGroupMemberService.getGroupMember(groupId);
-//        for (ChatGroupMember member : list) {
-//            if (!message.getFromId().equals(member.getUserId()) || MsgType.System.equals(message.getType())) {
-//                sendNotifyToUser(message, member.getUserId());
-//            }
-//        }
-//    }
-//
-//    public void sendVideoToUser(Object msg, String userId) {
-//        Channel channel = Online_User.get(userId);
-//        if (channel != null) {
-//            sendMsg(channel, msg, WsContentType.Video);
-//        }
-//    }
-//
-//    public void sendNotifyAll(Object msg) {
-//        Online_Channel.forEach((channel, ext) -> {
-//            sendMsg(channel, msg, WsContentType.Notify);
-//        });
-//    }
+    /**
+     * 发送消息给所有在线用户
+     * @param msg
+     */
+    public void sendMsgAll(Object msg) {
+        Online_Channel.forEach((channel, ext) -> {
+            sendMsg(channel, msg, WebSocketContentType.Msg);
+        });
+    }
+
+    /**
+     * 发送系统通知给指定用户
+     * @param msg
+     * @param userId
+     */
+    public void sendNotifyToUser(Object msg, String userId) {
+        List<Channel> channels = Online_User.get(userId);
+        if (channels != null) {
+            channels.forEach(channel -> {
+                sendMsg(channel, msg, WebSocketContentType.Notify);
+            });
+        }
+    }
+
+    /**
+     * 发送系统消息给指定群组成员
+     * @param chatMessage
+     * @param groupId
+     */
+    public void sendNoticeToGroup(ChatMessage chatMessage, String groupId) {
+        List<ChatGroupMember> list = chatGroupMemberService.getGroupMemberByGroupId(groupId);
+        for (ChatGroupMember member : list) {
+            if (!chatMessage.getFromId().equals(member.getUserId()) || SourceType.SYSTEM.equals(chatMessage.getSourceType())) {
+                sendNotifyToUser(chatMessage, String.valueOf(member.getUserId()));
+            }
+        }
+    }
+
+    /**
+     * 发送媒体消息给指定用户
+     * @param msg
+     * @param userId
+     */
+    public void sendVideoToUser(Object msg, String userId) {
+        List<Channel> channels = Online_User.get(userId);
+        if (channels != null) {
+            channels.forEach(channel -> {
+                sendMsg(channel, msg, WebSocketContentType.Media);
+            });
+        }
+    }
+
+    /**
+     * 发送系统通知给所有在线用户
+     * @param msg
+     */
+    public void sendNotifyAll(Object msg) {
+        Online_Channel.forEach((channel, ext) -> {
+            sendMsg(channel, msg, WebSocketContentType.Notify);
+        });
+    }
 
 }

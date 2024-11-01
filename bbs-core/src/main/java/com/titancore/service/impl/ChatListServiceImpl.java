@@ -40,7 +40,7 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
     public void updateChatList(String fromId, String toId, ChatMessageContent chatMessageContent, SourceType sourceType) {
         //todo 判断聊天列表是否存在
         ChatList chatList = chatListMapper.selectOne(new LambdaQueryWrapper<ChatList>()
-                .eq(ChatList::getToId, toId).eq(ChatList::getFromId, fromId));
+                .eq(ChatList::getToId, toId).eq(ChatList::getFromId, fromId).eq(ChatList::getSourceType, sourceType));
 
         if (null == chatList) {
             //新建
@@ -87,7 +87,7 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
 
     @Override
     public PageResult queryChatList(ChatListParam chatListParam) {
-        // todo 登入鉴权
+        // todo 登入鉴权 解决列表为空
         Page<ChatList> page = new Page<>(chatListParam.getPageNo(), chatListParam.getPageSize());
         LambdaQueryWrapper<ChatList> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ChatList::getFromId, chatListParam.getFromId());
@@ -120,7 +120,7 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
                         chatListVo.setToName(userMapper.selectById(chatList.getToId()).getUserName());
                     }
                     case GROUP -> {
-                        chatListVo.setToName(cacheGroupService.getGroupNameByGroupId(chatList.getFromId()).getName());
+                        chatListVo.setToName(cacheGroupService.getGroupNameByGroupId(chatList.getToId()).getName());
                     }
                     case SYSTEM -> {
                         chatListVo.setToName("系统消息");

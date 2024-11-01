@@ -12,5 +12,5 @@ public class WebSocketContentType {
     /**
      * 视频/音频
      */
-    public static String Video = "video";
+    public static String Media = "media";
 }

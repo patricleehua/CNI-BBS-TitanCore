@@ -75,7 +75,8 @@ public class NettyWebSocketServer {
                         pipeline.addLast(new ChunkedWriteHandler()); // 处理大数据流
                         pipeline.addLast(new HttpObjectAggregator(8192)); // 聚合 HTTP 消息
                         pipeline.addLast(new HttpHeadersHandler()); // 自定义头处理器
-                        pipeline.addLast(new IdleStateHandler(30, 0, 0));  // 心跳检测
+//                        pipeline.addLast(new IdleStateHandler(30, 0, 0));  // 心跳检测
+                        pipeline.addLast(new IdleStateHandler(3000, 0, 0));  // 心跳检测
                         pipeline.addLast(new HeartBeatHandler());//心跳处理
                         pipeline.addLast(new WebSocketServerProtocolHandler("/ws")); // 升级为 WebSocket 协议处理
                         pipeline.addLast(Netty_Web_Socket_Server_Handler); // 自定义的 WebSocket 处理器 (如心跳规则/用户登入）

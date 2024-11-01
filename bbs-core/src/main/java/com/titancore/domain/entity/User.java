@@ -75,11 +75,11 @@ public class User  {
     /**
      * 最后登录时间
      */
-    private Long loginTime;
+    private LocalDateTime loginTime;
     /**
      * 密码最后更新时间
      */
-    private Long pwdUpdateTime;
+    private LocalDateTime pwdUpdateTime;
     /**
      * 创建者
      */

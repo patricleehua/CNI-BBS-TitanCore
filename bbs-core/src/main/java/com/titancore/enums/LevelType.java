@@ -14,8 +14,9 @@ import java.util.Objects;
 @AllArgsConstructor
 public enum LevelType implements IEnum<String> {
 
-    SYSTEM("system"),
-    NORMAL("normal");
+    MESSAGE("message"),
+    NOTIFY("notify"),
+    MEDIA("media");
     private final String value;
     public static LevelType valueOfAll(String value) {
         for (LevelType levelEnum : LevelType.values()) {

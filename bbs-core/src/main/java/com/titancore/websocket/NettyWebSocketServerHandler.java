@@ -1,6 +1,7 @@
 package com.titancore.websocket;
 
 import cn.hutool.extra.spring.SpringUtil;
+import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.WebSocketService;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -72,8 +73,11 @@ public class NettyWebSocketServerHandler extends SimpleChannelInboundHandler<Tex
         if (evt instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
             // 获取 WebSocket 握手完成后的 token
             String token = NettyUtil.getAttr(ctx.channel(), NettyUtil.TOKEN);
-            log.info("token"+token);
-            webSocketService.online(ctx.channel(), token);  // 标记用户为在线
+            try{
+                webSocketService.online(ctx.channel(), token);  // 标记用户为在线
+            }catch (BizException e){
+                offLine(ctx);
+            }
         }
         super.userEventTriggered(ctx, evt);
     }

@@ -67,11 +67,12 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
                 }
             }
         }
+        //todo 一个用户一天只能创建三个群组 也许还需要规划人数
         ChatGroup chatGroup = this.copy(chatGroupDTO);
         int first = chatGroupMapper.insert(chatGroup);
         //todo 建立用户群组关系
         boolean second = handleTheRelationshipBetweenUsersAndGroups(chatGroup.getId(), chatGroupDTO);
-
+        //todo 创建聊天列表 仅为自己，只有当创建者 发送第一条消息才会给群成员创建他们的聊天列表
         ChatGroupVo chatGroupVo = new ChatGroupVo();
         //todo 优化响应结果
         if(first>0 || second){

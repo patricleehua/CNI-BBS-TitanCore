@@ -3,7 +3,6 @@ package com.titancore.service;
 import com.alibaba.fastjson.JSON;
 import com.titancore.config.rabbitmq.RabbitMqConstant;
 import com.titancore.domain.dto.ChatMessageDTO;
-import com.titancore.domain.entity.ChatMessage;
 import com.titancore.enums.ResponseCodeEnum;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.rabbitmq.util.RabbitMqHelper;
@@ -22,11 +21,35 @@ public class RBMQProducerService {
     /**
      * 发送可重试消息给用户
      */
-
     public void sendMsgToUser(ChatMessageDTO chatMessageDTO) {
         try {
             String jsonMessage = JSON.toJSONString(chatMessageDTO);
             rabbitMqHelper.sendMessageRetry(RabbitMqConstant.EXCHANGE_TOPIC, RabbitMqConstant.ROUTING_TOPIC_PRIVATE_CHAT, jsonMessage);
+        } catch (Exception e) {
+            log.error("发送可重试消息失败:{}", e.getMessage());
+            throw new BizException(ResponseCodeEnum.MESSAGE_QUEUE_SEND_MESSAGE_TO_USER_ERROR);
+        }
+    }
+
+    /**
+     * 发送可重试消息给群组
+     */
+    public void sendMsgToGroup(ChatMessageDTO chatMessageDTO) {
+        try {
+            String jsonMessage = JSON.toJSONString(chatMessageDTO);
+            rabbitMqHelper.sendMessageRetry(RabbitMqConstant.EXCHANGE_TOPIC, RabbitMqConstant.ROUTING_TOPIC_GROUP_CHAT, jsonMessage);
+        } catch (Exception e) {
+            log.error("发送可重试消息失败:{}", e.getMessage());
+            throw new BizException(ResponseCodeEnum.MESSAGE_QUEUE_SEND_MESSAGE_TO_USER_ERROR);
+        }
+    }
+    /**
+     * 发送可重试消息给系统消息
+     */
+    public void sendMsgToSystem(ChatMessageDTO chatMessageDTO) {
+        try {
+            String jsonMessage = JSON.toJSONString(chatMessageDTO);
+            rabbitMqHelper.sendMessageRetry(RabbitMqConstant.EXCHANGE_TOPIC, RabbitMqConstant.ROUTING_TOPIC_BROAD_CAST, jsonMessage);
         } catch (Exception e) {
             log.error("发送可重试消息失败:{}", e.getMessage());
             throw new BizException(ResponseCodeEnum.MESSAGE_QUEUE_SEND_MESSAGE_TO_USER_ERROR);

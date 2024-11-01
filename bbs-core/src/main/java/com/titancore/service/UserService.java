@@ -25,7 +25,11 @@ public interface UserService  extends IService<User> {
      */
     UserLoginVo login(UserLoginDTO userLoginDto);
 
-
+    /**
+     * 用户上线
+     * @param token
+     * @return
+     */
     String onlineByToken(String token);
 
     /**
@@ -40,5 +44,11 @@ public interface UserService  extends IService<User> {
      * @return
      */
     UserRegisterVo register(RegisterUserDTO registerUserDTO);
+
+    /**
+     * 用户下线
+     * @param userId
+     */
+    void offline(String userId);
 }
 

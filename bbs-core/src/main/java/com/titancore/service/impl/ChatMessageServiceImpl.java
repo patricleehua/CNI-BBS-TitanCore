@@ -42,7 +42,8 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         if(sourceType!=null){
             switch(sourceType) {
                 case USER -> result = sendMessageToUser(chatMessageDTO);
-//                case GROUP -> result = sendMessageToGroup(chatMessageDTO);
+                case GROUP -> result = sendMessageToGroup(chatMessageDTO);
+                case SYSTEM -> result = sendMessageToSystem(chatMessageDTO);
             }
         }
         DMLVo dmlVo = new DMLVo();
@@ -57,56 +58,39 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         }
         return dmlVo;
     }
-    @Autowired
-    private ChatListService chatListService;
-    private ChatMessage sendMessageToSystem(ChatMessageDTO chatMessageDTO) {
-        //获取发送方用户信息
-        User user = userService.getById(chatMessageDTO.getFromId());
-        //保存消息
-        ChatMessage chatMessage = saveChatMessage(user,chatMessageDTO);
-        //更新聊天列表
-        if (chatMessage != null) {
-            chatListService.updateChatList(chatMessageDTO.getFromId(),chatMessageDTO.getToId(), chatMessage.getChatMessageContent(),SourceType.SYSTEM);
-        }
-
-        //发送消息
-        if (null != chatMessage) {
-            try {
-//                mqProducerService.sendMsgToUser(chatMessage);
+    private ChatMessageDTO sendMessageToSystem(ChatMessageDTO chatMessageDTO) {
+        //todo 不同消息类型 的处理
+        if (chatMessageDTO != null) {
+            try{
+                rbmqProducerService.sendMsgToSystem(chatMessageDTO);
             } catch (Exception e) {
-                // todo 发送消息
-//                webSocketService.sendMsgToUser(message, message.getToId());
+                User user = userService.getById(chatMessageDTO.getFromId());
+                ChatMessage chatMessage = convertDtoToChatMessage(user, chatMessageDTO);
+                webSocketService.sendMsgAll(chatMessage);
             }
         }
-        return  chatMessage;
+        return  chatMessageDTO;
     }
 
 
 
-    private ChatMessage sendMessageToGroup(ChatMessageDTO chatMessageDTO) {
-        //获取发送方用户信息
-        User user = userService.getById(chatMessageDTO.getFromId());
-        //保存消息
-        ChatMessage chatMessage = saveChatMessage(user,chatMessageDTO);
-        //更新聊天列表
-        if (chatMessage != null) {
-            chatListService.updateChatListGroup(String.valueOf(chatMessage.getToId()), chatMessage.getChatMessageContent());
-        }
-
+    private ChatMessageDTO sendMessageToGroup(ChatMessageDTO chatMessageDTO) {
+        //todo 不同消息类型 的处理
         //发送消息
-        if (null != chatMessage) {
-            try {
-//                mqProducerService.sendMsgToUser(chatMessage);
-            } catch (Exception e) {
-                //发送消息
-//                webSocketService.sendMsgToUser(message, message.getToId());
+        if (chatMessageDTO != null) {
+            try{
+                rbmqProducerService.sendMsgToGroup(chatMessageDTO);
+            }catch (Exception e){
+                User user = userService.getById(chatMessageDTO.getFromId());
+                ChatMessage chatMessage = convertDtoToChatMessage(user, chatMessageDTO);
+                webSocketService.sendMsgToGroup(chatMessage, String.valueOf(chatMessage.getToId()));
             }
         }
-        return  chatMessage;
+        return  chatMessageDTO;
     }
 
     private ChatMessageDTO sendMessageToUser(ChatMessageDTO chatMessageDTO) {
-
+        //todo 不同消息类型 的处理
         //发送消息
         if (null != chatMessageDTO) {
             try {
@@ -132,6 +116,12 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         return result > 0 ? chatMessage : null;
     }
 
+    /**
+     * ChatMessageDTO 对象转换为 ChatMessage 对象
+     * @param user
+     * @param chatMessageDTO
+     * @return
+     */
     private ChatMessage convertDtoToChatMessage(User user, ChatMessageDTO chatMessageDTO) {
         String toUserId = chatMessageDTO.getToId();
         LevelType levelType = LevelType.valueOfAll(chatMessageDTO.getLevel());
