@@ -54,4 +54,12 @@ public class RedisConstant {
      * 用户注册重要信息标识前缀
      */
     public static final String USER_REGISTER_INFO_PRIX = "user:register:info:";
+    /**
+     * 临时通行码前缀 (仅一次使用)
+     */
+    public static final String TEMPORARY_PASS_CODE_PRIX = "temporary:pass:code:";
+    /**
+     * 临时通行码过期时间
+     */
+    public static final Long TEMPORARY_PASS_CODE_TTL = 5L;
 }

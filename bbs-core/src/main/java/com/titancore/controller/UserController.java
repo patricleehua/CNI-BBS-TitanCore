@@ -2,10 +2,10 @@ package com.titancore.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.titancore.domain.dto.RegisterUserDTO;
+import com.titancore.domain.dto.ResetPasswordUserDTO;
 import com.titancore.domain.dto.UserLoginDTO;
-import com.titancore.domain.vo.UserLoginVo;
-import com.titancore.domain.vo.UserRegisterVo;
-import com.titancore.domain.vo.UserVo;
+import com.titancore.domain.dto.VerificationCodeForUserDTO;
+import com.titancore.domain.vo.*;
 import com.titancore.framework.biz.operationlog.aspect.ApiOperationLog;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.UserService;
@@ -69,5 +69,23 @@ public class UserController {
     public Response<?> register(@RequestBody RegisterUserDTO registerUserDTO){
         UserRegisterVo userRegisterVo = userService.register(registerUserDTO);
         return Response.success(userRegisterVo);
-        }
+    }
+    @GetMapping("/open/checkUserIfExist/{account}")
+    @Operation(summary = "检查用户是否存在于系统")
+    public Response<?> checkUserIfExist(@PathVariable String account){
+        boolean result = userService.checkUserIfExist(account);
+        return Response.success(result);
+    }
+    @PostMapping("/open/checkUserVerificationCode")
+    @Operation(summary = "检查用户验证码并生成临时通行凭证")
+    public Response<?> checkUserVerificationCode(@RequestBody VerificationCodeForUserDTO verificationCodeForUserDTO){
+        UserVerificationCodeVo userVerificationCodeVo = userService.checkUserVerificationCode(verificationCodeForUserDTO);
+        return Response.success(userVerificationCodeVo);
+    }
+    @PostMapping("/open/resetPassword")
+    @Operation(summary = "用户重置密码")
+    public Response<?> resetPassword(@RequestBody ResetPasswordUserDTO resetPasswordUserDTO){
+        UserResetPasswordVo userResetPasswordVo = userService.resetPassword(resetPasswordUserDTO);
+        return Response.success(userResetPasswordVo);
+    }
 }

@@ -2,11 +2,11 @@ package com.titancore.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.titancore.domain.dto.RegisterUserDTO;
+import com.titancore.domain.dto.ResetPasswordUserDTO;
 import com.titancore.domain.dto.UserLoginDTO;
+import com.titancore.domain.dto.VerificationCodeForUserDTO;
 import com.titancore.domain.entity.User;
-import com.titancore.domain.vo.UserLoginVo;
-import com.titancore.domain.vo.UserRegisterVo;
-import com.titancore.domain.vo.UserVo;
+import com.titancore.domain.vo.*;
 
 import java.util.List;
 
@@ -50,5 +50,26 @@ public interface UserService  extends IService<User> {
      * @param userId
      */
     void offline(String userId);
+
+    /**
+     * 检查用户账号是否存在
+     * @param account
+     * @return
+     */
+    boolean checkUserIfExist(String account);
+
+    /**
+     * 校验用户验证码
+     * @param verificationCodeForUserDTO
+     * @return
+     */
+    UserVerificationCodeVo checkUserVerificationCode(VerificationCodeForUserDTO verificationCodeForUserDTO);
+
+    /**
+     * 重置密码
+     * @param resetPasswordUserDTO
+     * @return
+     */
+    UserResetPasswordVo resetPassword(ResetPasswordUserDTO resetPasswordUserDTO);
 }
 

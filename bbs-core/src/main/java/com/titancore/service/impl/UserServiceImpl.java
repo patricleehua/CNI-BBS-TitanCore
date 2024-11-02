@@ -9,18 +9,13 @@ import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.titancore.domain.dto.PointsRecordDTO;
-import com.titancore.domain.dto.RegisterUserDTO;
-import com.titancore.domain.dto.UserLoginDTO;
+import com.titancore.domain.dto.*;
 import com.titancore.domain.entity.User;
 import com.titancore.domain.entity.UserInvite;
 import com.titancore.domain.mapper.UserInviteMapper;
 import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.mapper.UserRoleMapper;
-import com.titancore.domain.vo.PointsRuleVo;
-import com.titancore.domain.vo.UserLoginVo;
-import com.titancore.domain.vo.UserRegisterVo;
-import com.titancore.domain.vo.UserVo;
+import com.titancore.domain.vo.*;
 import com.titancore.enums.*;
 import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
@@ -69,13 +64,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (loginType != null) {
             switch (loginType) {
                 case PASSWORD -> {
-                    //todo 注意bug!!!
                     LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
                             .eq(User::getDelFlag, "0")
-                            .and(w -> w.eq(User::getLoginName, userLoginDto.getUsername())
-                                    .or().eq(User::getPhoneNumber, userLoginDto.getPhoneNumber())
-                                    .or().eq(User::getEmail, userLoginDto.getEmailNumber()))
                             .last("limit 1");
+                    if (!userLoginDto.getUsername().isEmpty()){
+                        queryWrapper.eq(User::getLoginName, userLoginDto.getUsername());
+                    }else if(!userLoginDto.getEmailNumber().isEmpty()){
+                        queryWrapper.eq(User::getEmail, userLoginDto.getEmailNumber());
+                    }else if(!userLoginDto.getPhoneNumber().isEmpty()){
+                        queryWrapper.eq(User::getPhoneNumber, userLoginDto.getPhoneNumber());
+                    }
                     user = userMapper.selectOne(queryWrapper);
                     //账号异常
                     if (user == null ) {
@@ -98,21 +96,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 case VERIFICATION_CODE -> {
                     String code = getCaptchaRedisCache(userLoginDto);
                     if (!code.equals(userLoginDto.getCaptchaCode())) {
-                        throw new BizException(ResponseCodeEnum.APTCHACODE_ISNOTSAME);
+                        throw new BizException(ResponseCodeEnum.APTCHACODE_IS_NOT_CORRECT);
                     }
-
-                    user = getOne(new LambdaQueryWrapper<User>()
-                            .eq(User::getPhoneNumber, userLoginDto.getPhoneNumber())
-                            .or()
-                            .eq(User::getEmail, userLoginDto.getEmailNumber())
-                            .eq(User::getDelFlag, "0"));
+                    LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
+                            .eq(User::getDelFlag, "0")
+                            .last("limit 1");
+                    if (!userLoginDto.getEmailNumber().isEmpty()){
+                        queryWrapper.eq(User::getEmail, userLoginDto.getEmailNumber());
+                    }else if(!userLoginDto.getPhoneNumber().isEmpty()){
+                        queryWrapper.eq(User::getPhoneNumber, userLoginDto.getPhoneNumber());
+                    }
+                    user = getOne(queryWrapper);
                 }
             }
         } else {
             throw new BizException(ResponseCodeEnum.ACCOUNT_VERIFICATION_TYPE_ISNULL);
         }
 
-        //todo
+        //todo 待完善部分代码
         if (user != null) {
             //登入成功创建saToken
             LoginEnum rememberMe = LoginEnum.valueOfAll(userLoginDto.getRememberMe());
@@ -164,6 +165,105 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if(userId!=null){
             userMapper.update(new LambdaUpdateWrapper<User>().eq(User::getUserId,userId).set(User::getLoginTime, LocalDateTime.now()));
         }
+    }
+
+    @Override
+    public boolean checkUserIfExist(String account) {
+        //todo 第三方登入待处理
+        if(account == null){
+            throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
+        }
+        List<User> users = userMapper.selectList(new LambdaQueryWrapper<User>().eq(User::getEmail, account).or().eq(User::getPhoneNumber, account));
+        return !users.isEmpty();
+    }
+
+    @Override
+    public UserVerificationCodeVo checkUserVerificationCode(VerificationCodeForUserDTO verificationCodeForUserDTO) {
+        String emailNumber = verificationCodeForUserDTO.getEmailNumber();
+        String phoneNumber = verificationCodeForUserDTO.getPhoneNumber();
+        String code = verificationCodeForUserDTO.getCode();
+        UserVerificationCodeVo userVerificationCodeVo = new UserVerificationCodeVo();
+
+        if (emailNumber == null && phoneNumber == null) {
+            throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
+        }
+
+        if (emailNumber != null) {
+            String redisKey = RedisConstant.EMAIL_PRIX + emailNumber;
+            String emailCode = stringRedisTemplate.opsForValue().get(redisKey);
+            if (emailCode == null) {
+                throw new BizException(ResponseCodeEnum.APTCHACODE_IS_NOT_EXIST);
+            }
+            if (!emailCode.equals(code)) {
+                throw new BizException(ResponseCodeEnum.APTCHACODE_IS_NOT_CORRECT);
+            }
+            stringRedisTemplate.delete(redisKey);
+            userVerificationCodeVo.setEmailNumber(emailNumber);
+        }else {
+            String redisKey = RedisConstant.PHONE_PRIX + phoneNumber;
+            String phoneCode = stringRedisTemplate.opsForValue().get(redisKey);
+            if (phoneCode == null) {
+                throw new BizException(ResponseCodeEnum.APTCHACODE_IS_NOT_EXIST);
+            }
+            if (!phoneCode.equals(code)) {
+                throw new BizException(ResponseCodeEnum.APTCHACODE_IS_NOT_CORRECT);
+            }
+            stringRedisTemplate.delete(redisKey);
+            userVerificationCodeVo.setPhoneNumber(phoneNumber);
+        }
+        int temporaryPassCode = RandomUtil.randomInt(100000, 1000000);
+        String redisKey = emailNumber != null
+                ? RedisConstant.TEMPORARY_PASS_CODE_PRIX + emailNumber
+                : RedisConstant.TEMPORARY_PASS_CODE_PRIX + phoneNumber;
+
+        stringRedisTemplate.opsForValue().set(
+                redisKey,
+                String.valueOf(temporaryPassCode),
+                RedisConstant.TEMPORARY_PASS_CODE_TTL,
+                TimeUnit.MINUTES
+        );
+        userVerificationCodeVo.setTemporaryCode(temporaryPassCode);
+        userVerificationCodeVo.setPassed(true);
+        return userVerificationCodeVo;
+    }
+
+
+    @Override
+    public UserResetPasswordVo resetPassword(ResetPasswordUserDTO resetPasswordUserDTO) {
+        UserResetPasswordVo userResetPasswordVo = new UserResetPasswordVo();
+        String emailNumber = resetPasswordUserDTO.getEmailNumber();
+        String phoneNumber = resetPasswordUserDTO.getPhoneNumber();
+        String code = resetPasswordUserDTO.getTemporaryCode();
+        String newPassword = resetPasswordUserDTO.getNewPassword();
+        if (emailNumber == null && phoneNumber == null) {
+            throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
+        }
+        //校验临时通行码
+        String redisKey = emailNumber != null ? RedisConstant.TEMPORARY_PASS_CODE_PRIX + emailNumber : RedisConstant.TEMPORARY_PASS_CODE_PRIX + phoneNumber ;
+        String temporaryCode = stringRedisTemplate.opsForValue().get(redisKey);
+        if (temporaryCode != null){
+            if(!temporaryCode.equals(code)){
+                throw new BizException(ResponseCodeEnum.PASSCODE_IS_NOT_CORRECT);
+            }
+        }else{
+            //清除通行码
+            stringRedisTemplate.delete(redisKey);
+            throw new  BizException(ResponseCodeEnum.PASSCODE_IS_NOT_EXIST);
+        }
+        int result = 0;
+        if(!newPassword.isEmpty()){
+            newPassword += md5Salt.getSalt();
+            String md5newPassword = DigestUtils.md5DigestAsHex(newPassword.getBytes());
+            if(emailNumber != null && !emailNumber.isEmpty()){
+                userResetPasswordVo.setEmailNumber(emailNumber);
+                result = userMapper.update(new LambdaUpdateWrapper<User>().eq(User::getEmail, emailNumber).set(User::getPassword, md5newPassword));
+            }else {
+                userResetPasswordVo.setPhoneNumber(phoneNumber);
+                result = userMapper.update(new LambdaUpdateWrapper<User>().eq(User::getPhoneNumber, phoneNumber).set(User::getPassword, md5newPassword));
+            }
+        }
+        userResetPasswordVo.setResult(result > 0);
+        return userResetPasswordVo;
     }
 
     @Override
