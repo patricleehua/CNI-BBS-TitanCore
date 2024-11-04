@@ -20,8 +20,8 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     CAPTCHACODE_IS_ERROR("AUTH-30005","验证码发送失败"),
     PHONE_NUMBER_IS_ERROR("AUTH-30006","输入的手机号码有误"),
     EMAIL_NUMBER_IS_ERROR("AUTH-30007","输入的邮箱号码有误"),
-    APTCHACODE_ISNOTSAME("AUTH-30008","输入的验证码有误"),
-    APTCHACODE_IS_NOT_EXIST("AUTH-30009","验证码不存在"),
+
+
 
     AUTH_ACCOUNT_IS_DIFFERENT("AUTH-30010","操作者与当前线程用户不一致!"),
     AUTH_ACCOUNT_IS_MISSED("AUTH-30011","操作者信息丢失或有误!"),
@@ -34,7 +34,14 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     AUTH_ACCOUNT_REGISTER_FAIL("AUTH-30015","用户注册失败!" ),
     AUTH_ACCOUNT_ROLE_REL_CREATE_FALL("AUTH-30016","用户角色关系构建失败!" ),
     AUTH_ACCOUNT_INVITE_CREATE_FAIL("AUTH-30017","用户链接创建失败!" ),
+    AUTH_ACCOUNT_TEMPORARY_USER_CREATED_FAIL("AUTH-30018","临时用户创建失败!" ),
 
+    //code
+    APTCHACODE_IS_NOT_EXIST("APTCHACODE-10001","验证码不存在!"),
+    APTCHACODE_IS_NOT_CORRECT("APTCHACODE-10002","验证码校验不通过!"),
+    //passcode
+    PASSCODE_IS_NOT_EXIST("PASSCODE-10001","输入的通行码不存在!"),
+    PASSCODE_IS_NOT_CORRECT("PASSCODE-10001","输入的通行码校验不通过!"),
 
     UPLOAD_FILE_IS_TOO_BIG("FILE-10001","上传的文件过大"),
     FILE_IS_NOT_IMAGE("FILE-10002", "上传的文件格式须为图片"),
