@@ -20,7 +20,7 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     CAPTCHACODE_IS_ERROR("AUTH-30005","验证码发送失败"),
     PHONE_NUMBER_IS_ERROR("AUTH-30006","输入的手机号码有误"),
     EMAIL_NUMBER_IS_ERROR("AUTH-30007","输入的邮箱号码有误"),
-
+    ACCOUNT_CAN_NOT_FOUND("AUTH-30008","账号没有找到！"),
 
 
     AUTH_ACCOUNT_IS_DIFFERENT("AUTH-30010","操作者与当前线程用户不一致!"),
