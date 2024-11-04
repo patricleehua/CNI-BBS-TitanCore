@@ -1,10 +1,7 @@
 package com.titancore.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
-import com.titancore.domain.dto.RegisterUserDTO;
-import com.titancore.domain.dto.ResetPasswordUserDTO;
-import com.titancore.domain.dto.UserLoginDTO;
-import com.titancore.domain.dto.VerificationCodeForUserDTO;
+import com.titancore.domain.dto.*;
 import com.titancore.domain.vo.*;
 import com.titancore.framework.biz.operationlog.aspect.ApiOperationLog;
 import com.titancore.framework.common.response.Response;
@@ -26,6 +23,7 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
+
     @PostMapping("/open/login")
     @ApiOperationLog
     @Operation(summary = "用户登入")
@@ -88,4 +86,15 @@ public class UserController {
         UserResetPasswordVo userResetPasswordVo = userService.resetPassword(resetPasswordUserDTO);
         return Response.success(userResetPasswordVo);
     }
+    @PostMapping("/open/socialUserBindLocalUser")
+    @Operation(summary = "第三方用户绑定本地用户")
+    public Response<?> socialUserBindLocalUser(@RequestBody BindSocialUserDTO bindSocialUserDTO){
+        boolean isVerify = userService.verifyTemporaryPassCode(bindSocialUserDTO.getSocialUserId(), bindSocialUserDTO.getTemporaryCode());
+        if(isVerify){
+            DMLVo dmlVo = userService.socialUserBindLocalUser(bindSocialUserDTO);
+            return Response.success(dmlVo);
+        }
+        return Response.success();
+    }
+
 }

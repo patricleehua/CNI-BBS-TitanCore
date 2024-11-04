@@ -1,10 +1,7 @@
 package com.titancore.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.titancore.domain.dto.RegisterUserDTO;
-import com.titancore.domain.dto.ResetPasswordUserDTO;
-import com.titancore.domain.dto.UserLoginDTO;
-import com.titancore.domain.dto.VerificationCodeForUserDTO;
+import com.titancore.domain.dto.*;
 import com.titancore.domain.entity.User;
 import com.titancore.domain.vo.*;
 
@@ -71,5 +68,27 @@ public interface UserService  extends IService<User> {
      * @return
      */
     UserResetPasswordVo resetPassword(ResetPasswordUserDTO resetPasswordUserDTO);
+
+    /**
+     * 给key生成通行码
+     * @param key
+     * @return
+     */
+    int getTemporaryPassCode(String key);
+
+    /**
+     * 校验key的通行码
+     * @param key
+     * @param verifyCode
+     * @return
+     */
+    boolean verifyTemporaryPassCode(String key,String verifyCode);
+
+    /**
+     * 为第三方平台用户建立本地数据用户关联
+     * @param bindSocialUserDTO
+     * @return
+     */
+    DMLVo socialUserBindLocalUser(BindSocialUserDTO bindSocialUserDTO);
 }
 

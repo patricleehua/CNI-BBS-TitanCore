@@ -17,6 +17,7 @@ import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.mapper.UserRoleMapper;
 import com.titancore.domain.vo.*;
 import com.titancore.enums.*;
+import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.common.properties.Md5Salt;
@@ -57,6 +58,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private PointsRecordService pointsRecordService;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private SocialUserService socialUserService;
 
     public UserLoginVo login(UserLoginDTO userLoginDto) {
         LoginEnum loginType = LoginEnum.valueOfAll(userLoginDto.getLoginType());
@@ -211,20 +214,92 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             stringRedisTemplate.delete(redisKey);
             userVerificationCodeVo.setPhoneNumber(phoneNumber);
         }
-        int temporaryPassCode = RandomUtil.randomInt(100000, 1000000);
-        String redisKey = emailNumber != null
-                ? RedisConstant.TEMPORARY_PASS_CODE_PRIX + emailNumber
-                : RedisConstant.TEMPORARY_PASS_CODE_PRIX + phoneNumber;
 
+        String key = emailNumber != null
+                ? emailNumber
+                : phoneNumber;
+        int temporaryPassCode = getTemporaryPassCode(key);
+        userVerificationCodeVo.setTemporaryCode(temporaryPassCode);
+        userVerificationCodeVo.setPassed(true);
+        return userVerificationCodeVo;
+    }
+    @Override
+    public int getTemporaryPassCode(String key) {
+        String redisKey = RedisConstant.TEMPORARY_PASS_CODE_PRIX + key;
+        int temporaryPassCode = RandomUtil.randomInt(100000, 1000000);
         stringRedisTemplate.opsForValue().set(
                 redisKey,
                 String.valueOf(temporaryPassCode),
                 RedisConstant.TEMPORARY_PASS_CODE_TTL,
                 TimeUnit.MINUTES
         );
-        userVerificationCodeVo.setTemporaryCode(temporaryPassCode);
-        userVerificationCodeVo.setPassed(true);
-        return userVerificationCodeVo;
+        return temporaryPassCode;
+    }
+    @Override
+    public boolean verifyTemporaryPassCode(String key,String verifyCode){
+        String redisKey = RedisConstant.TEMPORARY_PASS_CODE_PRIX + key;
+        String temporaryPassCode = stringRedisTemplate.opsForValue().get(redisKey);
+        if(temporaryPassCode == null){
+            //清除通行码
+            stringRedisTemplate.delete(redisKey);
+            throw new  BizException(ResponseCodeEnum.PASSCODE_IS_NOT_EXIST);
+        }
+        if(!temporaryPassCode.equals(verifyCode)){
+            throw new BizException(ResponseCodeEnum.PASSCODE_IS_NOT_CORRECT);
+        }
+        return true;
+    }
+    @Transactional
+    @Override
+    public DMLVo socialUserBindLocalUser(BindSocialUserDTO bindSocialUserDTO) {
+        String phoneNumber = bindSocialUserDTO.getPhoneNumber();
+        String emailNumber = bindSocialUserDTO.getEmailNumber();
+        if (emailNumber == null && phoneNumber == null) {
+            throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
+        }
+        User user = null;
+        if(bindSocialUserDTO.getHasLocalUser()){
+            if(!phoneNumber.isEmpty()){
+                user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getPhoneNumber, phoneNumber));
+            }else{
+                user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, emailNumber));
+            }
+        }else{
+            user = socialUserService.buildThirdUserFromSocialUser(bindSocialUserDTO.getSocialUserId());
+            //生成临时密码随机
+            String temporaryPassword = bindSocialUserDTO.getPassword().isEmpty() ? RandomUtil.randomString(10) : bindSocialUserDTO.getPassword();
+            temporaryPassword += md5Salt.getSalt();
+            String md5temporaryPassword = DigestUtils.md5DigestAsHex(temporaryPassword.getBytes());
+            user.setPassword(md5temporaryPassword);
+
+            int userResult = userMapper.insert(user);
+            if (!(userResult > 0)) {
+                throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_TEMPORARY_USER_CREATED_FAIL);
+            }
+            // 生成新的临时ID
+            int userRoleRelResult = userRoleMapper.buildUserRoleRelByUserId(new SnowflakeGenerator().next(), user.getUserId(), 6L);
+            if (!(userRoleRelResult > 0)) {
+                throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_ROLE_REL_CREATE_FALL);
+            }
+        }
+        int result = 0;
+        Long snowflakeId = new SnowflakeGenerator().next();
+
+        if (user != null){
+            result = socialUserService.buildRelForSocialUserWithUserByUserIdAndSocialUserId(snowflakeId, user.getUserId(), bindSocialUserDTO.getSocialUserId());
+        }else{
+            throw new BizException(ResponseCodeEnum.ACCOUNT_CAN_NOT_FOUND);
+        }
+        DMLVo dmlVo = new DMLVo();
+        if (result > 0){
+            dmlVo.setId(String.valueOf(snowflakeId));
+            dmlVo.setStatus(true);
+            dmlVo.setMessage(CommonConstant.DML_CREATE_SUCCESS);
+        }else {
+            dmlVo.setStatus(false);
+            dmlVo.setMessage(CommonConstant.DML_CREATE_ERROR);
+        }
+        return dmlVo;
     }
 
 
@@ -239,17 +314,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
         }
         //校验临时通行码
-        String redisKey = emailNumber != null ? RedisConstant.TEMPORARY_PASS_CODE_PRIX + emailNumber : RedisConstant.TEMPORARY_PASS_CODE_PRIX + phoneNumber ;
-        String temporaryCode = stringRedisTemplate.opsForValue().get(redisKey);
-        if (temporaryCode != null){
-            if(!temporaryCode.equals(code)){
-                throw new BizException(ResponseCodeEnum.PASSCODE_IS_NOT_CORRECT);
-            }
-        }else{
-            //清除通行码
-            stringRedisTemplate.delete(redisKey);
-            throw new  BizException(ResponseCodeEnum.PASSCODE_IS_NOT_EXIST);
-        }
+        verifyTemporaryPassCode(emailNumber != null ? emailNumber : phoneNumber, code);
+
         int result = 0;
         if(!newPassword.isEmpty()){
             newPassword += md5Salt.getSalt();

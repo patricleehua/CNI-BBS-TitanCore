@@ -33,7 +33,7 @@ public class User  {
      */
     private String userName;
     /**
-     * 用户类型（00系统用户 01注册用户）
+     * 用户类型（00系统用户 01注册用户 02第三方平台注册用户）
      */
     private String userType;
     /**
@@ -49,7 +49,7 @@ public class User  {
      */
     private String phoneNumber;
     /**
-     * 用户性别（0男 1女 2未知）
+     * 用户性别（0男 1女 -1未知）
      */
     private String sex;
     /**

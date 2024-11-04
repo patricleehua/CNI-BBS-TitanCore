@@ -17,7 +17,7 @@ public class RegisterUserDTO extends BaseDTO {
     @Schema(description = "用户名称", example = "test", requiredMode = Schema.RequiredMode.REQUIRED)
     private String userName;
 
-    @Schema(description = "性别", example = "0/1/2", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "性别", example = "0/1/-1", requiredMode = Schema.RequiredMode.REQUIRED)
     private int sex;
 
     @Schema(description = "用户密码", example = "123456", requiredMode = Schema.RequiredMode.REQUIRED)
