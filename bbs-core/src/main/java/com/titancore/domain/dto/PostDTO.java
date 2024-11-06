@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(name = "帖子DTO", description = "帖子数据传输对象")
+@Schema(name = "PostDTO", description = "帖子数据传输对象")
 public class PostDTO  extends BaseDTO{
 
     @Schema(description = "帖子Id")

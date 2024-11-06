@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Schema(name = "聊天群参数", description = "聊天群参数对象")
+@Schema(name = "ChatGroupParam", description = "聊天群参数对象")
 public class ChatGroupParam extends PageParams {
 
     @Schema(description = "群号")

@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Schema(name = "发送消息DTO", description = "发送消息数据传输对象")
+@Schema(name = "ChatMessageDTO", description = "发送消息数据传输对象")
 public class ChatMessageDTO extends BaseDTO{
     @Schema(description = "发送方ID")
     private String fromId;

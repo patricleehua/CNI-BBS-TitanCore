@@ -9,7 +9,7 @@ import lombok.NonNull;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Schema(name = "关注DTO", description = "关注数据传输对象")
+@Schema(name = "FollowDTO", description = "关注数据传输对象")
 @NoArgsConstructor
 public class FollowDTO extends BaseDTO{
     @Schema(description = "当前用户Id")

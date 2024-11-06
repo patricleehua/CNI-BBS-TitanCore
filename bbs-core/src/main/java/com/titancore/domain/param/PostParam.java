@@ -9,7 +9,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Schema(name = "帖子传递参数", description = "帖子传递参数对象")
+@Schema(name = "PostParam", description = "帖子传递参数对象")
 public class PostParam extends PageParams {
     @Schema(description = "帖子id")
     private String postId;

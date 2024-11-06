@@ -8,7 +8,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Schema(name = "群成员DTO", description = "群成员数据传输对象")
+@Schema(name = "ChatMemberDTO", description = "群成员数据传输对象")
 public class ChatMemberDTO extends BaseDTO{
     @Schema(description = "群号")
     private String chatGroupId;

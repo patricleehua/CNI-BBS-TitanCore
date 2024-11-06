@@ -11,7 +11,7 @@ import lombok.NonNull;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@Schema(name = "关注参数", description = "关注参数对象")
+@Schema(name = "FollowParam", description = "关注参数对象")
 public class FollowParam extends PageParams {
 
     @Schema(description = "用户Id")

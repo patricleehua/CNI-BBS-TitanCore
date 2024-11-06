@@ -12,7 +12,7 @@ import lombok.NonNull;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@Schema(name = "用户登入DTO", description = "用户登录数据传输对象")
+@Schema(name = "UserLoginDTO", description = "用户登录数据传输对象")
 public class UserLoginDTO  extends BaseDTO {
 
     @Schema(description = "用户名称/登入名称", example = "test", requiredMode = Schema.RequiredMode.REQUIRED)

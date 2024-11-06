@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@Schema(name = "用户注册DTO", description = "用户注册数据传输对象")
+@Schema(name = "RegisterUserDTO", description = "用户注册数据传输对象")
 public class RegisterUserDTO extends BaseDTO {
 
     @Schema(description = "登入名称", example = "123456aa", requiredMode = Schema.RequiredMode.REQUIRED)

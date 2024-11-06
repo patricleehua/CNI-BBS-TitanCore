@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Schema(name = "聊天群通知DTO", description = "聊天群通知数据传输对象")
+@Schema(name = "ChatNoticeDTO", description = "聊天群通知数据传输对象")
 public class ChatNoticeDTO  extends BaseDTO{
     @Schema(description = "通知ID，如果为空则为插入否则为编辑")
     private String noticeId;

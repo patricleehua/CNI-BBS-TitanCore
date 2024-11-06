@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Schema(name = "积分记录DTO", description = "积分记录数据传输对象")
+@Schema(name = "PointsRecordDTO", description = "积分记录数据传输对象")
 @NoArgsConstructor
 public class PointsRecordDTO extends BaseDTO{
 

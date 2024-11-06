@@ -7,7 +7,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "板块DTO", description = "板块数据传输对象")
+@Schema(name = "CategoryDTO", description = "板块数据传输对象")
 public class CategoryDTO extends BaseDTO{
 
     @Schema(description = "板块Id")

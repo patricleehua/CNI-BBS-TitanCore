@@ -9,7 +9,7 @@ import lombok.NonNull;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Schema(name = "积分规则DTO", description = "积分规则数据传输对象")
+@Schema(name = "PointsRuleDTO", description = "积分规则数据传输对象")
 @NoArgsConstructor
 public class PointsRuleDTO extends BaseDTO{
 

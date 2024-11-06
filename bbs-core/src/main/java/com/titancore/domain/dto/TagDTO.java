@@ -7,7 +7,7 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(name = "标签DTO", description = "标签数据传输对象")
+@Schema(name = "TagDTO", description = "标签数据传输对象")
 public class TagDTO extends BaseDTO{
 
     @Schema(description = "标签Id")

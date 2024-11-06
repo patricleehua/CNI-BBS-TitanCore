@@ -13,7 +13,7 @@ import lombok.NonNull;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@Schema(name = "验证码DTO", description = "验证码数据传输对象")
+@Schema(name = "CaptchaCodeDTO", description = "验证码数据传输对象")
 public class CaptchaCodeDTO extends BaseDTO {
 
     @Schema(description = "用户手机号", example = "13700000000", requiredMode = Schema.RequiredMode.NOT_REQUIRED)

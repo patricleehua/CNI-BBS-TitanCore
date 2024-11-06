@@ -9,7 +9,7 @@ import lombok.NonNull;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@Schema(name = "校验用户验证码DTO", description = "校验用户验证码数据传输对象")
+@Schema(name = "VerificationCodeForUserDTO", description = "校验用户验证码数据传输对象")
 public class VerificationCodeForUserDTO extends BaseDTO {
 
     @Schema(description = "用户手机号", example = "13700000000")
