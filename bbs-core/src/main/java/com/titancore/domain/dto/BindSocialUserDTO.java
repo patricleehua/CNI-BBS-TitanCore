@@ -9,7 +9,7 @@ import lombok.NonNull;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@Schema(name = "ResetPasswordUserDTO", description = "绑定第三方用户数据传输对象")
+@Schema(name = "BindSocialUserDTO", description = "绑定第三方用户数据传输对象")
 public class BindSocialUserDTO extends BaseDTO {
 
     @Schema(description = "用户手机号", example = "13700000000")
