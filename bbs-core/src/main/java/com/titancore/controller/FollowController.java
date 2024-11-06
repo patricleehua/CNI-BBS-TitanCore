@@ -10,10 +10,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
 
 @RestController
 @Slf4j
@@ -55,6 +54,12 @@ public class FollowController {
     public Response<?> removeFollow(@RequestBody FollowDTO followDTO){
         DMLVo dmlVo = followService.removeFollow(followDTO);
         return Response.success(dmlVo);
+    }
+    @GetMapping("/queryFollowCount/{userId}")
+    @Operation(summary = "查询统计关注数")
+    public Response<?> queryFollowCount(@RequestParam String userId){
+        HashMap<String,Long> followCount = followService.queryFollowCount(userId);
+        return Response.success(followCount);
     }
 
 }

@@ -7,6 +7,7 @@ import com.titancore.domain.param.FollowParam;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.DMLVo;
 
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -25,4 +26,11 @@ public interface FollowService extends IService<Follow> {
     List<Long> highFollowedTop10();
 
     int followNumCount(Long userId,boolean isfansCount);
+
+    /**
+     * 查询关注数
+     * @param userId
+     * @return
+     */
+    HashMap<String, Long> queryFollowCount(String userId);
 }

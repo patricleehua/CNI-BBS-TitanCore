@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 //todo 异常处理
@@ -251,6 +252,16 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
             count = followMapper.selectCount(new LambdaQueryWrapper<Follow>().eq(Follow::getFollowerId, userId));
         }
         return Math.toIntExact(count);
+    }
+
+    @Override
+    public HashMap<String, Long> queryFollowCount(String userId) {
+        HashMap<String, Long> map = new HashMap<>();
+        Long fansCount = followMapper.selectCount(new LambdaQueryWrapper<Follow>().eq(Follow::getUserId, userId));
+        map.put("fansCount", fansCount);
+        Long followingCount = followMapper.selectCount(new LambdaQueryWrapper<Follow>().eq(Follow::getFollowerId, userId));
+        map.put("followingCount", followingCount);
+        return map;
     }
 
     private List<FollowerVo> filterFollowListToFollowerVoList(List<Follow> follows, boolean isGroup,boolean isCheckFollower) {

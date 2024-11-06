@@ -21,10 +21,7 @@ import com.titancore.enums.RoleType;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
-import com.titancore.service.CategoryService;
-import com.titancore.service.MediaUrlService;
-import com.titancore.service.PostsService;
-import com.titancore.service.TagService;
+import com.titancore.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -54,6 +51,8 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
     private PostContentMapper postContentMapper;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private FollowService followService;
 
     @Override
     public PageResult queryPostList(PostParam postParam) {
@@ -175,13 +174,13 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         if(isAuthor){
             User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, posts.getAuthorId()));
             UserVo userVo = new UserVo();
-            //todo
             userVo.setUserId(String.valueOf(user.getUserId()));
             userVo.setUserName(user.getUserName());
             userVo.setAvatar(user.getAvatar());
-            userVo.setBio("测试个人简介");
-            userVo.setFollowingCount("1");
-            userVo.setFansCount("10000");
+            userVo.setBio(user.getBio());
+            HashMap<String, Long> map = followService.queryFollowCount(String.valueOf(user.getUserId()));
+            userVo.setFollowingCount(map.get("followingCount").toString());
+            userVo.setFansCount(map.get("fansCount").toString());
             postViewVo.setUserVo(userVo);
         }
         postViewVo.setTitle(posts.getTitle());
@@ -223,13 +222,13 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         if(isAuthor){
             User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, posts.getAuthorId()));
             UserVo userVo = new UserVo();
-            //todo
             userVo.setUserId(String.valueOf(user.getUserId()));
             userVo.setUserName(user.getUserName());
             userVo.setAvatar(user.getAvatar());
-            userVo.setBio("测试个人简介");
-            userVo.setFollowingCount("1");
-            userVo.setFansCount("10000");
+            userVo.setBio(user.getBio());
+            HashMap<String, Long> map = followService.queryFollowCount(String.valueOf(user.getUserId()));
+            userVo.setFollowingCount(map.get("followingCount").toString());
+            userVo.setFansCount(map.get("fansCount").toString());
             postVo.setUserVo(userVo);
         }
         postVo.setTitle(posts.getTitle());
