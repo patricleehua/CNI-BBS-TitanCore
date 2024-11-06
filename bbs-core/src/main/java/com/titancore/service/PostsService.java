@@ -22,4 +22,6 @@ public interface PostsService extends IService<Posts> {
      * @return
      */
     DMLVo createPost(PostDTO postDTO);
+
+    DMLVo deletePost(String postId);
 }

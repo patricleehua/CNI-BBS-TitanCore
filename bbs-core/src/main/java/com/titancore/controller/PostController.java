@@ -41,5 +41,10 @@ public class PostController {
         DMLVo dmlVo = postsService.createPost(postDTO);
         return Response.success(dmlVo);
     }
-
+    @DeleteMapping("/deletePost/{postId}")
+    @Operation(summary ="删除帖子")
+    public Response<?> deletePost(@PathVariable("postId") String postId){
+        DMLVo dmlVo = postsService.deletePost(postId);
+        return Response.success(dmlVo);
+    }
 }

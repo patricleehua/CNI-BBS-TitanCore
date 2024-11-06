@@ -158,6 +158,29 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         }
         return dmlVo;
     }
+    @Transactional
+    @Override
+    public DMLVo deletePost(String postId) {
+        //删除帖子标签
+        int first = postMapper.deletePostTagRelBypostId(postId);
+        //删除帖子链接 todo
+        //删除帖子内容
+        int third = postContentMapper.delete(new LambdaQueryWrapper<PostContent>().eq(PostContent::getPostId, postId));
+
+        //删除帖子
+        int last = postMapper.deleteById(postId);
+
+        DMLVo dmlVo = new DMLVo();
+        if(last > 0){
+            dmlVo.setId(postId);
+            dmlVo.setStatus(true);
+            dmlVo.setMessage(CommonConstant.DML_CREATE_SUCCESS);
+        }else{
+            dmlVo.setStatus(false);
+            dmlVo.setMessage(CommonConstant.DML_CREATE_ERROR);
+        }
+        return dmlVo;
+    }
 
     /**
      * 将帖子对象转换为帖子视图对象

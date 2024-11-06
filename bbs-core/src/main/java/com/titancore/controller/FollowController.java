@@ -57,7 +57,7 @@ public class FollowController {
     }
     @GetMapping("/queryFollowCount/{userId}")
     @Operation(summary = "查询统计关注数")
-    public Response<?> queryFollowCount(@RequestParam String userId){
+    public Response<?> queryFollowCount(@PathVariable String userId){
         HashMap<String,Long> followCount = followService.queryFollowCount(userId);
         return Response.success(followCount);
     }
