@@ -1,6 +1,7 @@
 package com.titancore.controller;
 
 import com.titancore.domain.dto.CaptchaCodeDTO;
+import com.titancore.framework.cloud.manager.domain.dto.FileDelDTO;
 import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
 import com.titancore.framework.cloud.manager.urils.MinioUtil;
 import com.titancore.framework.common.response.Response;
@@ -131,5 +132,10 @@ public class CommonController {
     public Response<?> generateTemporaryUrl(@RequestBody FileDownloadDTO fileDownloadDTO){
         String temporaryUrl = commonService.createTemporaryUrl(fileDownloadDTO);
         return Response.success(temporaryUrl);
+    }
+    @PostMapping("/deleteFile")
+    @Operation(summary = "删除文件")
+    public Response<?> deleteFile(@RequestBody FileDelDTO fileDelDTO){
+        return Response.success(commonService.deleteFile(fileDelDTO));
     }
 }

@@ -74,7 +74,15 @@ public class MinioStorageService implements CloudService {
 
     @Override
     public boolean deleteByPath(FileDelDTO fileDelDTO,boolean isPrivate) {
-        return false;
+        String path = fileDelDTO.getUserId() + "/" + fileDelDTO.getPath();
+        if (fileDelDTO.getFileName() != null && !fileDelDTO.getFileName().isEmpty() ) {
+            path = fileDelDTO.getPath().endsWith("/") ? path : path + "/";
+            // 删除单个文件
+            return initOss().deleteFile(path + fileDelDTO.getFileName(),isPrivate);
+        } else {
+            // 删除整个目录
+            return initOss().deleteDirectory(path,isPrivate);
+        }
     }
 
 

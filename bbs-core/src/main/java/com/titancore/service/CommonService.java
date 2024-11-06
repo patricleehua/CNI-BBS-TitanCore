@@ -13,6 +13,7 @@ import com.titancore.enums.ResponseCodeEnum;
 import com.titancore.enums.RoleType;
 import com.titancore.framework.cloud.manager.config.CloudServiceFactory;
 import com.titancore.framework.cloud.manager.constant.CloudStorePath;
+import com.titancore.framework.cloud.manager.domain.dto.FileDelDTO;
 import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
 import com.titancore.framework.cloud.manager.urils.FileUtil;
 import com.titancore.framework.common.constant.CommonConstant;
@@ -338,5 +339,19 @@ public class CommonService {
         return url;
     }
 
+    public boolean deleteFile(FileDelDTO fileDelDTO) {
+        String userId = fileDelDTO.getUserId();
+        if(StringUtils.isEmpty(userId)){
+            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
+        }else{
+            if(!StpUtil.getLoginId().equals(userId)){
+                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
+                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
+                }
+            }
+        }
+        var cloudStorageService  = factory.createService();
+        return cloudStorageService.deleteByPath(fileDelDTO, fileDelDTO.isPrivate());
+    }
 }
 

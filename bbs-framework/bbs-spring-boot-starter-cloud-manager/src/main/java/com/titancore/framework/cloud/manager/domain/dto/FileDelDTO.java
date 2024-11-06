@@ -20,5 +20,9 @@ public class FileDelDTO {
      * 路径 例: post/background/176XXX/
      */
     private String path;
+    /**
+     * 是否为私有文件
+     */
+    private boolean isPrivate = false;
 
 }

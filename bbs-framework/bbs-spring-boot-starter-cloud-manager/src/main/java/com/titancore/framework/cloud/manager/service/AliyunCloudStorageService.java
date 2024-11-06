@@ -110,6 +110,7 @@ public class AliyunCloudStorageService implements CloudService {
     public boolean deleteByPath(FileDelDTO fileDelDTO,boolean isPrivate) {
         String path = fileDelDTO.getUserId() + "/" + fileDelDTO.getPath();
         if (fileDelDTO.getFileName() != null && !fileDelDTO.getFileName().isEmpty()) {
+            path = fileDelDTO.getPath().endsWith("/") ? path : path + "/";
             // 删除单个文件
             return initOss().deleteFile(path + fileDelDTO.getFileName(),isPrivate);
         } else {

@@ -1,14 +1,11 @@
 package com.titancore.framework.cloud.manager.urils;
 
-import com.aliyun.oss.ClientException;
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSClientBuilder;
-import com.aliyun.oss.OSSException;
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
+import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
+import io.minio.messages.Item;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Data
@@ -155,6 +154,116 @@ public class MinioUtil {
             log.error("This is cache exception message:{}",e.toString());
             return "";
         } finally {
+            try {
+                minioClient.close();
+            } catch (Exception e) {
+                log.error("Minio: Close minio connect is error!");
+                log.error("This is cache exception message:{}",e.toString());
+            }
+        }
+    }
+    /**
+     * 2024.11.6 pass
+     * 删除指定的文件
+     * @param filePath
+     * @param isPrivate
+     * @return
+     */
+    public boolean deleteFile(String filePath,boolean isPrivate) {
+        //是否私有
+        String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        MinioClient minioClient = createMinioClient();
+        try {
+            RemoveObjectArgs removeArgs = RemoveObjectArgs.builder().bucket(bucketName).object(filePath).build();
+            minioClient.removeObject(removeArgs);
+            log.info("Deleted file: {}", filePath);
+            return true;
+        }catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
+            log.error("Minio: Delete file from Minio failed!");
+            log.error("This is cache exception message:{}",e.toString());
+            return false;
+        } finally {
+            try {
+                minioClient.close();
+            } catch (Exception e) {
+                log.error("Minio: Close minio connect is error!");
+                log.error("This is cache exception message:{}",e.toString());
+            }
+        }
+    }
+
+    /**
+     * 2024.11.6 pass
+     * 删除指定的整个目录
+     * @param dirPath
+     * @param isPrivate
+     * @return
+     */
+    public boolean deleteDirectory(String dirPath,boolean isPrivate) {
+        //是否私有
+        String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        MinioClient minioClient = createMinioClient();
+        try {
+            List<Item> items = listObjects(dirPath, true, isPrivate);
+            if (items == null || items.isEmpty()) {
+                log.info("Directory is empty or does not exist.");
+                return true;
+            }
+            // 构建删除对象列表
+            List<DeleteObject> objectsToDelete = new ArrayList<>();
+            for (Item item : items) {
+                objectsToDelete.add(new DeleteObject(item.objectName()));
+            }
+            // 删除对象
+            Iterable<Result<DeleteError>> results = minioClient.removeObjects(
+                    RemoveObjectsArgs.builder()
+                            .bucket(bucketName)
+                            .objects(objectsToDelete)
+                            .build()
+            );
+            // 检查是否有删除错误
+            for (Result<DeleteError> result : results) {
+                DeleteError error = result.get();
+                log.error("Error deleting object: " + error.objectName() + ", " + error.message());
+            }
+            return true;
+        }catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
+            log.error("Minio: Deleting file to Minio is error!");
+            log.error("This is cache exception message:{}",e.toString());
+            return false;
+        } finally {
+            try {
+                minioClient.close();
+            } catch (Exception e) {
+                log.error("Minio: Close minio connect is error!");
+                log.error("This is cache exception message:{}",e.toString());
+            }
+        }
+    }
+    /**
+     * 2024.11.6 pass
+     * 获取路径下文件列表
+     * @param prefix 文件名称
+     * @param recursive 是否递归查找，false：模拟文件夹结构查找 true:递归查找，如果有子文件夹，则返回包含子文件夹的内容
+     * @param isPrivate
+     * @return
+     */
+    public List<Item> listObjects(String prefix, boolean recursive, boolean isPrivate) {
+        String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        MinioClient minioClient = createMinioClient();
+        try{
+            ListObjectsArgs listObjectsArgs = ListObjectsArgs.builder().bucket(bucketName).prefix(prefix).recursive(recursive).build();
+            Iterable<Result<Item>> results = minioClient.listObjects(listObjectsArgs);
+            ArrayList<Item> items = new ArrayList<>();
+            for (Result<Item> result : results) {
+                items.add(result.get());
+            }
+            return items;
+        }catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
+            log.error("Minio: Query List for Dir from Minio is error!");
+            log.error("This is cache exception message:{}",e.toString());
+            return null;
+        }finally {
             try {
                 minioClient.close();
             } catch (Exception e) {
