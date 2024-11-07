@@ -15,6 +15,7 @@ import com.titancore.framework.cloud.manager.config.CloudServiceFactory;
 import com.titancore.framework.cloud.manager.constant.CloudStorePath;
 import com.titancore.framework.cloud.manager.domain.dto.FileDelDTO;
 import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
+import com.titancore.framework.cloud.manager.domain.vo.FileListVo;
 import com.titancore.framework.cloud.manager.urils.FileUtil;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.constant.RedisConstant;
@@ -227,7 +228,7 @@ public class CommonService {
         }
         var cloudStorageService = factory.createService();
         String folderName = CloudStorePath.BASE_PATH
-                + "/" + userId
+                + userId
                 + "/" + CloudStorePath.FOLDER_PATH;
         return cloudStorageService.uploadFile(file,folderName,true);
     }
@@ -312,9 +313,9 @@ public class CommonService {
                 FOLDER_PATH = postsId + "/" + FOLDER_PATH;
             }
         }
-        String folderName = CloudStorePath.BASE_PATH + "/" + userId + "/" + FOLDER_PATH;
+        String folderName = CloudStorePath.BASE_PATH + userId + "/" + FOLDER_PATH + "/";
         if(type.equals(LinkType.TAG.getValue()) || type.equals(LinkType.CATEGORY.getValue())){
-            folderName = CloudStorePath.BASE_PATH + "/" + "common" + "/" + type;
+            folderName = CloudStorePath.BASE_PATH + "/" + "common" + "/" + type +"/";
         }
         String url = cloudStorageService.uploadImage(file, folderName, false);
 
@@ -339,6 +340,11 @@ public class CommonService {
         return url;
     }
 
+    /**
+     * 删除文件
+     * @param fileDelDTO
+     * @return
+     */
     public boolean deleteFile(FileDelDTO fileDelDTO) {
         String userId = fileDelDTO.getUserId();
         if(StringUtils.isEmpty(userId)){
@@ -352,6 +358,28 @@ public class CommonService {
         }
         var cloudStorageService  = factory.createService();
         return cloudStorageService.deleteByPath(fileDelDTO, fileDelDTO.isPrivate());
+    }
+
+    /**
+     * 根据用户id查询用户上传的文件
+     * @param userId
+     * @return
+     */
+    public FileListVo queryFileListByUserId(String userId) {
+        if(StringUtils.isEmpty(userId)){
+            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
+        }else{
+            if(!StpUtil.getLoginId().equals(userId)){
+                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
+                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
+                }
+            }
+        }
+        var cloudStorageService  = factory.createService();
+        String prefix = CloudStorePath.BASE_PATH + userId+ "/" +CloudStorePath.FOLDER_PATH;
+        FileListVo fileListVo = cloudStorageService.queryFileList(prefix, false, true);
+        fileListVo.setUserId(userId);
+        return fileListVo;
     }
 }
 

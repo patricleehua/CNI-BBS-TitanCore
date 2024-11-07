@@ -48,7 +48,7 @@ public class AliyunOssUtilV2 {
              fileName = file.getOriginalFilename();
         }
         //上传指定文件夹：
-        String fullObjectName = folderName + "/" + fileName;
+        String fullObjectName = folderName + fileName;
         //创建OSSClient实例
         OSS ossClient = createOssClient();
         try {
@@ -95,18 +95,18 @@ public class AliyunOssUtilV2 {
 
 
     /**
-     * 查询 路径 fileNamePath/ 下的文件
-     * @param fileNamePath
+     * 查询 路径 Path/ 下的文件
+     * @param path
      * @return
      */
-    public List<OSSObjectSummary> queryFileListByFileNamePath(String fileNamePath,boolean isPrivate) {
+    public List<OSSObjectSummary> queryFileListByPath(String path,boolean isPrivate) {
         //是否私有
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
         //创建OSSClient实例
         OSS ossClient = createOssClient();
         List<OSSObjectSummary> sums = null;
         try{
-            ObjectListing objectListing = ossClient.listObjects(new ListObjectsRequest(bucketName).withPrefix(String.valueOf(fileNamePath)));
+            ObjectListing objectListing = ossClient.listObjects(new ListObjectsRequest(bucketName).withPrefix(String.valueOf(path)));
             sums = objectListing.getObjectSummaries();
         }catch (OSSException oe) {
             log.error(

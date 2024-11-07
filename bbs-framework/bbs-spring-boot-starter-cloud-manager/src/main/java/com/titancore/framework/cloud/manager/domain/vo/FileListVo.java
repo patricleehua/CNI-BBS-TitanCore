@@ -8,11 +8,18 @@ import java.util.List;
 
 @Data
 public class FileListVo implements Serializable {
-    //用户ID
+
+    /**
+     * 用户ID
+     */
     private String userId;
-    //文件所属的用户名
+    /**
+     * 文件所属的用户名
+     */
     private String userName;
-    //文件列表
+    /**
+     * 文件列表
+     */
     private List<File> files;
 
 }

@@ -138,4 +138,10 @@ public class CommonController {
     public Response<?> deleteFile(@RequestBody FileDelDTO fileDelDTO){
         return Response.success(commonService.deleteFile(fileDelDTO));
     }
+    @PostMapping("/queryFileList/{userId}")
+    @Operation(summary = "根据用户ID查询文件列表")
+    public Response<?> deleteFile(@PathVariable String userId){
+        return Response.success(commonService.queryFileListByUserId(userId));
+    }
+
 }

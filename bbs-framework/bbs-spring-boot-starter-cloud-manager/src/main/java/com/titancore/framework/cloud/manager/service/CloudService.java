@@ -5,6 +5,7 @@ import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
 import com.titancore.framework.cloud.manager.domain.vo.FileListVo;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,15 +41,6 @@ public interface CloudService {
     String uploadFile(MultipartFile file,String folderName,boolean isPrivate);
 
     /**
-     * 根据用户id查询用户上传的文件
-     * 路径 userId/file/ 下的文件
-     *
-     * @param userId
-     * @return
-     */
-    FileListVo queryFileListByUserId(long userId,boolean isPrivate);
-
-    /**
      * 删除指定路径下的文件/文件夹（包含子文件/文件夹）
      *
      * @param fileDelDTO 包含要删除的路径信息的DTO对象
@@ -72,4 +64,13 @@ public interface CloudService {
      * @return
      */
     String createTemplateUrlOfFile(String filePath,int expiresIn,boolean isPrivate);
+
+    /**
+     * 查询文件列表
+     * @param path 文件路径
+     * @param recursive 是否递归查询
+     * @param isPrivate 是否私有
+     * @return
+     */
+    FileListVo queryFileList(String path,boolean recursive,boolean isPrivate);
 }

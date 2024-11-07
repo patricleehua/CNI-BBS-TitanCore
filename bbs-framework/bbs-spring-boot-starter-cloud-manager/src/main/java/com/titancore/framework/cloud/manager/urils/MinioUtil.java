@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -35,12 +36,12 @@ public class MinioUtil {
     }
     /**
      * 2024.9.30 pass
-     * 文件上传
+     * 使用MultipartFile进行文件上传
      * @param file
      * @param folderName 路径/文件夹名
      * @return
      */
-    public String upload(MultipartFile file, String folderName,boolean isPrivate){
+    public String uploadFile(MultipartFile file, String folderName,boolean isPrivate){
         String bucketName = isPrivate?bucketNamePrivate:bucketNameOpen;
         //如果是图片则重命名
         String fileName;
@@ -50,7 +51,7 @@ public class MinioUtil {
             fileName = file.getOriginalFilename();
         }
         //上传指定文件夹：
-        String fullObjectName = folderName + "/" + fileName;
+        String fullObjectName = folderName + fileName;
         //创建OSSClient实例
         // 构建 Minio 客户端
         MinioClient minioClient = createMinioClient();
@@ -62,7 +63,7 @@ public class MinioUtil {
                     .contentType(file.getContentType())
                     .build());
         } catch (Exception e) {
-            log.error("Minio: create template url for file is error!");
+            log.error("Minio: Using MultipartFile upload to minio is error!");
             log.error("This is cache exception message:{}",e.toString());
             return "";
         } finally {
@@ -84,48 +85,6 @@ public class MinioUtil {
         log.info("文件上传到:{}", stringBuilder);
         return stringBuilder.toString();
     }
-
-//    /**
-//     * 上传文件
-//     * @param file
-//     * @return
-//     * @throws Exception
-//     */
-//    public String uploadFile(MultipartFile file) throws Exception {
-//        // 判断文件是否为空
-//        if (file == null || file.getSize() == 0) {
-//            log.error("==> 上传文件异常：文件大小为空 ...");
-//            throw new RuntimeException("文件大小不能为空");
-//        }
-//
-//        // 文件的原始名称
-//        String originalFileName = file.getOriginalFilename();
-//        // 文件的 Content-Type
-//        String contentType = file.getContentType();
-//
-//        // 生成存储对象的名称（将 UUID 字符串中的 - 替换成空字符串）
-//        String key = UUID.randomUUID().toString().replace("-", "");
-//        // 获取文件的后缀，如 .jpg
-//        String suffix = originalFileName.substring(originalFileName.lastIndexOf("."));
-//
-//        // 拼接上文件后缀，即为要存储的文件名
-//        String objectName = String.format("%s%s", key, suffix);
-//
-//        log.info("==> 开始上传文件至 Minio, ObjectName: {}", objectName);
-//
-//        // 上传文件至 Minio
-//        minioClient.putObject(PutObjectArgs.builder()
-//                .bucket(minioProperties.getBucketName())
-//                .object(objectName)
-//                .stream(file.getInputStream(), file.getSize(), -1)
-//                .contentType(contentType)
-//                .build());
-//
-//        // 返回文件的访问链接
-//        String url = String.format("%s/%s/%s", minioProperties.getEndpoint(), minioProperties.getBucketName(), objectName);
-//        log.info("==> 上传文件至 Minio 成功，访问路径: {}", url);
-//        return url;
-//    }
 
     /**
      * 2024.9.30 pass
@@ -150,7 +109,7 @@ public class MinioUtil {
                             .build()
             );
         } catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
-            log.error("Minio: Upload file to Minio is error!");
+            log.error("Minio: get template url from file is error!");
             log.error("This is cache exception message:{}",e.toString());
             return "";
         } finally {
@@ -204,7 +163,7 @@ public class MinioUtil {
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
         MinioClient minioClient = createMinioClient();
         try {
-            List<Item> items = listObjects(dirPath, true, isPrivate);
+            List<Item> items = queryFileListByPath(dirPath, true, isPrivate);
             if (items == null || items.isEmpty()) {
                 log.info("Directory is empty or does not exist.");
                 return true;
@@ -243,12 +202,12 @@ public class MinioUtil {
     /**
      * 2024.11.6 pass
      * 获取路径下文件列表
-     * @param prefix 文件名称
+     * @param prefix 文件名称路径
      * @param recursive 是否递归查找，false：模拟文件夹结构查找 true:递归查找，如果有子文件夹，则返回包含子文件夹的内容
      * @param isPrivate
      * @return
      */
-    public List<Item> listObjects(String prefix, boolean recursive, boolean isPrivate) {
+    public List<Item> queryFileListByPath(String prefix, boolean recursive, boolean isPrivate) {
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
         MinioClient minioClient = createMinioClient();
         try{
@@ -272,4 +231,99 @@ public class MinioUtil {
             }
         }
     }
+    /**
+     * 2024.11.6 pass
+     * 判断Bucket是否存在，true：存在，false：不存在
+     *
+     * @param bucketName
+     * @return
+     */
+    public boolean bucketExists(String bucketName) {
+        MinioClient minioClient = createMinioClient();
+        try{
+            return minioClient.bucketExists(BucketExistsArgs.builder()
+                    .bucket(bucketName)
+                    .build());
+        }catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
+            log.error("Minio: bucketExists from Minio is error!");
+            log.error("This is cache exception message:{}",e.toString());
+            return false;
+        }finally {
+            try {
+                minioClient.close();
+            } catch (Exception e) {
+                log.error("Minio: Close minio connect is error!");
+                log.error("This is cache exception message:{}",e.toString());
+            }
+        }
+    }
+    /**
+     * 2024.11.6 pass
+     * 拷贝文件
+     *
+     * @param bucketName    存储桶
+     * @param objectName    文件名
+     * @param srcBucketName 目标存储桶
+     * @param srcObjectName 目标文件名
+     */
+    public ObjectWriteResponse copyFile(String bucketName, String objectName, String srcBucketName, String srcObjectName) {
+        MinioClient minioClient = createMinioClient();
+        try{
+            return minioClient.copyObject(CopyObjectArgs.builder()
+                    .source(CopySource.builder()
+                            .bucket(bucketName)
+                            .object(objectName)
+                            .build())
+                    .bucket(srcBucketName)
+                    .object(srcObjectName)
+                    .build());
+        }catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
+            log.error("Minio: copyFile from Minio is error!");
+            log.error("This is cache exception message:{}",e.toString());
+            return null;
+        }finally {
+            try {
+                minioClient.close();
+            } catch (Exception e) {
+                log.error("Minio: Close minio connect is error!");
+                log.error("This is cache exception message:{}",e.toString());
+            }
+        }
+    }
+    /**
+     * 断点下载
+     *
+     * @param objectName 文件名称
+     * @param offset     起始字节的位置
+     * @param length     要读取的长度
+     * @return 二进制流
+     */
+    public InputStream getObject(String objectName, long offset, long length, boolean isPrivate) {
+        String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        MinioClient minioClient = createMinioClient();
+        try{
+            return minioClient.getObject(GetObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectName)
+                    .offset(offset)
+                    .length(length)
+                    .build());
+
+        }catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
+            log.error("Minio: copyFile from Minio is error!");
+            log.error("This is cache exception message:{}",e.toString());
+            return null;
+        }finally {
+            try {
+                minioClient.close();
+            } catch (Exception e) {
+                log.error("Minio: Close minio connect is error!");
+                log.error("This is cache exception message:{}",e.toString());
+            }
+        }
+
+    }
+
+
+
 }

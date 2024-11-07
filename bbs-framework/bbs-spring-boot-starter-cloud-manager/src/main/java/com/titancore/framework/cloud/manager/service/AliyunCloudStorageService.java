@@ -67,39 +67,6 @@ public class AliyunCloudStorageService implements CloudService {
         return initOss().upload(file,folderName,isPrivate);
     }
 
-
-    /**
-     * 根据用户id查询用户上传的文件
-     * 路径 userId/file/ 下的文件
-     *
-     * @param userId
-     * @return
-     */
-    @Override
-    public FileListVo queryFileListByUserId(long userId,boolean isPrivate) {
-        String fileNamePath = "userFile/"+userId+"/file";
-        List<OSSObjectSummary> ossObjectSummaries = initOss().queryFileListByFileNamePath(fileNamePath,true);
-        List<File> files= new ArrayList<>();
-        for (OSSObjectSummary file : ossObjectSummaries) {
-            String fname=file.getKey();
-            // 找到最后一个斜杠的位置
-            int lastSlashIndex = fname.lastIndexOf('/');
-            // 使用substring截取从最后一个斜杠位置开始到字符串末尾的部分
-            String result = fname.substring(lastSlashIndex + 1);
-            File f = new File();
-            f.setFileSize(String.valueOf(file.getSize()));
-            f.setUploadTime(file.getLastModified().toString());
-            f.setFileName(result);
-            files.add(f);
-        }
-        FileListVo fileListVo = new FileListVo();
-        fileListVo.setFiles(files);
-        fileListVo.setUserId(String.valueOf(userId));
-//        fileListVo.setUserName(user.getUserName());
-
-        return fileListVo;
-    }
-
     /**
      * 删除指定路径下的文件/文件夹（包含子文件/文件夹）
      *
@@ -130,6 +97,31 @@ public class AliyunCloudStorageService implements CloudService {
     @Override
     public String createTemplateUrlOfFile(String filePath,int expiresIn,boolean isPrivate) {
         return initOss().getTemplateUrl(filePath,expiresIn,isPrivate);
+    }
+
+    @Override
+    public FileListVo queryFileList(String prefix, boolean recursive, boolean isPrivate) {
+        List<OSSObjectSummary> ossObjectSummaries = initOss().queryFileListByPath(prefix,true);
+        List<File> files= new ArrayList<>();
+        for (OSSObjectSummary file : ossObjectSummaries) {
+            String fNamePath=file.getKey();
+            // 找到最后一个斜杠的位置
+            int lastSlashIndex = fNamePath.lastIndexOf('/');
+            // 使用substring截取从最后一个斜杠位置开始到字符串末尾的部分
+            String result = fNamePath.substring(lastSlashIndex + 1);
+            File f = new File();
+            f.setEtag(file.getETag());
+            f.setFileName(result);
+            f.setFileType(file.getType());
+            f.setFileSize(String.valueOf(file.getSize()));
+            f.setLastModified(String.valueOf(file.getLastModified()));
+            f.setStorageClass(file.getStorageClass());
+
+            files.add(f);
+        }
+        FileListVo fileListVo = new FileListVo();
+        fileListVo.setFiles(files);
+        return fileListVo;
     }
 
 
