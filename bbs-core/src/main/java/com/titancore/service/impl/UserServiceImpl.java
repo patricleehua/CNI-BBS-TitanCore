@@ -176,7 +176,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if(account == null){
             throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
         }
-        List<User> users = userMapper.selectList(new LambdaQueryWrapper<User>().eq(User::getEmail, account).or().eq(User::getPhoneNumber, account));
+        List<User> users = userMapper.selectList(new LambdaQueryWrapper<User>()
+                .eq(User::getEmail, account)
+                .or().eq(User::getPhoneNumber, account)
+                .or().eq(User::getLoginName, account)
+                .or().eq(User::getUserName, account));
         return !users.isEmpty();
     }
 
