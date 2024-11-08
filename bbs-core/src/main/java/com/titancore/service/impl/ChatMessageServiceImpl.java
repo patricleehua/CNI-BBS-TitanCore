@@ -5,15 +5,20 @@ import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.titancore.domain.dto.ChatMessageDTO;
+import com.titancore.domain.dto.ReeditDTO;
 import com.titancore.domain.entity.ChatMessage;
 import com.titancore.domain.entity.ChatMessageContent;
+import com.titancore.domain.entity.ChatMessageRetraction;
 import com.titancore.domain.entity.User;
 import com.titancore.domain.mapper.ChatMessageMapper;
+import com.titancore.domain.vo.ChatMessageRetractionVo;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.enums.LevelType;
 import com.titancore.enums.MessageType;
 import com.titancore.enums.SourceType;
 import com.titancore.service.*;
+import com.titancore.util.AuthenticationUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +38,8 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     private RBMQProducerService rbmqProducerService;
     @Autowired
     private WebSocketService webSocketService;
+    @Autowired
+    private ChatMessageRetractionService chatMessageRetractionService;
     @Override
     public DMLVo sendMessage(ChatMessageDTO chatMessageDTO) {
         //todo 判断当前登入用户是否与 发送方一致
@@ -114,6 +121,17 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         // 保存消息到数据库
         int result = chatMessageMapper.insert(chatMessage);
         return result > 0 ? chatMessage : null;
+    }
+
+    @Override
+    public ChatMessageRetractionVo reeditMessage(ReeditDTO reeditDTO) {
+        AuthenticationUtil.checkUserId(reeditDTO.getUserId());
+        ChatMessageRetraction chatMessageRetraction = chatMessageRetractionService.getOne(new LambdaQueryWrapper<ChatMessageRetraction>().eq(ChatMessageRetraction::getMsgId, reeditDTO.getMsgId()));
+        ChatMessageRetractionVo chatMessageRetractionVo = new ChatMessageRetractionVo();
+        BeanUtils.copyProperties(chatMessageRetraction, chatMessageRetractionVo);
+        chatMessageRetractionVo.setId(String.valueOf(chatMessageRetraction.getId()));
+        chatMessageRetractionVo.setMsgId(String.valueOf(chatMessageRetraction.getMsgId()));
+        return chatMessageRetractionVo;
     }
 
     /**

@@ -1,6 +1,9 @@
 package com.titancore.controller;
 
+import cn.hutool.json.JSONObject;
 import com.titancore.domain.dto.ChatMessageDTO;
+import com.titancore.domain.dto.ReeditDTO;
+import com.titancore.domain.vo.ChatMessageRetractionVo;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.ChatMessageService;
@@ -40,11 +43,16 @@ public class ChatMessageController {
 
 
     /**
-     * 重新编辑
+     * 重新编辑 (返回撤回消息信息)
      *
      * @return
      */
-
+    @PostMapping("/reedit")
+    @Operation(summary = "重新编辑")
+    public Response<?> reeditMessage(@RequestBody ReeditDTO reeditDTO) {
+        ChatMessageRetractionVo result = chatMessageService.reeditMessage(reeditDTO);
+        return Response.success(result);
+    }
 
     /**
      * 聊天记录

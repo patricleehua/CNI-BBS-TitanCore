@@ -4,15 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.titancore.domain.entity.ChatGroupMember;
 import com.titancore.domain.entity.ChatMessage;
 import com.titancore.enums.SourceType;
-import com.titancore.enums.WebSocketContentType;
+import com.titancore.constant.WebSocketContentType;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

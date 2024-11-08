@@ -1,4 +1,4 @@
-package com.titancore.enums;
+package com.titancore.constant;
 
 public class WebSocketContentType {
     /**

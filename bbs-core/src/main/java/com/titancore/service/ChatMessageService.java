@@ -2,8 +2,10 @@ package com.titancore.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.titancore.domain.dto.ChatMessageDTO;
+import com.titancore.domain.dto.ReeditDTO;
 import com.titancore.domain.entity.ChatMessage;
 import com.titancore.domain.entity.User;
+import com.titancore.domain.vo.ChatMessageRetractionVo;
 import com.titancore.domain.vo.DMLVo;
 
 public interface ChatMessageService extends IService<ChatMessage> {
@@ -21,4 +23,11 @@ public interface ChatMessageService extends IService<ChatMessage> {
      * @return
      */
     ChatMessage saveChatMessage(User user, ChatMessageDTO chatMessageDTO) ;
+
+    /**
+     * 撤回消息内容
+     * @param reeditDTO
+     * @return
+     */
+    ChatMessageRetractionVo reeditMessage(ReeditDTO reeditDTO);
 }

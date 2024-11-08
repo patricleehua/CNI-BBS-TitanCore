@@ -9,6 +9,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.titancore.constant.PointsRuleUniqueKey;
 import com.titancore.domain.dto.*;
 import com.titancore.domain.entity.User;
 import com.titancore.domain.entity.UserInvite;
