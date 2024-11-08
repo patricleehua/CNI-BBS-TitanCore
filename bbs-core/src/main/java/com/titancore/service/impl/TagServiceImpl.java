@@ -20,6 +20,7 @@ import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.CategoryService;
 import com.titancore.service.TagService;
+import com.titancore.util.AuthenticationUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +40,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
     @Override
     public DMLVo createTag(TagDTO tagDTO) {
         String userId = tagDTO.getUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         Tag selectOne = tagMapper.selectOne(new LambdaQueryWrapper<Tag>().eq(Tag::getTagName, tagDTO.getTagName()));
         if(selectOne != null){
             throw new BizException(ResponseCodeEnum.TAG_TAGNAME_IS_EXIST);
@@ -112,15 +105,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
             throw new BizException(ResponseCodeEnum.TAG_TAGID_IS_NOT_EXIST);
         }
         String createByUserId = tag.getCreatedByUserId().toString();
-        if(StringUtils.isEmpty(createByUserId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(createByUserId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(createByUserId);
         LambdaQueryWrapper<Tag> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Tag::getId,tagId);
         int result = tagMapper.delete(queryWrapper);
@@ -139,15 +124,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
     @Override
     public DMLVo updateTagById(TagDTO tagDTO) {
         String userId = tagDTO.getUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         String tagId = tagDTO.getTagId();
         int result = 0;
         if (StringUtils.isNotBlank(tagId)){

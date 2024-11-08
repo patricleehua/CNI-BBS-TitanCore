@@ -18,6 +18,7 @@ import com.titancore.enums.RoleType;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.CategoryService;
+import com.titancore.util.AuthenticationUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +40,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public DMLVo createCategory(CategoryDTO categoryDTO) {
         String userId = categoryDTO.getUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         Category selectOne = categoryMapper.selectOne(new LambdaQueryWrapper<Category>().eq(Category::getCategoryName, categoryDTO.getCategoryName()));
         if(selectOne != null){
             throw new BizException(ResponseCodeEnum.CATEGORY_CATEGORYNAME_IS_EXIST);
@@ -95,15 +88,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             throw new BizException(ResponseCodeEnum.CATEGORY_CATEGORYID_IS_NOT_EXIST);
         }
         String createByUserId = category.getCreatedByUserId().toString();
-        if(StringUtils.isEmpty(createByUserId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(createByUserId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(createByUserId);
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Category::getId,categoryId);
         int result = categoryMapper.delete(queryWrapper);
@@ -122,15 +107,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public DMLVo updateCategoryById(CategoryDTO categoryDTO) {
         String userId = categoryDTO.getUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         String categoryId = categoryDTO.getCategoryId();
         int result = 0;
         if (StringUtils.isNotBlank(categoryId)){

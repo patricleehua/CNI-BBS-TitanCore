@@ -22,6 +22,7 @@ import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.*;
+import com.titancore.util.AuthenticationUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -88,15 +89,7 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
     public DMLVo createPost(PostDTO postDTO) {
         //当前作者是否与帖子作者一致
         String authorId = postDTO.getAuthorId();
-        if(StringUtils.isEmpty(authorId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(authorId)){
-                if(!StpUtil.hasRole(authorId, RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(authorId);
         //1、帖子主题 从redis获取
         String temporalPostId = stringRedisTemplate.opsForValue().get(RedisConstant.TEMPORARYPOSTID_PRIX + authorId);
         if(StringUtils.isEmpty(temporalPostId)){

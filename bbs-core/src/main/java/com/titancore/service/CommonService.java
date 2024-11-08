@@ -22,6 +22,7 @@ import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.common.response.Response;
 import com.titancore.framework.common.util.RegexUtils;
+import com.titancore.util.AuthenticationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -216,16 +217,7 @@ public class CommonService {
      */
     public String uploadFile(MultipartFile file,String userId){
         long size = file.getSize();
-        //校验用户
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         var cloudStorageService = factory.createService();
         String folderName = CloudStorePath.BASE_PATH
                 + userId
@@ -256,15 +248,7 @@ public class CommonService {
      */
     public String uploadMedia(MultipartFile file, String userId, String type) {
         //校验用户
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         //校验媒体格式
         LinkType linkType = LinkType.valueOfAll(type);
         if (linkType!= null){
@@ -347,15 +331,7 @@ public class CommonService {
      */
     public boolean deleteFile(FileDelDTO fileDelDTO) {
         String userId = fileDelDTO.getUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         var cloudStorageService  = factory.createService();
         return cloudStorageService.deleteByPath(fileDelDTO, fileDelDTO.isPrivate());
     }
@@ -366,15 +342,6 @@ public class CommonService {
      * @return
      */
     public FileListVo queryFileListByUserId(String userId) {
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
         var cloudStorageService  = factory.createService();
         String prefix = CloudStorePath.BASE_PATH + userId+ "/" +CloudStorePath.FOLDER_PATH;
         FileListVo fileListVo = cloudStorageService.queryFileList(prefix, false, true);

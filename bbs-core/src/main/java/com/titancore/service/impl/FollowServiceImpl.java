@@ -22,6 +22,7 @@ import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.FollowService;
 import com.titancore.domain.mapper.FollowMapper;
+import com.titancore.util.AuthenticationUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,15 +69,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 
         //当前关注者的信息是否与当前用户一致
         String userId = followDTO.getUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         //查询原始数据
         Follow followOrg = followMapper.selectOne(new LambdaQueryWrapper<Follow>().eq(Follow::getFollowerId, followDTO.getUserId()).eq(Follow::getUserId, followDTO.getFollowerId()).last("limit 1"));
         if(followOrg != null && followOrg.getFollowStatus().getValue() != null){
@@ -114,15 +107,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
     public DMLVo changeFollowStatus(FollowDTO followDTO) {
         //当前用户的信息是否与当前用户一致
         String userId = followDTO.getUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         boolean isAcceptRequested = followDTO.isAcceptRequested();
         //查询原始数据
         Follow follow = followMapper.selectOne(new LambdaQueryWrapper<Follow>().eq(Follow::getUserId, followDTO.getUserId()).eq(Follow::getFollowerId, followDTO.getFollowerId()).last("limit 1"));
@@ -161,15 +146,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
     public DMLVo changeBlockStatus(FollowDTO followDTO) {
         //当前用户的信息是否与当前用户一致
         String userId = followDTO.getUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         boolean isBlocked = followDTO.isBlocked();
         LambdaUpdateWrapper<Follow> updateWrapper = new LambdaUpdateWrapper<>();
         if(isBlocked){
@@ -197,15 +174,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
     public DMLVo removeFollow(FollowDTO followDTO) {
         //当前用户的信息是否与当前用户一致
         String userId = followDTO.getUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         //查询原始数据
         Follow followFromMe = followMapper.selectOne(new LambdaQueryWrapper<Follow>().eq(Follow::getUserId, followDTO.getUserId()).eq(Follow::getFollowerId, followDTO.getFollowerId()).last("limit 1"));
         Follow followFromOther = followMapper.selectOne(new LambdaQueryWrapper<Follow>().eq(Follow::getFollowerId, followDTO.getUserId()).eq(Follow::getUserId, followDTO.getFollowerId()).last("limit 1"));

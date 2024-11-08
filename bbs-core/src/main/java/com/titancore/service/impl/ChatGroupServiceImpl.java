@@ -19,6 +19,7 @@ import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.ChatGroupMemberService;
 import com.titancore.service.ChatGroupNoticeService;
 import com.titancore.service.ChatGroupService;
+import com.titancore.util.AuthenticationUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,15 +59,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
     @Transactional
     public ChatGroupVo createChatGroup(ChatGroupDTO chatGroupDTO) {
         String userId = chatGroupDTO.getUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         //todo 一个用户一天只能创建三个群组 也许还需要规划人数
         ChatGroup chatGroup = this.copy(chatGroupDTO);
         int first = chatGroupMapper.insert(chatGroup);
@@ -90,16 +83,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
     public ChatGroupVo dissolveChatGroup(ChatGroupDTO chatGroupDTO) {
 
         String userId = chatGroupDTO.getOwnerUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
         //断当前用户是否等于群主 抛出异常
         ChatGroup chatGroup = chatGroupMapper.selectOne(new LambdaQueryWrapper<ChatGroup>().eq(ChatGroup::getOwnerUserId, userId).eq(ChatGroup::getId,chatGroupDTO.getGroupId()));
         if(chatGroup==null){

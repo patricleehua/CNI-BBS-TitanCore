@@ -20,6 +20,7 @@ import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.ChatGroupMemberService;
 import com.titancore.service.ChatGroupNoticeService;
 import com.titancore.service.ChatGroupService;
+import com.titancore.util.AuthenticationUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,15 +38,7 @@ public class ChatGroupNoticeServiceImpl extends ServiceImpl<ChatGroupNoticeMappe
     @Override
     public boolean createNotice(ChatNoticeDTO chatNoticeDTO) {
         String userId = chatNoticeDTO.getOwnerUserId();
-        if(StringUtils.isEmpty(userId)){
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_MISSED);
-        }else{
-            if(!StpUtil.getLoginId().equals(userId)){
-                if(!StpUtil.hasRole(RoleType.SUPERPOWER_USER.getValue())){
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_IS_DIFFERENT);
-                }
-            }
-        }
+        AuthenticationUtil.checkUserId(userId);
 
         ChatGroupNotice chatGroupNotice = new ChatGroupNotice();
 //        String jsonString = JSON.toJSONString(noticeVo);
