@@ -21,10 +21,7 @@ import me.zhyd.oauth.request.*;
 import me.zhyd.oauth.utils.AuthScopeUtils;
 import me.zhyd.oauth.utils.AuthStateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -47,8 +44,8 @@ public class RestAuthController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping("/render/{source}")
-    @Operation(description = "向三方接口申请认证链接")
+    @GetMapping("/render/{source}")
+    @Operation(summary = "向三方接口申请认证链接")
     public void renderAuth(@PathVariable("source") String source,HttpServletResponse response) throws IOException {
         AuthRequest authRequest = getAuthRequest(source);
         response.sendRedirect(authRequest.authorize(AuthStateUtils.createState()));
@@ -60,8 +57,8 @@ public class RestAuthController {
      * @param callback
      * @return
      */
-    @RequestMapping("/callback/{source}")
-    @Operation(description = "三方登录成功后回调函数")
+    @GetMapping("/callback/{source}")
+    @Operation(summary = "三方登录成功后回调函数")
     public Object login(@PathVariable("source") String source, AuthCallback callback,HttpServletResponse response) throws IOException {
         log.info("callback start {}", callback);
         AuthRequest authRequest = getAuthRequest(source);
@@ -90,7 +87,7 @@ public class RestAuthController {
                 response.sendRedirect(redirectUrl);
             }else if(systemUser.getDelFlag().equals("2")){
                 //账号被删除
-                String redirectUrl = "https://baidu.com/auth/callback?token=";
+                String redirectUrl = "https://baidu.com/auth/callback?blocked=    ";
                 response.sendRedirect(redirectUrl);
             }
             else {
