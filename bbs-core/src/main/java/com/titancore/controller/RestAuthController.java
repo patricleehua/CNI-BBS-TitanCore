@@ -111,7 +111,8 @@ public class RestAuthController {
 
     private AuthRequest getAuthRequest(String source) {
         AuthRequest authRequest = null;
-        AuthSourceType authSourceType = AuthSourceType.valueOfAll(source.toLowerCase());
+        AuthSourceType authSourceType = AuthSourceType.valueOfAll(source.toLowerCase());/*
+        */
         if (authSourceType != null ){
             switch (authSourceType){
                 case GITEE ->

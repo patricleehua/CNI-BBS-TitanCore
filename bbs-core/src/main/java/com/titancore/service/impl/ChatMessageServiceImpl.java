@@ -1,26 +1,29 @@
 package com.titancore.service.impl;
 
+import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.titancore.constant.MessageContentType;
 import com.titancore.domain.dto.ChatMessageDTO;
 import com.titancore.domain.dto.ReeditDTO;
-import com.titancore.domain.entity.ChatMessage;
-import com.titancore.domain.entity.ChatMessageContent;
-import com.titancore.domain.entity.ChatMessageRetraction;
-import com.titancore.domain.entity.User;
+import com.titancore.domain.dto.RetractionDTO;
+import com.titancore.domain.entity.*;
 import com.titancore.domain.mapper.ChatMessageMapper;
 import com.titancore.domain.vo.ChatMessageRetractionVo;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.enums.LevelType;
 import com.titancore.enums.MessageType;
+import com.titancore.enums.ResponseCodeEnum;
 import com.titancore.enums.SourceType;
+import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.*;
 import com.titancore.util.AuthenticationUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.time.Duration;
@@ -40,6 +43,8 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     private WebSocketService webSocketService;
     @Autowired
     private ChatMessageRetractionService chatMessageRetractionService;
+    @Autowired
+    private ChatListService chatListService;
     @Override
     public DMLVo sendMessage(ChatMessageDTO chatMessageDTO) {
         //todo 判断当前登入用户是否与 发送方一致
@@ -128,10 +133,46 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         AuthenticationUtil.checkUserId(reeditDTO.getUserId());
         ChatMessageRetraction chatMessageRetraction = chatMessageRetractionService.getOne(new LambdaQueryWrapper<ChatMessageRetraction>().eq(ChatMessageRetraction::getMsgId, reeditDTO.getMsgId()));
         ChatMessageRetractionVo chatMessageRetractionVo = new ChatMessageRetractionVo();
-        BeanUtils.copyProperties(chatMessageRetraction, chatMessageRetractionVo);
         chatMessageRetractionVo.setId(String.valueOf(chatMessageRetraction.getId()));
+        chatMessageRetractionVo.setMsgContent(chatMessageRetraction.getMsgContent());
         chatMessageRetractionVo.setMsgId(String.valueOf(chatMessageRetraction.getMsgId()));
         return chatMessageRetractionVo;
+    }
+    @Transactional
+    @Override
+    public ChatMessage retractionMessage(RetractionDTO retractionDTO) {
+        String userId = retractionDTO.getUserId();
+        AuthenticationUtil.checkUserId(retractionDTO.getUserId());
+        ChatMessage chatMessage = this.getById(retractionDTO.getMsgId());
+        if (null == chatMessage)
+            throw new BizException(ResponseCodeEnum.CHAT_MESSAGE_CONTENT_IS_NOT_EXIST);
+        ChatMessageContent chatMessageContent = chatMessage.getChatMessageContent();
+        chatMessageContent.setExt(chatMessageContent.getType());
+        //保存入消息撤回表
+        if(MessageType.TEXT.getValue().equals(chatMessageContent.getType())){
+            ChatMessageRetraction chatMessageRetraction = new ChatMessageRetraction();
+            chatMessageRetraction.setMsgId(chatMessage.getId());
+            chatMessageRetraction.setMsgContent(chatMessageContent);
+            chatMessageRetractionService.save(chatMessageRetraction);
+        }
+        //更改原始消息
+        chatMessageContent.setType(MessageContentType.Retraction);
+        chatMessageContent.setContent("");
+        chatMessage.setChatMessageContent(chatMessageContent);
+        updateById(chatMessage);
+        //更新聊天列表 自己
+        ChatList fromIdChatList = chatListService.getChatListByFromIdAndToId(String.valueOf(chatMessage.getFromId()), String.valueOf(chatMessage.getToId()));
+        fromIdChatList.setLastMsgContent(chatMessageContent);
+        chatListService.updateById(fromIdChatList);
+        //更新聊天列表 对方
+        ChatList toIdchatList = chatListService.getChatListByFromIdAndToId(String.valueOf(chatMessage.getToId()), String.valueOf(chatMessage.getFromId()));
+        if(null != toIdchatList){
+            toIdchatList.setLastMsgContent(chatMessageContent);
+            chatListService.updateById(toIdchatList);
+            //推送消息给对方
+            webSocketService.sendMsgToUser(chatMessage, String.valueOf(chatMessage.getToId()));
+        }
+        return chatMessage;
     }
 
     /**

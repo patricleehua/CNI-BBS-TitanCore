@@ -33,13 +33,13 @@ public class ChatMessage extends BaseEntity{
     private Long toId;
 
     /**
-     * 消息类型
+     * 消息类型 (text,image,video,audio)
      */
     @TableField("`message_type`")
     private MessageType type;
 
     /**
-     * 消息类型
+     * 消息类型 (message,notify,media)
      */
     @TableField("`level`")
     private LevelType levelType;
@@ -63,7 +63,7 @@ public class ChatMessage extends BaseEntity{
     private int status;
 
     /**
-     * 消息来源
+     * 消息来源 (user,system,group)
      */
     @TableField("`source_type`")
     private SourceType sourceType;

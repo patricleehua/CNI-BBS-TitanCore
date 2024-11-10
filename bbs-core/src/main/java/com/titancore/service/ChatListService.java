@@ -7,6 +7,7 @@ import com.titancore.domain.entity.ChatMessageContent;
 import com.titancore.domain.param.ChatListParam;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.ChatListDmlVo;
+import com.titancore.domain.vo.ChatListVo;
 import com.titancore.enums.SourceType;
 
 
@@ -28,12 +29,19 @@ public interface ChatListService extends IService<ChatList> {
     void updateChatListGroup(String groupId, ChatMessageContent chatMessageContent);
 
     /**
-     * 根据UserId 查询对应的聊天列表
+     * 根据fromId 查询对应的聊天列表
      * @param chatListParam
      * @return
      */
     PageResult queryChatList(ChatListParam chatListParam);
 
+    /**
+     * 通过 from id 和 to id 获取聊天列表
+     * @param fromId
+     * @param toId
+     * @return
+     */
+    ChatList getChatListByFromIdAndToId(String fromId, String toId);
     /**
      * 建立聊天对话
      * @param chatListDTO

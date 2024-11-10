@@ -20,6 +20,7 @@ import com.titancore.enums.SourceType;
 import com.titancore.service.ChatGroupMemberService;
 import com.titancore.service.ChatGroupService;
 import com.titancore.service.ChatListService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -99,6 +100,11 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
         List<ChatListVo> chatListVoListDml = filterChatListToChatListVo(chatListPage.getRecords());
         pageResult.setRecords(chatListVoListDml);
         return pageResult;
+    }
+
+    @Override
+    public ChatList getChatListByFromIdAndToId(String fromId, String toId) {
+        return chatListMapper.selectOne(new LambdaQueryWrapper<ChatList>().eq(ChatList::getFromId, fromId).eq(ChatList::getToId, toId));
     }
 
     /**

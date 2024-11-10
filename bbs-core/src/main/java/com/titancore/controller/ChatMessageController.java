@@ -3,6 +3,8 @@ package com.titancore.controller;
 import cn.hutool.json.JSONObject;
 import com.titancore.domain.dto.ChatMessageDTO;
 import com.titancore.domain.dto.ReeditDTO;
+import com.titancore.domain.dto.RetractionDTO;
+import com.titancore.domain.entity.ChatMessage;
 import com.titancore.domain.vo.ChatMessageRetractionVo;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.framework.common.response.Response;
@@ -37,14 +39,19 @@ public class ChatMessageController {
 
     /**
      * 撤回消息
-     *
+     * @param retractionDTO
      * @return
      */
-
+    @PostMapping("/retraction")
+    @Operation(summary = "撤回消息")
+    public Response<?> retractionMsg(@RequestBody RetractionDTO retractionDTO) {
+        ChatMessage result = chatMessageService.retractionMessage(retractionDTO);
+        return Response.success(result);
+    }
 
     /**
      * 重新编辑 (返回撤回消息信息)
-     *
+     * @param reeditDTO
      * @return
      */
     @PostMapping("/reedit")
