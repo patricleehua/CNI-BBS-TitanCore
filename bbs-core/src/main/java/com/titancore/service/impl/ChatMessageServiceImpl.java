@@ -1,9 +1,10 @@
 package com.titancore.service.impl;
 
-import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.titancore.constant.MessageContentType;
 import com.titancore.domain.dto.ChatMessageDTO;
@@ -11,19 +12,18 @@ import com.titancore.domain.dto.ReeditDTO;
 import com.titancore.domain.dto.RetractionDTO;
 import com.titancore.domain.entity.*;
 import com.titancore.domain.mapper.ChatMessageMapper;
+import com.titancore.domain.param.ChatMessageParam;
+import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.ChatMessageRetractionVo;
 import com.titancore.domain.vo.DMLVo;
-import com.titancore.enums.LevelType;
-import com.titancore.enums.MessageType;
-import com.titancore.enums.ResponseCodeEnum;
-import com.titancore.enums.SourceType;
+import com.titancore.enums.*;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.*;
 import com.titancore.util.AuthenticationUtil;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Type;
 import java.time.Duration;
@@ -45,6 +45,11 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     private ChatMessageRetractionService chatMessageRetractionService;
     @Autowired
     private ChatListService chatListService;
+    @Autowired
+    private ChatGroupMemberService chatGroupMemberService;
+    @Autowired
+    private CommonService commonService;
+
     @Override
     public DMLVo sendMessage(ChatMessageDTO chatMessageDTO) {
         //todo 判断当前登入用户是否与 发送方一致
@@ -173,6 +178,59 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             webSocketService.sendMsgToUser(chatMessage, String.valueOf(chatMessage.getToId()));
         }
         return chatMessage;
+    }
+
+    @Override
+    public PageResult messageRecord(ChatMessageParam chatMessageParam) {
+
+        Page<ChatMessage> page = new Page<>(chatMessageParam.getPageNo(), chatMessageParam.getPageSize());
+        LambdaQueryWrapper<ChatMessage> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ChatMessage::getFromId, chatMessageParam.getFromId())
+                .eq(ChatMessage::getToId, chatMessageParam.getTargetId())
+                .or()
+                .eq(ChatMessage::getFromId, chatMessageParam.getTargetId())
+                .eq(ChatMessage::getToId, chatMessageParam.getFromId())
+                .or()
+                .eq(ChatMessage::getSourceType, SourceType.GROUP)
+                .eq(ChatMessage::getToId, chatMessageParam.getTargetId());
+
+        if(chatMessageParam.getIsDesc().equals(String.valueOf(StatusEnum.DISABLED.getValue()))){
+            queryWrapper.orderByDesc(ChatMessage::getCreateTime);
+        }else {
+            queryWrapper.orderByAsc(ChatMessage::getCreateTime);
+        }
+
+
+        Page<ChatMessage> chatMessagePage = chatMessageMapper.selectPage(page, queryWrapper);
+        PageResult pageResult = new PageResult();
+        pageResult.setTotal(chatMessagePage.getTotal());
+        pageResult.setRecords(chatMessagePage.getRecords());
+        return pageResult;
+    }
+
+    @Override
+    public String sendFileOnMsgId(MultipartFile file, String userId, String msgId) {
+        AuthenticationUtil.checkUserId(userId);
+        ChatMessageContent fileMsgContent = getFileMsgContent(userId, msgId);
+        JSONObject fileInfo = JSON.parseObject(fileMsgContent.getContent());
+        //todo 聊天文件上传
+        //commonService.uploadFileForChat(file, fileInfo.getString("filePath"), true);
+        return "";
+    }
+
+    @Override
+    public ChatMessageContent getFileMsgContent(String userId, String msgId) {
+        ChatMessage chatMessage = this.getById(msgId);
+        if(null == chatMessage){
+            throw new BizException(ResponseCodeEnum.CHAT_MESSAGE_CONTENT_IS_NOT_EXIST);
+        }
+        if(chatMessage.getFromId().equals(Long.valueOf(userId))
+                || chatMessage.getToId().equals(Long.valueOf(userId))
+                || chatGroupMemberService.isMemberExists(String.valueOf(chatMessage.getToId()), userId) ){
+            return chatMessage.getChatMessageContent();
+        }else{
+            throw new BizException(ResponseCodeEnum.CHAT_MESSAGE_CONTENT_IS_NOT_EXIST);
+        }
     }
 
     /**

@@ -44,4 +44,12 @@ public interface ChatGroupMemberService extends IService<ChatGroupMember> {
      * @return
      */
     List<ChatGroupMember> getGroupMemberByGroupId(String groupId);
+
+    /**
+     * 根据GroupId查询userId是否存在于群组内
+     * @param groupId
+     * @param userId
+     * @return
+     */
+    boolean isMemberExists(String groupId, String userId);
 }

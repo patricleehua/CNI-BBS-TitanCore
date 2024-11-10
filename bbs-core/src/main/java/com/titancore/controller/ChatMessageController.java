@@ -5,6 +5,8 @@ import com.titancore.domain.dto.ChatMessageDTO;
 import com.titancore.domain.dto.ReeditDTO;
 import com.titancore.domain.dto.RetractionDTO;
 import com.titancore.domain.entity.ChatMessage;
+import com.titancore.domain.param.ChatMessageParam;
+import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.ChatMessageRetractionVo;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.framework.common.response.Response;
@@ -14,6 +16,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 @RestController
@@ -62,26 +67,30 @@ public class ChatMessageController {
     }
 
     /**
-     * 聊天记录
-     *
+     * 历史聊天记录
+     * @param chatMessageParam
      * @return
      */
-
-
-    /**
-     * 聊天记录（降序）
-     *
-     * @return
-     */
-
-
+    @PostMapping("/record")
+    @Operation(summary = "历史聊天记录")
+    public Response<?> messageRecord(@RequestBody ChatMessageParam chatMessageParam) {
+        PageResult result = chatMessageService.messageRecord(chatMessageParam);
+        return Response.success(result);
+    }
 
     /**
      * 发送文件
-     *
+     * @param file 文件
+     * @param userId 用户ID
+     * @param msgId 预存消息ID
      * @return
      */
-
+    @PostMapping("/send/file")
+    @Operation(summary = "历史聊天记录")
+    public Response<?> sendFile(MultipartFile file, String userId, String msgId) {
+        String url = chatMessageService.sendFileOnMsgId(file,userId,msgId);
+        return Response.success(url);
+    }
 
     /**
      * 发送图片
