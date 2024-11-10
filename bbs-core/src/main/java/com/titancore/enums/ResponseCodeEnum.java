@@ -71,7 +71,12 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
 
     //MessageQueue
     MESSAGE_QUEUE_ERROR("MESSAGE-10001","消息队列异常"),
-    MESSAGE_QUEUE_SEND_MESSAGE_TO_USER_ERROR("MESSAGE-10002","发送用户消息到消息队列出错!");
+    MESSAGE_QUEUE_SEND_MESSAGE_TO_USER_ERROR("MESSAGE-10002","发送用户消息到消息队列出错!"),
+
+
+    //ChatMessage
+    CHAT_MESSAGE_CONTENT_IS_NOT_EXIST("CHAT-10001","消息不存在!"),
+    ;
 
     // ----------- 业务异常状态码 -----------
 
