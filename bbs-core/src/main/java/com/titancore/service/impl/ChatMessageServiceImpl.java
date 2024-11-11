@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatMessage>
@@ -212,10 +213,13 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     public String sendFileOnMsgId(MultipartFile file, String userId, String msgId) {
         AuthenticationUtil.checkUserId(userId);
         ChatMessageContent fileMsgContent = getFileMsgContent(userId, msgId);
+        String toId = this.getById(msgId).getToId().toString();
         JSONObject fileInfo = JSON.parseObject(fileMsgContent.getContent());
-        //todo 聊天文件上传
-        //commonService.uploadFileForChat(file, fileInfo.getString("filePath"), true);
-        return "";
+        //文件校验
+        if(!Objects.equals(file.getOriginalFilename(), fileInfo.getString("fileName")) || fileInfo.getLong("fileSize") != file.getSize()){
+            throw new BizException(ResponseCodeEnum.FILE_IS_NOT_MATCH);
+        }
+        return commonService.uploadFileForChat(file,userId,toId,msgId);
     }
 
     @Override

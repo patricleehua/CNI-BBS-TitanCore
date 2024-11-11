@@ -16,7 +16,7 @@ public class ChatMessageContent {
      */
     private String formUserPortrait;
     /**
-     * 消息内容类型 text/image/video/audio
+     * 消息内容类型 check in MessageContentType
      */
     private String type;
     /**

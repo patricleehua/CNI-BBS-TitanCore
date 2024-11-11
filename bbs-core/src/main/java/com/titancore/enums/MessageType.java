@@ -13,7 +13,8 @@ public enum  MessageType  implements IEnum<String> {
     TEXT("text"),
     IMAGE("image"),
     VIDEO("video"),
-    AUDIO("audio");
+    AUDIO("audio"),
+    FILE("file");
 
     private final String value;
     public static MessageType valueOfAll(String value) {

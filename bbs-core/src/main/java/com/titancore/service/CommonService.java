@@ -1,7 +1,6 @@
 package com.titancore.service;
 
 
-import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.lang.generator.SnowflakeGenerator;
 import com.alibaba.fastjson.JSON;
 import com.titancore.domain.dto.CaptchaCodeDTO;
@@ -10,9 +9,8 @@ import com.titancore.domain.entity.MediaUrl;
 import com.titancore.enums.CapchaEnum;
 import com.titancore.enums.LinkType;
 import com.titancore.enums.ResponseCodeEnum;
-import com.titancore.enums.RoleType;
 import com.titancore.framework.cloud.manager.config.CloudServiceFactory;
-import com.titancore.framework.cloud.manager.constant.CloudStorePath;
+import com.titancore.constant.CloudStorePath;
 import com.titancore.framework.cloud.manager.domain.dto.FileDelDTO;
 import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
 import com.titancore.framework.cloud.manager.domain.vo.FileListVo;
@@ -347,6 +345,26 @@ public class CommonService {
         FileListVo fileListVo = cloudStorageService.queryFileList(prefix, false, true);
         fileListVo.setUserId(userId);
         return fileListVo;
+    }
+
+    /**
+     * 上传用户文件
+     * @param file
+     * @param userId
+     * @param toId
+     * @param msgId
+     * @return
+     */
+    public String uploadFileForChat(MultipartFile file, String userId,String toId, String msgId) {
+        var cloudStorageService  = factory.createService();
+        String path = CloudStorePath.CHAT_USER_BASE_PATH
+                + userId + "/"
+                + CloudStorePath.CHAT_USER_TO_USER_PATH
+                + toId + "/"
+                + CloudStorePath.CHAT_USER_MESSAGES_PATH
+                + msgId + "/"
+                + CloudStorePath.CHAT_USER_FILES_PATH;
+        return cloudStorageService.uploadFile(file, path,true);
     }
 }
 

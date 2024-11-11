@@ -47,7 +47,7 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     FILE_IS_NOT_IMAGE("FILE-10002", "上传的文件格式须为图片"),
     FILE_IS_NOT_VIDEO("FILE-10003", "上传的文件格式须为视频"),
     FILE_IS_NOT_SUPPORTED("FILE-10004", "上传的文件格式不支持"),
-
+    FILE_IS_NOT_MATCH("FILE-10005", "上传的文件不一致!"),
     //Redis
     REDIS_LOCK_KEY_FREE_ERROR("REDIS-10001","分布式锁释放失败"),
 

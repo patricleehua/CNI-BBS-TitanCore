@@ -33,7 +33,7 @@ public class ChatMessage extends BaseEntity{
     private Long toId;
 
     /**
-     * 消息格式 (text,image,video,audio)
+     * 消息格式 (text,image,video,audio.file) check in MessageContentType
      */
     @TableField("`message_type`")
     private MessageType type;

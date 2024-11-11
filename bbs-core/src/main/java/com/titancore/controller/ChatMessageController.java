@@ -79,14 +79,14 @@ public class ChatMessageController {
     }
 
     /**
-     * 发送文件
+     * 发送文件(先存消息在调用发送)
      * @param file 文件
      * @param userId 用户ID
      * @param msgId 预存消息ID
      * @return
      */
     @PostMapping("/send/file")
-    @Operation(summary = "历史聊天记录")
+    @Operation(summary = "发送文件")
     public Response<?> sendFile(MultipartFile file, String userId, String msgId) {
         String url = chatMessageService.sendFileOnMsgId(file,userId,msgId);
         return Response.success(url);

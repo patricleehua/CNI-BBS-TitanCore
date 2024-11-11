@@ -16,7 +16,7 @@ public class ChatMessageDTO extends BaseDTO{
     private String toId;
     @Schema(description = "目标源:user,group,system")
     private String source;
-    @Schema(description = "消息级别:message,notify,meda")
+    @Schema(description = "消息级别:message,notify,media")
     private String level;
     @Schema(description = "消息内容")
     private ChatMessageContent chatMessageContent;

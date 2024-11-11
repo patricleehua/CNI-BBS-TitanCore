@@ -5,8 +5,11 @@ package com.titancore.constant;
  */
 public class MessageContentType {
     public static String Text = "text";
-    public static String Img = "img";
+    public static String Image = "image";
     public static String File = "file";
+    public static String Video = "video";
+    public static String Audio = "audio";
+
     public static String Voice = "voice";
     public static String Retraction = "retraction";
     public static String Call = "call";
