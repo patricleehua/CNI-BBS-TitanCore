@@ -66,4 +66,13 @@ public interface ChatMessageService extends IService<ChatMessage> {
      * @return
      */
     ChatMessageContent getFileMsgContent(String userId, String msgId);
+
+    /**
+     * 发送媒体
+     * @param file 媒体文件
+     * @param userId 用户ID
+     * @param msgId 预存消息ID
+     * @return
+     */
+    String sendMediaOnMsgId(MultipartFile file, String userId, String msgId);
 }

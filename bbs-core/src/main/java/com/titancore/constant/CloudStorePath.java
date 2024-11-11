@@ -14,4 +14,5 @@ public class CloudStorePath {
     public static final String CHAT_USER_TO_USER_PATH = "toUser/";
     public static final String CHAT_USER_MESSAGES_PATH = "chatMessages/";
     public static final String CHAT_USER_FILES_PATH = "chatFiles/";
+    public static final String CHAT_USER_MEDIAS_PATH = "chatMedias/";
 }

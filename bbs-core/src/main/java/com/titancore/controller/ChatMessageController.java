@@ -93,11 +93,18 @@ public class ChatMessageController {
     }
 
     /**
-     * 发送图片
-     *
+     * 发送媒体(先存消息在调用发送)
+     * @param file
+     * @param userId
+     * @param msgId
      * @return
      */
-
+    @PostMapping("/send/media")
+    @Operation(summary = "发送媒体")
+    public Response<?> sendImage(MultipartFile file, String userId, String msgId) {
+        String url = chatMessageService.sendMediaOnMsgId(file,userId,msgId);
+        return Response.success(url);
+    }
 
 
     /**

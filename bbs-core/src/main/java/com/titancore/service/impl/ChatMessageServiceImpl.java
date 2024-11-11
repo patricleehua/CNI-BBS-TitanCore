@@ -222,6 +222,19 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         return commonService.uploadFileForChat(file,userId,toId,msgId);
     }
 
+
+    @Override
+    public String sendMediaOnMsgId(MultipartFile file, String userId, String msgId) {
+        AuthenticationUtil.checkUserId(userId);
+        ChatMessageContent fileMsgContent = getFileMsgContent(userId, msgId);
+        String toId = this.getById(msgId).getToId().toString();
+        JSONObject fileInfo = JSON.parseObject(fileMsgContent.getContent());
+        //文件校验
+        if(!Objects.equals(file.getOriginalFilename(), fileInfo.getString("fileName")) || fileInfo.getLong("fileSize") != file.getSize()){
+            throw new BizException(ResponseCodeEnum.FILE_IS_NOT_MATCH);
+        }
+        return commonService.uploadMediaForChat(file,userId,toId,msgId);
+    }
     @Override
     public ChatMessageContent getFileMsgContent(String userId, String msgId) {
         ChatMessage chatMessage = this.getById(msgId);
