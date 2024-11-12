@@ -10,6 +10,7 @@ public class FileDownloadDTO {
     private String fileName;
     private String userId;
     private int expiresIn;
+
     /**
      * 是否私有，私有0/公开1
      */

@@ -88,6 +88,7 @@ public class MinioUtil {
 
     /**
      * 2024.9.30 pass
+     * 2024.11.12 增加对url携带域名的处理
      * 文件的临时URL地址
      * @param filePath
      * @param expiresIn
@@ -100,6 +101,7 @@ public class MinioUtil {
 
         MinioClient minioClient = createMinioClient();
         try {
+            filePath = FileUtil.extractPathAfterKeyword(filePath, bucketName);
             return minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
@@ -153,6 +155,7 @@ public class MinioUtil {
 
     /**
      * 2024.11.6 pass
+     * 2024.11.12 增加对url携带域名的处理
      * 删除指定的整个目录
      * @param dirPath
      * @param isPrivate
@@ -163,6 +166,7 @@ public class MinioUtil {
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
         MinioClient minioClient = createMinioClient();
         try {
+            dirPath = FileUtil.extractPathAfterKeyword(dirPath, bucketName);
             List<Item> items = queryFileListByPath(dirPath, true, isPrivate);
             if (items == null || items.isEmpty()) {
                 log.info("Directory is empty or does not exist.");
@@ -201,6 +205,7 @@ public class MinioUtil {
     }
     /**
      * 2024.11.6 pass
+     * 2024.11.12 增加对url携带域名的处理
      * 获取路径下文件列表
      * @param prefix 文件名称路径
      * @param recursive 是否递归查找，false：模拟文件夹结构查找 true:递归查找，如果有子文件夹，则返回包含子文件夹的内容
@@ -211,6 +216,7 @@ public class MinioUtil {
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
         MinioClient minioClient = createMinioClient();
         try{
+            prefix = FileUtil.extractPathAfterKeyword(prefix, bucketName);
             ListObjectsArgs listObjectsArgs = ListObjectsArgs.builder().bucket(bucketName).prefix(prefix).recursive(recursive).build();
             Iterable<Result<Item>> results = minioClient.listObjects(listObjectsArgs);
             ArrayList<Item> items = new ArrayList<>();
@@ -259,6 +265,7 @@ public class MinioUtil {
     }
     /**
      * 2024.11.6 pass
+     * 2024.11.12 增加对url携带域名的处理
      * 拷贝文件
      *
      * @param bucketName    存储桶
@@ -269,6 +276,7 @@ public class MinioUtil {
     public ObjectWriteResponse copyFile(String bucketName, String objectName, String srcBucketName, String srcObjectName) {
         MinioClient minioClient = createMinioClient();
         try{
+            objectName = FileUtil.extractPathAfterKeyword(objectName, bucketName);
             return minioClient.copyObject(CopyObjectArgs.builder()
                     .source(CopySource.builder()
                             .bucket(bucketName)
@@ -302,6 +310,7 @@ public class MinioUtil {
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
         MinioClient minioClient = createMinioClient();
         try{
+            objectName = FileUtil.extractPathAfterKeyword(objectName, bucketName);
             return minioClient.getObject(GetObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)

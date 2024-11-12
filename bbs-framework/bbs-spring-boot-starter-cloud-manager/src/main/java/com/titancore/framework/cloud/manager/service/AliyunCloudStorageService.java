@@ -12,6 +12,7 @@ import com.titancore.framework.cloud.manager.urils.AliyunSmsUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -122,6 +123,12 @@ public class AliyunCloudStorageService implements CloudService {
         FileListVo fileListVo = new FileListVo();
         fileListVo.setFiles(files);
         return fileListVo;
+    }
+
+    @Override
+    public InputStream BreakPointDownload(String path, long offset, long length, boolean isPrivate) {
+        //todo
+        return null;
     }
 
 

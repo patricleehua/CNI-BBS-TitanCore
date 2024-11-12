@@ -96,12 +96,14 @@ public class AliyunOssUtilV2 {
 
     /**
      * 查询 路径 Path/ 下的文件
+     * 2024.11.12 增加对url携带域名的处理
      * @param path
      * @return
      */
     public List<OSSObjectSummary> queryFileListByPath(String path,boolean isPrivate) {
         //是否私有
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        path = FileUtil.extractPathAfterKeyword(path, bucketName);
         //创建OSSClient实例
         OSS ossClient = createOssClient();
         List<OSSObjectSummary> sums = null;
@@ -130,6 +132,7 @@ public class AliyunOssUtilV2 {
 
     /**
      * 2024.9.30 pass
+     * 2024.11.12 增加对url携带域名的处理
      * 删除指定单个文件
      * @param filePath
      * @return
@@ -138,6 +141,7 @@ public class AliyunOssUtilV2 {
     public boolean deleteFile(String filePath,boolean isPrivate) {
         //是否私有
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        filePath = FileUtil.extractPathAfterKeyword(filePath, bucketName);
         OSS ossClient = createOssClient();
         try {
             ossClient.deleteObject(bucketName, filePath);
@@ -164,6 +168,7 @@ public class AliyunOssUtilV2 {
 
     /**
      * 2024.9.30 pass
+     * 2024.11.12 增加对url携带域名的处理
      * 删除指定的整个目录
      * @param dirPath
      * @return
@@ -171,6 +176,7 @@ public class AliyunOssUtilV2 {
     public boolean deleteDirectory(String dirPath,boolean isPrivate) {
         //是否私有
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        dirPath = FileUtil.extractPathAfterKeyword(dirPath, bucketName);
         OSS ossClient = createOssClient();
         try {
             ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName)
@@ -205,6 +211,7 @@ public class AliyunOssUtilV2 {
 
     /**
      * 2024.9.30 不建议使用，仅供参考
+     * 2024.11.12 增加对url携带域名的处理
      * todo 问题: 在客户端执行取消后，阿里云OSS的流还是被继续访问，直到传完！这个一个非常严重的bug
      * @author gaojun
      * @desc 下载文件
@@ -215,6 +222,7 @@ public class AliyunOssUtilV2 {
     public Map<String, Object> exportOssFile(String Path,boolean isPrivate) {
         //是否私有
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        Path = FileUtil.extractPathAfterKeyword(Path, bucketName);
         //创建OSSClient实例
         OSS ossClient = createOssClient();
         // ossObject包含文件所在的存储空间名称、文件名称、文件元信息以及一个输入流。
@@ -232,6 +240,7 @@ public class AliyunOssUtilV2 {
 
     /**
      * 2024.9.30 pass
+     * 2024.11.12 增加对url携带域名的处理
      * 获取指定路径文件的临时URL
      * @param filePath
      * @param expiresIn
@@ -241,6 +250,7 @@ public class AliyunOssUtilV2 {
     public String getTemplateUrl(String filePath,int expiresIn,boolean isPrivate) {
         //是否私有
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        filePath = FileUtil.extractPathAfterKeyword(filePath, bucketName);
         OSS ossClient = createOssClient();
         try {
             Date expireTime = new Date(System.currentTimeMillis() + expiresIn * 3600 * 1000);

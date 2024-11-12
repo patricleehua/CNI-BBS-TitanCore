@@ -62,4 +62,12 @@ public class RedisConstant {
      * 临时通行码过期时间
      */
     public static final Long TEMPORARY_PASS_CODE_TTL = 5L;
+    /**
+     * 消息媒体临时链接
+     */
+    public static final String MESSAGE_MEDIA_TEMPORARY_URL = "message:media:temporary:url:";
+    /**
+     * 消息媒体临时链接时长
+     */
+    public static final Long MESSAGE_MEDIA_TEMPORARY_URL_TTL = 7L;
 }

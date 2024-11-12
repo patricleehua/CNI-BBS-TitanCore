@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.titancore.constant.MessageContentType;
 import com.titancore.domain.dto.ChatMessageDTO;
+import com.titancore.domain.dto.ChatMessageFileDTO;
 import com.titancore.domain.dto.ReeditDTO;
 import com.titancore.domain.dto.RetractionDTO;
 import com.titancore.domain.entity.*;
@@ -17,18 +18,23 @@ import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.ChatMessageRetractionVo;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.enums.*;
+import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.*;
 import com.titancore.util.AuthenticationUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatMessage>
@@ -50,6 +56,8 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     private ChatGroupMemberService chatGroupMemberService;
     @Autowired
     private CommonService commonService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public DMLVo sendMessage(ChatMessageDTO chatMessageDTO) {
@@ -212,31 +220,70 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     @Override
     public String sendFileOnMsgId(MultipartFile file, String userId, String msgId) {
         AuthenticationUtil.checkUserId(userId);
-        ChatMessageContent fileMsgContent = getFileMsgContent(userId, msgId);
-        String toId = this.getById(msgId).getToId().toString();
+        ChatMessage chatMessage = this.getById(msgId);
+        String toId = chatMessage.getToId().toString();
+        ChatMessageContent fileMsgContent = chatMessage.getChatMessageContent();
         JSONObject fileInfo = JSON.parseObject(fileMsgContent.getContent());
         //文件校验
         if(!Objects.equals(file.getOriginalFilename(), fileInfo.getString("fileName")) || fileInfo.getLong("fileSize") != file.getSize()){
             throw new BizException(ResponseCodeEnum.FILE_IS_NOT_MATCH);
         }
-        return commonService.uploadFileForChat(file,userId,toId,msgId);
+        String fileUrl = commonService.uploadFileForChat(file, userId, toId, msgId);
+        //更新原始数据
+        fileInfo.put("filePath",fileUrl);
+        fileMsgContent.setContent(fileInfo.toJSONString());
+        chatMessage.setChatMessageContent(fileMsgContent);
+        chatMessage.setUpdateTime(LocalDateTime.now());
+        this.updateById(chatMessage);
+        return fileUrl;
     }
 
 
     @Override
     public String sendMediaOnMsgId(MultipartFile file, String userId, String msgId) {
         AuthenticationUtil.checkUserId(userId);
-        ChatMessageContent fileMsgContent = getFileMsgContent(userId, msgId);
-        String toId = this.getById(msgId).getToId().toString();
+        ChatMessage chatMessage = this.getById(msgId);
+        String toId = chatMessage.getToId().toString();
+        ChatMessageContent fileMsgContent = chatMessage.getChatMessageContent();
         JSONObject fileInfo = JSON.parseObject(fileMsgContent.getContent());
         //文件校验
         if(!Objects.equals(file.getOriginalFilename(), fileInfo.getString("fileName")) || fileInfo.getLong("fileSize") != file.getSize()){
             throw new BizException(ResponseCodeEnum.FILE_IS_NOT_MATCH);
         }
-        return commonService.uploadMediaForChat(file,userId,toId,msgId);
+        String mediaUrl = commonService.uploadMediaForChat(file, userId, toId, msgId);
+        //更新原始数据
+        fileInfo.put("filePath",mediaUrl);
+        fileMsgContent.setContent(fileInfo.toJSONString());
+        chatMessage.setChatMessageContent(fileMsgContent);
+        chatMessage.setUpdateTime(LocalDateTime.now());
+        this.updateById(chatMessage);
+        return mediaUrl;
     }
+
     @Override
-    public ChatMessageContent getFileMsgContent(String userId, String msgId) {
+    public InputStream getFileToInputStreamByFilePath(String filePath,long offset, long length) {
+        return commonService.getFileToInputStreamByFilePath(filePath,offset,length);
+    }
+
+    @Override
+    public String getMedia(String userId, String msgId) {
+        ChatMessageContent fileMsgContent = getFileMsgContent(new ChatMessageFileDTO(userId, msgId));
+        JSONObject fileInfo = JSON.parseObject(fileMsgContent.getContent());
+        String fileName = fileInfo.getString("fileName");
+        String filePath = fileInfo.getString("filePath");
+        String temporaryUrl = stringRedisTemplate.opsForValue().get(RedisConstant.MESSAGE_MEDIA_TEMPORARY_URL+fileName);
+        if (StringUtils.isBlank(temporaryUrl)) {
+            int expiresIn = (int) (RedisConstant.MESSAGE_MEDIA_TEMPORARY_URL_TTL * 24);
+            temporaryUrl = commonService.createTemporaryUrl(filePath, expiresIn, true);
+            stringRedisTemplate.opsForValue().set(RedisConstant.MESSAGE_MEDIA_TEMPORARY_URL+fileName,temporaryUrl,expiresIn, TimeUnit.HOURS);
+        }
+        return temporaryUrl;
+    }
+
+    @Override
+    public ChatMessageContent getFileMsgContent(ChatMessageFileDTO chatMessageFileDTO) {
+        String userId = chatMessageFileDTO.getUserId();
+        String msgId = chatMessageFileDTO.getMsgId();
         ChatMessage chatMessage = this.getById(msgId);
         if(null == chatMessage){
             throw new BizException(ResponseCodeEnum.CHAT_MESSAGE_CONTENT_IS_NOT_EXIST);

@@ -70,4 +70,18 @@ public class FileUtil {
                 filename.endsWith(".wmv") ||
                 filename.endsWith(".flv"));
     }
+
+    /**
+     * 处理 url 路径转为 文件路径
+     * @param path
+     * @param key
+     * @return
+     */
+    public static String extractPathAfterKeyword(String path, String key) {
+        int index = path.indexOf(key);
+        if (index != -1) {
+            return path.substring(index + key.length());
+        }
+        return path;
+    }
 }

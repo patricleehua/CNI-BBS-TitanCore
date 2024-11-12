@@ -2,6 +2,7 @@ package com.titancore.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.titancore.domain.dto.ChatMessageDTO;
+import com.titancore.domain.dto.ChatMessageFileDTO;
 import com.titancore.domain.dto.ReeditDTO;
 import com.titancore.domain.dto.RetractionDTO;
 import com.titancore.domain.entity.ChatMessage;
@@ -12,6 +13,8 @@ import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.ChatMessageRetractionVo;
 import com.titancore.domain.vo.DMLVo;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.InputStream;
 
 public interface ChatMessageService extends IService<ChatMessage> {
     /**
@@ -61,11 +64,10 @@ public interface ChatMessageService extends IService<ChatMessage> {
 
     /**
      * 获取文件消息内容
-     * @param userId
-     * @param msgId
+     * @param chatMessageFileDTO
      * @return
      */
-    ChatMessageContent getFileMsgContent(String userId, String msgId);
+    ChatMessageContent getFileMsgContent(ChatMessageFileDTO chatMessageFileDTO);
 
     /**
      * 发送媒体
@@ -75,4 +77,19 @@ public interface ChatMessageService extends IService<ChatMessage> {
      * @return
      */
     String sendMediaOnMsgId(MultipartFile file, String userId, String msgId);
+
+    /**
+     * 根据文件链接获取流
+     * @param filePath
+     * @return
+     */
+    InputStream getFileToInputStreamByFilePath(String filePath,long offset, long length);
+
+    /**
+     * 获取媒体
+     * @param userId
+     * @param msgId
+     * @return
+     */
+    String getMedia(String userId, String msgId);
 }

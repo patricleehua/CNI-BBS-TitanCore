@@ -5,6 +5,7 @@ import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
 import com.titancore.framework.cloud.manager.domain.vo.FileListVo;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -73,4 +74,15 @@ public interface CloudService {
      * @return
      */
     FileListVo queryFileList(String path,boolean recursive,boolean isPrivate);
+
+    /**
+     * 断点下载
+     * @param path
+     * @param offset
+     * @param length
+     * @param isPrivate
+     * @return
+     */
+    InputStream BreakPointDownload(String path,long offset,long length,boolean isPrivate);
+
 }

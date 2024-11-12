@@ -11,6 +11,7 @@ import io.minio.messages.Item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +106,11 @@ public class MinioStorageService implements CloudService {
         FileListVo fileListVo = new FileListVo();
         fileListVo.setFiles(files);
         return fileListVo;
+    }
+
+    @Override
+    public InputStream BreakPointDownload(String path, long offset, long length, boolean isPrivate) {
+        return initOss().getObject(path,offset,length,isPrivate);
     }
 
 }

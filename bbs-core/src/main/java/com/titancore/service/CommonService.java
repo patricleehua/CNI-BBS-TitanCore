@@ -31,6 +31,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -384,6 +385,30 @@ public class CommonService {
                 + CloudStorePath.CHAT_USER_MESSAGES_PATH
                 + msgId + "/";
         return cloudStorageService.uploadFile(file, path,true);
+    }
+
+    /**
+     * 断点下载
+     * @param filePath 文件路径(带域名/不带域名）
+     * @param offset 开始位置
+     * @param length 结束位置
+     * @return
+     */
+    public InputStream getFileToInputStreamByFilePath(String filePath,long offset, long length) {
+        var cloudStorageService  = factory.createService();
+        return cloudStorageService.BreakPointDownload(filePath,offset,length,true);
+    }
+
+    /**
+     * 根据url 生成临时链接
+     * @param filePath 文件路径(带域名/不带域名）
+     * @param expiresIn hours
+     * @param isPrivate 是否私有
+     * @return
+     */
+    public String createTemporaryUrl(String filePath,int expiresIn,boolean isPrivate) {
+        var cloudStorageService = factory.createService();
+        return cloudStorageService.createTemplateUrlOfFile(filePath,expiresIn,isPrivate);
     }
 }
 
