@@ -1,18 +1,13 @@
 package com.titancore.framework.cloud.manager.urils;
 
-import com.aliyun.oss.ClientException;
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSClientBuilder;
-import com.aliyun.oss.OSSException;
-import com.aliyun.oss.model.ListObjectsRequest;
-import com.aliyun.oss.model.OSSObject;
-import com.aliyun.oss.model.OSSObjectSummary;
-import com.aliyun.oss.model.ObjectListing;
+import com.aliyun.oss.*;
+import com.aliyun.oss.model.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -29,6 +24,8 @@ public class AliyunOssUtilV2 {
     private String bucketNamePrivate;
 
     private OSS createOssClient(){
+
+
         return new OSSClientBuilder().build(endpoint,accessKeyId,accessSecret);
     }
     /**
@@ -103,7 +100,7 @@ public class AliyunOssUtilV2 {
     public List<OSSObjectSummary> queryFileListByPath(String path,boolean isPrivate) {
         //是否私有
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
-        path = FileUtil.extractPathAfterKeyword(path, bucketName);
+        path = FileUtil.extractPathAfterKeyword(path,"aliyuncs.com/");
         //创建OSSClient实例
         OSS ossClient = createOssClient();
         List<OSSObjectSummary> sums = null;
@@ -141,7 +138,7 @@ public class AliyunOssUtilV2 {
     public boolean deleteFile(String filePath,boolean isPrivate) {
         //是否私有
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
-        filePath = FileUtil.extractPathAfterKeyword(filePath, bucketName);
+        filePath = FileUtil.extractPathAfterKeyword(filePath,"aliyuncs.com/");
         OSS ossClient = createOssClient();
         try {
             ossClient.deleteObject(bucketName, filePath);
@@ -176,7 +173,7 @@ public class AliyunOssUtilV2 {
     public boolean deleteDirectory(String dirPath,boolean isPrivate) {
         //是否私有
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
-        dirPath = FileUtil.extractPathAfterKeyword(dirPath, bucketName);
+        dirPath = FileUtil.extractPathAfterKeyword(dirPath,"aliyuncs.com/");
         OSS ossClient = createOssClient();
         try {
             ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName)
@@ -222,7 +219,7 @@ public class AliyunOssUtilV2 {
     public Map<String, Object> exportOssFile(String Path,boolean isPrivate) {
         //是否私有
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
-        Path = FileUtil.extractPathAfterKeyword(Path, bucketName);
+        Path = FileUtil.extractPathAfterKeyword(Path,"aliyuncs.com/");
         //创建OSSClient实例
         OSS ossClient = createOssClient();
         // ossObject包含文件所在的存储空间名称、文件名称、文件元信息以及一个输入流。
@@ -250,10 +247,10 @@ public class AliyunOssUtilV2 {
     public String getTemplateUrl(String filePath,int expiresIn,boolean isPrivate) {
         //是否私有
         String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
-        filePath = FileUtil.extractPathAfterKeyword(filePath, bucketName);
+        filePath = FileUtil.extractPathAfterKeyword(filePath, "aliyuncs.com/");
         OSS ossClient = createOssClient();
         try {
-            Date expireTime = new Date(System.currentTimeMillis() + expiresIn * 3600 * 1000);
+            Date expireTime = new Date(System.currentTimeMillis() + expiresIn * 24 * 3600 * 1000);
             URL url = ossClient.generatePresignedUrl(bucketName, filePath, expireTime);
             return url.toString();
         }catch (ClientException ce){
@@ -267,6 +264,52 @@ public class AliyunOssUtilV2 {
             log.error("Error Code: {}", ce.getErrorCode());
             log.error("Request ID: {}", ce.getRequestId());
             return "";
+        }finally {
+            if (ossClient != null) {
+                ossClient.shutdown();
+            }
+        }
+    }
+
+    /**
+     * un pass 2024 11 13
+     * 断点下载
+     * @param filePath
+     * @param offset
+     * @param length
+     * @param isPrivate
+     * @return
+     */
+    public InputStream getObject(String filePath,long offset, long length,boolean isPrivate) {
+        //是否私有
+        String bucketName = isPrivate ? bucketNamePrivate:bucketNameOpen;
+        filePath = FileUtil.extractPathAfterKeyword(filePath, "aliyuncs.com/");
+        OSS ossClient = createOssClient();
+        try {
+            // 创建 GetObjectRequest 对象，并设置 Range 参数
+            GetObjectRequest getObjectRequest = new GetObjectRequest(bucketName, filePath);
+            getObjectRequest.setRange(offset, offset + length - 1);  // 设置下载范围
+
+            // 下载对象并返回输入流
+            OSSObject ossObject = ossClient.getObject(getObjectRequest);
+            // todo 这个先存本地，然后在返回，这个有问题，不可用！！
+            try (InputStream inputStream = ossObject.getObjectContent()) {
+                byte[] data = inputStream.readAllBytes();
+                return new ByteArrayInputStream(data);  // 返回字节数组的流
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }catch (ClientException ce){
+            log.error(
+                    """
+                    Caught an ClientException, which means your request made it to OSS,
+                    but was rejected with an error response for some reason.
+                    """
+            );
+            log.error("Error Message: {}", ce.getErrorMessage());
+            log.error("Error Code: {}", ce.getErrorCode());
+            log.error("Request ID: {}", ce.getRequestId());
+            return null;
         }finally {
             if (ossClient != null) {
                 ossClient.shutdown();

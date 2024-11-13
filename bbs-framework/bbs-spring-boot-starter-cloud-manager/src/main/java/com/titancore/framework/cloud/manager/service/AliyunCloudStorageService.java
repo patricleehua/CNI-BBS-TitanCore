@@ -127,8 +127,7 @@ public class AliyunCloudStorageService implements CloudService {
 
     @Override
     public InputStream BreakPointDownload(String path, long offset, long length, boolean isPrivate) {
-        //todo
-        return null;
+        return initOss().getObject(path,offset,length,isPrivate);
     }
 
 

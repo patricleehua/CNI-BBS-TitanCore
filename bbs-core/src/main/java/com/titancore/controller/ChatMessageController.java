@@ -30,6 +30,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 
 @RestController
@@ -162,7 +164,7 @@ public class ChatMessageController {
 
         /**
          * 2024/11/12 patricLee
-         * 创建 StreamingResponseBody 以流式传输文件内容 作用L:
+         * 创建 StreamingResponseBody 以流式传输文件内容 作用:
          * StreamingResponseBody 是 Spring MVC 中提供的一种响应机制，用于处理流式数据的传输。
          * 它允许我们在客户端请求时动态地将数据写入响应流，而无需将整个响应缓存在服务器内存中（这很关键）。
          * 这种机制非常适合处理大文件传输，因为 StreamingResponseBody 会自动处理响应的分块传输（chunked transfer encoding），而且对客户端的中断异常有内置的支持。
@@ -170,7 +172,7 @@ public class ChatMessageController {
          */
         StreamingResponseBody stream = outputStream -> {
             try (InputStream inputStream = chatMessageService.getFileToInputStreamByFilePath(filePath, start, contentLength)) {
-                byte[] buffer = new byte[4096];
+                byte[] buffer = new byte[8192];
                 int bytesRead;
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
                     outputStream.write(buffer, 0, bytesRead);
@@ -185,7 +187,7 @@ public class ChatMessageController {
         };
         // 返回文件的分块内容，包含适当的头部信息
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + URLEncoder.encode(fileName, StandardCharsets.UTF_8) + "\"")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
                 .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength))
                 .header(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileSize)
