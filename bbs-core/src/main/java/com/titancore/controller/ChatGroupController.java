@@ -1,12 +1,10 @@
 package com.titancore.controller;
 
 
-import com.titancore.domain.dto.ChatGroupDTO;
-import com.titancore.domain.dto.ChatGroupInviteMemberDTO;
-import com.titancore.domain.dto.ChatGroupQuitDTO;
-import com.titancore.domain.dto.ChatGroupUpdateDTO;
+import com.titancore.domain.dto.*;
 import com.titancore.domain.param.ChatGroupParam;
 import com.titancore.domain.param.PageResult;
+import com.titancore.domain.vo.ChatGroupDetailsVo;
 import com.titancore.domain.vo.ChatGroupVo;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.framework.common.response.Response;
@@ -57,7 +55,7 @@ public class ChatGroupController {
     }
 
     /**
-     * 成员邀请
+     * 成员邀请 todo 成员邀请
      * @param chatGroupInviteMemberDTO
      * @return
      */
@@ -83,7 +81,15 @@ public class ChatGroupController {
 
     /**
      * 踢出群聊
+     * @param chatGroupKickDTO
+     * @return
      */
+    @PostMapping("/kick")
+    @Operation(summary = "踢出群聊")
+    public Response<?>  kickChatGroup(@RequestBody ChatGroupKickDTO chatGroupKickDTO) {
+        boolean result = chatGroupService.kickChatGroup(chatGroupKickDTO);
+        return Response.success(result);
+    }
 
 
     /**
@@ -98,15 +104,30 @@ public class ChatGroupController {
 
     /**
      * 转让群聊
+     * @param chatGroupTransferDTO
+     * @return
      */
-
+    @PostMapping("/transfer")
+    @Operation(summary = "转让群聊")
+    public Response<?> transferChatGroup(@RequestBody ChatGroupTransferDTO chatGroupTransferDTO) {
+        ChatGroupVo chatGroupVo = chatGroupService.transferChatGroup(chatGroupTransferDTO);
+        return Response.success(chatGroupVo);
+    }
 
     /**
      * 群详情
+     * @param chatGroupDTO
+     * @return
      */
-
+    @PostMapping("/details")
+    @Operation(summary = "群详情")
+    public Response<?> detailsChatGroup(@RequestBody ChatGroupDTO chatGroupDTO) {
+        ChatGroupDetailsVo chatGroupDetailsVo = chatGroupService.detailsChatGroup(chatGroupDTO);
+        return Response.success(chatGroupDetailsVo);
+    }
 
     /**
+     * todo
      * 更新群头像
      */
 

@@ -14,6 +14,7 @@ import com.titancore.domain.mapper.ChatGroupMapper;
 import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.param.ChatGroupParam;
 import com.titancore.domain.param.PageResult;
+import com.titancore.domain.vo.ChatGroupDetailsVo;
 import com.titancore.domain.vo.ChatGroupVo;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.enums.MessageType;
@@ -24,6 +25,7 @@ import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.*;
 import com.titancore.util.AuthenticationUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -199,6 +201,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
     @Transactional
     @Override
     public DMLVo quitChatGroup(ChatGroupQuitDTO chatGroupQuitDTO) {
+        //todo 群主不可退出 必须解散/转移群
         String userId = chatGroupQuitDTO.getUserId();
         AuthenticationUtil.checkUserId(userId);
 
@@ -233,6 +236,90 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         chatMessageContent.setContent(JSON.toJSONString(notifyDTO));
         chatMessageDTO.setChatMessageContent(chatMessageContent);
         return chatMessageService.sendMessage(chatMessageDTO);
+    }
+    @Transactional
+    @Override
+    public boolean kickChatGroup(ChatGroupKickDTO chatGroupKickDTO) {
+        String managerId = chatGroupKickDTO.getManagerId();
+        String userId = chatGroupKickDTO.getUserId();
+        String groupId = chatGroupKickDTO.getGroupId();
+        AuthenticationUtil.checkUserId(managerId);
+
+        LambdaQueryWrapper<ChatGroupMember> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ChatGroupMember::getChatGroupId, groupId)
+                    .eq(ChatGroupMember::getUserId, userId);
+        chatGroupMemberService.remove(queryWrapper);
+
+        //发送群消息系统消息
+        ChatMessageDTO chatMessageDTO = new ChatMessageDTO();
+        chatMessageDTO.setFromId(managerId);
+        chatMessageDTO.setToId(groupId);
+        chatMessageDTO.setSource(SourceType.GROUP.getValue());
+        chatMessageDTO.setMessageType(MessageType.NOTIFY.getValue());
+
+        ChatMessageContent chatMessageContent =  new ChatMessageContent();
+        chatMessageContent.setType(MessageContentType.Quit);
+        chatMessageContent.setFormUserId(managerId);
+        User manager = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, managerId));
+        chatMessageContent.setFormUserName(manager.getUserName());
+
+        NotifyDTO notifyDTO = new NotifyDTO();
+        notifyDTO.setId(groupId);
+        notifyDTO.setType(MessageContentType.Quit);
+        NotifyDTO.NotifyContent notifyContent = new NotifyDTO.NotifyContent();
+                notifyContent.setTitle(MessageContent.USER_KICK_TITLE);
+        User kickUser = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, managerId));
+                notifyContent.setText(String.format("%s%s", kickUser.getUserName(), MessageContent.USER_KICK_INFO));
+        notifyDTO.setContent(notifyContent);
+
+        chatMessageContent.setContent(JSON.toJSONString(notifyDTO));
+        chatMessageDTO.setChatMessageContent(chatMessageContent);
+        //群组通知
+        chatMessageService.sendMessage(chatMessageDTO);
+        //用户系统通知 todo
+        ChatGroup chatGroup = getById(groupId);
+        chatGroup.setMemberNum(chatGroup.getMemberNum() - 1);
+        return updateById(chatGroup);
+    }
+
+    @Override
+    public ChatGroupVo transferChatGroup(ChatGroupTransferDTO chatGroupTransferDTO) {
+        String ownerId = chatGroupTransferDTO.getOwnerId();
+        String userId = chatGroupTransferDTO.getUserId();
+        String groupId = chatGroupTransferDTO.getGroupId();
+        AuthenticationUtil.checkUserId(ownerId);
+        //查询被转对象是否在群内
+        boolean exists = chatGroupMemberService.exists(new LambdaQueryWrapper<ChatGroupMember>()
+                .eq(ChatGroupMember::getUserId, userId)
+                .eq(ChatGroupMember::getChatGroupId, groupId));
+        if (!exists){
+            throw new BizException(ResponseCodeEnum.CHAT_GROUP_MEMBER_IS_NOT_EXIST);
+        }
+        ChatGroup chatGroup = this.getById(groupId);
+        chatGroup.setOwnerUserId(Long.valueOf(userId));
+        chatGroup.setUpdateTime(LocalDateTime.now());
+        boolean result = this.updateById(chatGroup);
+        ChatGroupVo chatGroupVo = new ChatGroupVo();
+        chatGroupVo.setGroupId(groupId);
+        chatGroupVo.setStatus(result);
+        chatGroupVo.setMessage(result ? "群主转移成功" : "群主转移失败");
+        //todo 通知用户群被转移
+        return chatGroupVo;
+    }
+
+    @Override
+    public ChatGroupDetailsVo detailsChatGroup(ChatGroupDTO chatGroupDTO) {
+        //todo 异常处理 细节处理
+        ChatGroup chatGroup = getById(chatGroupDTO.getGroupId());
+        ChatGroupDetailsVo chatGroupDetailsVo = new ChatGroupDetailsVo();
+        BeanUtils.copyProperties(chatGroup, chatGroupDetailsVo);
+        chatGroupDetailsVo.setIsOpen(String.valueOf(chatGroup.getIsOpen()));
+        chatGroupDetailsVo.setGroupName(chatGroup.getName());
+        chatGroupDetailsVo.setGroupId(String.valueOf(chatGroup.getId()));
+        chatGroupDetailsVo.setMemberNum(String.valueOf(chatGroup.getMemberNum()));
+        chatGroupDetailsVo.setCreateUserName(userMapper.selectById(chatGroup.getUserId()).getUserName());
+        chatGroupDetailsVo.setOwnerUserName(userMapper.selectById(chatGroup.getOwnerUserId()).getUserName());
+        return chatGroupDetailsVo;
     }
 
     private ChatGroup copy(ChatGroupDTO chatGroupDTO) {

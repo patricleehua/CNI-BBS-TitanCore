@@ -1,13 +1,11 @@
 package com.titancore.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.titancore.domain.dto.ChatGroupDTO;
-import com.titancore.domain.dto.ChatGroupInviteMemberDTO;
-import com.titancore.domain.dto.ChatGroupQuitDTO;
-import com.titancore.domain.dto.ChatGroupUpdateDTO;
+import com.titancore.domain.dto.*;
 import com.titancore.domain.entity.ChatGroup;
 import com.titancore.domain.param.ChatGroupParam;
 import com.titancore.domain.param.PageResult;
+import com.titancore.domain.vo.ChatGroupDetailsVo;
 import com.titancore.domain.vo.ChatGroupVo;
 import com.titancore.domain.vo.DMLVo;
 
@@ -63,4 +61,25 @@ public interface ChatGroupService  extends IService<ChatGroup> {
      * @return
      */
     DMLVo quitChatGroup(ChatGroupQuitDTO chatGroupQuitDTO);
+
+    /**
+     * 踢出群聊
+     * @param chatGroupKickDTO
+     * @return
+     */
+    boolean kickChatGroup(ChatGroupKickDTO chatGroupKickDTO);
+
+    /**
+     * 转移群主
+     * @param chatGroupTransferDTO
+     * @return
+     */
+    ChatGroupVo transferChatGroup(ChatGroupTransferDTO chatGroupTransferDTO);
+
+    /**
+     * 群详情
+     * @param chatGroupDTO
+     * @return
+     */
+    ChatGroupDetailsVo detailsChatGroup(ChatGroupDTO chatGroupDTO);
 }
