@@ -308,9 +308,9 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
     }
 
     @Override
-    public ChatGroupDetailsVo detailsChatGroup(ChatGroupDTO chatGroupDTO) {
+    public ChatGroupDetailsVo detailsChatGroup(String groupId) {
         //todo 异常处理 细节处理
-        ChatGroup chatGroup = getById(chatGroupDTO.getGroupId());
+        ChatGroup chatGroup = getById(groupId);
         ChatGroupDetailsVo chatGroupDetailsVo = new ChatGroupDetailsVo();
         BeanUtils.copyProperties(chatGroup, chatGroupDetailsVo);
         chatGroupDetailsVo.setIsOpen(String.valueOf(chatGroup.getIsOpen()));

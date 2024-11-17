@@ -78,8 +78,8 @@ public interface ChatGroupService  extends IService<ChatGroup> {
 
     /**
      * 群详情
-     * @param chatGroupDTO
+     * @param groupId
      * @return
      */
-    ChatGroupDetailsVo detailsChatGroup(ChatGroupDTO chatGroupDTO);
+    ChatGroupDetailsVo detailsChatGroup(String groupId);
 }

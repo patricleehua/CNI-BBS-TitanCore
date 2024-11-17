@@ -25,7 +25,7 @@ public class ChatGroupController {
     /**
      * 群聊列表
      */
-    @PostMapping("/list")
+    @PostMapping("/open/list")
     @Operation(summary = "聊天群组列表")
     public Response<?> chatGroupList(@RequestBody ChatGroupParam chatGroupParam) {
         PageResult result = chatGroupService.chatGroupList(chatGroupParam);
@@ -116,13 +116,13 @@ public class ChatGroupController {
 
     /**
      * 群详情
-     * @param chatGroupDTO
+     * @param groupId
      * @return
      */
-    @PostMapping("/details")
+    @GetMapping("/open/details/{groupId}")
     @Operation(summary = "群详情")
-    public Response<?> detailsChatGroup(@RequestBody ChatGroupDTO chatGroupDTO) {
-        ChatGroupDetailsVo chatGroupDetailsVo = chatGroupService.detailsChatGroup(chatGroupDTO);
+    public Response<?> detailsChatGroup(@PathVariable String groupId) {
+        ChatGroupDetailsVo chatGroupDetailsVo = chatGroupService.detailsChatGroup(groupId);
         return Response.success(chatGroupDetailsVo);
     }
 
