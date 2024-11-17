@@ -57,9 +57,21 @@ public class ChatGroupMemberServiceImpl extends ServiceImpl<ChatGroupMemberMappe
     @Override
     @Transactional
     public boolean addMemberListToGroupByGroupId(ChatMemberDTO chatMemberDTO) {
-        List<ChatGroupMember> chatGroupMemberList = queryUserInfo(chatMemberDTO.getUserIds()).stream().map(user -> {
+        String chatGroupId = chatMemberDTO.getChatGroupId();
+        List<String> userIds = chatMemberDTO.getUserIds();
+        if (userIds.isEmpty()) return false;
+        List<String> newUserIds = userIds.stream()
+                .filter(userId -> {
+                    boolean exists = chatGroupMemberMapper.exists(new LambdaQueryWrapper<ChatGroupMember>()
+                            .eq(ChatGroupMember::getUserId, userId)
+                            .eq(ChatGroupMember::getChatGroupId, chatGroupId));
+                    return !exists;
+                })
+                .toList();
+        if (newUserIds.isEmpty()) return false;
+        List<ChatGroupMember> chatGroupMemberList = queryUserInfo(newUserIds).stream().map(user -> {
             ChatGroupMember chatGroupMember = new ChatGroupMember();
-            chatGroupMember.setChatGroupId(Long.valueOf(chatMemberDTO.getChatGroupId()));
+            chatGroupMember.setChatGroupId(Long.valueOf(chatGroupId));
             chatGroupMember.setGroupName(user.getUserName());
             chatGroupMember.setUserId(user.getUserId());
             return chatGroupMember;

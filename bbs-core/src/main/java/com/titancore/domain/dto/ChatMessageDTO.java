@@ -1,7 +1,6 @@
 package com.titancore.domain.dto;
 
 import com.titancore.domain.entity.ChatMessageContent;
-import com.titancore.enums.LevelType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,10 +13,10 @@ public class ChatMessageDTO extends BaseDTO{
     private String fromId;
     @Schema(description = "目标ID")
     private String toId;
-    @Schema(description = "目标源:user,group,system")
+    @Schema(description = "消息源:user,group,system")
     private String source;
-    @Schema(description = "消息级别:message,notify,media")
-    private String level;
+    @Schema(description = "消息类型:message,notify,media")
+    private String messageType;
     @Schema(description = "消息内容")
     private ChatMessageContent chatMessageContent;
 }

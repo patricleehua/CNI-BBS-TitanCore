@@ -6,34 +6,24 @@ import lombok.Getter;
 
 import java.util.Objects;
 
+
+/**
+ * 消息类型
+ */
 @Getter
 @AllArgsConstructor
-public enum  MessageType  implements IEnum<String> {
+public enum MessageType implements IEnum<String> {
 
-    TEXT("text"),
-    IMAGE("image"),
-    VIDEO("video"),
-    AUDIO("audio"),
-    FILE("file");
-
+    MESSAGE("message"),
+    NOTIFY("notify"),
+    MEDIA("media");
     private final String value;
     public static MessageType valueOfAll(String value) {
-        for (MessageType messageType : MessageType.values()) {
-            if(Objects.equals(value,messageType.getValue())){
-                return messageType;
+        for (MessageType levelEnum : MessageType.values()) {
+            if(Objects.equals(value,levelEnum.getValue())){
+                return levelEnum;
             }
 
-        }
-        return null;
-    }
-    public static MessageType fromValue(String value) {
-        if (value == null) {
-            return null;
-        }
-        for (MessageType  messageType : MessageType.values()) {
-            if (messageType.value.equalsIgnoreCase(value)) {
-                return messageType;
-            }
         }
         return null;
     }

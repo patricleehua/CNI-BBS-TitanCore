@@ -61,7 +61,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
 
     @Override
     public DMLVo sendMessage(ChatMessageDTO chatMessageDTO) {
-        //todo 判断当前登入用户是否与 发送方一致
+        AuthenticationUtil.checkUserId(chatMessageDTO.getFromId());
         // 异常处理
         SourceType sourceType = SourceType.valueOfAll(chatMessageDTO.getSource());
         ChatMessageDTO result = null;
@@ -163,7 +163,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         ChatMessageContent chatMessageContent = chatMessage.getChatMessageContent();
         chatMessageContent.setExt(chatMessageContent.getType());
         //保存入消息撤回表
-        if(MessageType.TEXT.getValue().equals(chatMessageContent.getType())){
+        if(MessageFormat.TEXT.getValue().equals(chatMessageContent.getType())){
             ChatMessageRetraction chatMessageRetraction = new ChatMessageRetraction();
             chatMessageRetraction.setMsgId(chatMessage.getId());
             chatMessageRetraction.setMsgContent(chatMessageContent);
@@ -305,10 +305,10 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
      */
     private ChatMessage convertDtoToChatMessage(User user, ChatMessageDTO chatMessageDTO) {
         String toUserId = chatMessageDTO.getToId();
-        LevelType levelType = LevelType.valueOfAll(chatMessageDTO.getLevel());
+        MessageType messageType = MessageType.valueOfAll(chatMessageDTO.getMessageType());
         ChatMessageContent chatMessageContent = chatMessageDTO.getChatMessageContent();
         SourceType sourceType = SourceType.valueOfAll(chatMessageDTO.getSource());
-        MessageType messageType = MessageType.valueOfAll(chatMessageContent.getType());
+        MessageFormat messageFormat = MessageFormat.valueOfAll(chatMessageContent.getType());
 
         // 获取上一条显示时间的消息
         LambdaQueryWrapper<ChatMessage> queryWrapper = new LambdaQueryWrapper<ChatMessage>()
@@ -324,8 +324,8 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setFromId(user.getUserId());
         chatMessage.setToId(Long.valueOf(toUserId));
-        chatMessage.setType(messageType);
-        chatMessage.setLevelType(levelType);
+        chatMessage.setMessageFormat(messageFormat);
+        chatMessage.setMessageType(messageType);
         chatMessage.setCreateTime(LocalDateTime.now());
         chatMessage.setUpdateTime(LocalDateTime.now());
         chatMessage.setSourceType(sourceType);
@@ -336,9 +336,9 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
             chatMessage.setIsShowTime(Duration.between(previousMessage.getUpdateTime(), LocalDateTime.now()).toMinutes() > 5);
         }
 
-        if (MessageType.AUDIO.equals(messageType)
-                || MessageType.IMAGE.equals(messageType)
-                || MessageType.VIDEO.equals(messageType)) {
+        if (MessageFormat.AUDIO.equals(messageFormat)
+                || MessageFormat.IMAGE.equals(messageFormat)
+                || MessageFormat.VIDEO.equals(messageFormat)) {
             //todo 存储到对象存储服务
             Type type = new TypeReference<ChatMessageContent>(){}.getType();
             ChatMessageContent content = JSON.parseObject(chatMessageContent.getContent(), type);

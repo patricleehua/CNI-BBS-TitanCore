@@ -2,9 +2,13 @@ package com.titancore.controller;
 
 
 import com.titancore.domain.dto.ChatGroupDTO;
+import com.titancore.domain.dto.ChatGroupInviteMemberDTO;
+import com.titancore.domain.dto.ChatGroupQuitDTO;
+import com.titancore.domain.dto.ChatGroupUpdateDTO;
 import com.titancore.domain.param.ChatGroupParam;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.ChatGroupVo;
+import com.titancore.domain.vo.DMLVo;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.ChatGroupService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,23 +45,40 @@ public class ChatGroupController {
     }
 
     /**
-     * 更新群信息
+     * 更新群聊信息
+     * @param chatGroupUpdateDTO
+     * @return
      */
-
-
-    /**
-     * 更新群信息(群名称)
-     */
-
+    @PostMapping("/update")
+    @Operation(summary = "更新群聊信息")
+    public Response<?> updateChatGroup(@RequestBody ChatGroupUpdateDTO chatGroupUpdateDTO) {
+        DMLVo dmlVo = chatGroupService.updateChatGroup(chatGroupUpdateDTO);
+        return Response.success(dmlVo);
+    }
 
     /**
      * 成员邀请
+     * @param chatGroupInviteMemberDTO
+     * @return
      */
+    @PostMapping("/invite")
+    @Operation(summary = "成员邀请")
+    public Response<?> inviteMember(@RequestBody ChatGroupInviteMemberDTO chatGroupInviteMemberDTO) {
+        DMLVo dmlVo = chatGroupService.inviteMember(chatGroupInviteMemberDTO);
+        return Response.success(dmlVo);
+    }
 
     /**
      * 退出群聊
+     * @param chatGroupQuitDTO
+     * @return
      */
-
+    @PostMapping("/quit")
+    @Operation(summary = "退出群聊")
+    public Response<?> quitChatGroup(@RequestBody ChatGroupQuitDTO chatGroupQuitDTO) {
+        DMLVo dmlVo = chatGroupService.quitChatGroup(chatGroupQuitDTO);
+        return Response.success(dmlVo);
+    }
 
 
     /**

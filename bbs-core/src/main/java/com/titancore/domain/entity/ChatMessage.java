@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import java.time.LocalDateTime;
 
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import com.titancore.enums.LevelType;
+import com.titancore.enums.MessageFormat;
 import com.titancore.enums.MessageType;
 import com.titancore.enums.SourceType;
 import lombok.Data;
@@ -33,16 +33,16 @@ public class ChatMessage extends BaseEntity{
     private Long toId;
 
     /**
-     * 消息格式 (text,image,video,audio.file) check in MessageContentType
+     * 消息格式 (text,image,video,audio.file) check in MessageFormat
      */
-    @TableField("`message_type`")
-    private MessageType type;
+    @TableField("`message_format`")
+    private MessageFormat messageFormat;
 
     /**
      * 消息类型 (message,notify,media)
      */
-    @TableField("`level`")
-    private LevelType levelType;
+    @TableField("`message_type`")
+    private MessageType messageType;
 
     /**
      * 消息内容
@@ -63,7 +63,7 @@ public class ChatMessage extends BaseEntity{
     private int status;
 
     /**
-     * 消息来源 (user,system,group)
+     * 消息源 (user,system,group)
      */
     @TableField("`source_type`")
     private SourceType sourceType;

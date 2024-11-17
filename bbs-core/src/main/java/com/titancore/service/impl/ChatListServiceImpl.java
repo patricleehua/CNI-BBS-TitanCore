@@ -20,9 +20,9 @@ import com.titancore.enums.SourceType;
 import com.titancore.service.ChatGroupMemberService;
 import com.titancore.service.ChatGroupService;
 import com.titancore.service.ChatListService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -77,6 +77,7 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
     @Autowired
     private ChatGroupMemberService chatGroupMemberService;
     @Autowired
+    @Lazy
     private ChatGroupService cacheGroupService;
     @Override
     public void updateChatListGroup(String groupId, ChatMessageContent chatMessageContent) {

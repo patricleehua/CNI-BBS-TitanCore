@@ -6,6 +6,9 @@ import lombok.Getter;
 
 import java.util.Objects;
 
+/**
+ * 消息源
+ */
 @Getter
 @AllArgsConstructor
 public enum SourceType implements IEnum<String> {
