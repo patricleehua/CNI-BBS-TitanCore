@@ -7,9 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.titancore.domain.dto.ChatListDTO;
-import com.titancore.domain.entity.ChatGroupMember;
-import com.titancore.domain.entity.ChatList;
-import com.titancore.domain.entity.ChatMessageContent;
+import com.titancore.domain.entity.*;
 import com.titancore.domain.mapper.ChatListMapper;
 import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.param.ChatListParam;
@@ -124,13 +122,23 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
             if(sourceType!=null){
                 switch (sourceType) {
                     case USER -> {
-                        chatListVo.setToName(userMapper.selectById(chatList.getToId()).getUserName());
+                        User user = userMapper.selectById(chatList.getToId());
+                        if (user != null) {
+                            chatListVo.setToName(user.getUserName());
+                            chatListVo.setToPortrait(user.getAvatar());
+                        }
                     }
                     case GROUP -> {
-                        chatListVo.setToName(cacheGroupService.getGroupNameByGroupId(chatList.getToId()).getName());
+                        ChatGroup chatGroup = cacheGroupService.getGroupNameByGroupId(chatList.getToId());
+                        if (chatGroup != null){
+                            chatListVo.setToName(chatGroup.getName());
+                            chatListVo.setToPortrait(chatGroup.getPortrait());
+                        }
+
                     }
                     case SYSTEM -> {
                         chatListVo.setToName("系统消息");
+                        chatListVo.setToPortrait("https://baidu.com");
                     }
                 }
                 chatListVo.setSourceType(sourceType.getValue());

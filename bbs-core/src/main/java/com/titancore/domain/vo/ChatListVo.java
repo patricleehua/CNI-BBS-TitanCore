@@ -30,6 +30,11 @@ public class ChatListVo {
     private String toName;
 
     /**
+     * 会话目标头像
+     */
+    private String toPortrait;
+
+    /**
      * 是否置顶
      */
     private Boolean isTop;
