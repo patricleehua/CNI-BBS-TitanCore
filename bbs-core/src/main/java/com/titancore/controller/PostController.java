@@ -4,6 +4,7 @@ import com.titancore.domain.dto.PostDTO;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.DMLVo;
+import com.titancore.domain.vo.PostFrequencyVo;
 import com.titancore.domain.vo.PostVo;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.PostsService;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -46,5 +49,17 @@ public class PostController {
     public Response<?> deletePost(@PathVariable("postId") String postId){
         DMLVo dmlVo = postsService.deletePost(postId);
         return Response.success(dmlVo);
+    }
+
+    /**
+     * 获取用户的发帖频率
+     * @param userId 用户ID
+     * @return 用户发帖频率数据
+     */
+    @GetMapping("/frequency")
+    @Operation(summary ="用户发帖频率数据")
+    public Response<?> getPostFrequency(@RequestParam String userId) {
+        List<PostFrequencyVo> frequencyData = postsService.getPostFrequency(userId);
+        return Response.success(frequencyData);
     }
 }

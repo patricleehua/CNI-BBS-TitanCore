@@ -29,9 +29,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -175,6 +177,31 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         return dmlVo;
     }
 
+    @Override
+    public List<PostFrequencyVo> getPostFrequency(String userId) {
+        AuthenticationUtil.checkUserId(userId);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(365);
+        // 获取发帖数据
+        List<PostFrequencyVo> frequencyData  = postMapper.getPostCountByDate(Long.valueOf(userId), startDate.toString(), endDate.toString());
+        List<LocalDate> allDates = new ArrayList<>();
+        while (!startDate.isAfter(endDate)) {
+            allDates.add(LocalDate.from(startDate));
+            startDate = startDate.plusDays(1);
+        }
+        Map<LocalDate, Integer> frequencyMap = frequencyData.stream()
+            .collect(Collectors.toMap(
+                PostFrequencyVo::getPostDate,
+                PostFrequencyVo::getPostCount
+            ));
+
+        return allDates.stream()
+            .map(date -> {
+                Integer postCount = frequencyMap.getOrDefault(date, 0);
+                return new PostFrequencyVo(date, postCount);
+            })
+            .collect(Collectors.toList());
+    }
     /**
      * 将帖子对象转换为帖子视图对象
      * @param posts
