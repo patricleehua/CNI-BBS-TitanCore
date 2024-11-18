@@ -297,6 +297,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return dmlVo;
     }
 
+    @Override
+    public UserVo findUserInfoByUserId(Long userId) {
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, userId));
+        if (user == null){
+            return null;
+        }
+        return userToUserVo(user,false);
+    }
+
 
     @Override
     public UserResetPasswordVo resetPassword(ResetPasswordUserDTO resetPasswordUserDTO) {

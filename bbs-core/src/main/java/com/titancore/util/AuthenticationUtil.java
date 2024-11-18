@@ -19,6 +19,8 @@ public class AuthenticationUtil {
             }
         }
     }
-
+    public static boolean hasSuperPowerUser(String userId){
+        return StpUtil.hasRole(userId ,RoleType.SUPERPOWER_USER.getValue());
+    }
 
 }

@@ -57,6 +57,8 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     POST_UPDATE_ERROR("POST-10003","帖子更新失败" ),
     TEMPORARY_POST_ID_NOT_EXISTS("POST-10004", "临时帖子ID不存在!"),
     POST_POST_ID_NOT_CORRECT("POST-10005", "帖子ID不正常!"),
+
+    POST_COMMENT_COMMENTID_CAN_NOT_BE_NULL("POST-COMMENT-10001", "帖子评论ID不能为空"),
     //Category
     CATEGORY_CATEGORYID_CAN_NOT_BE_NULL("CATEGORY-10001","板块ID不能为空!"),
     CATEGORY_CATEGORYNAME_IS_EXIST("CATEGORY-10002","板块名称已存在!" ),
@@ -87,8 +89,7 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     CHAT_GROUP_IS_NOT_EXIST("CHATGROUP-10001","群聊不存在!"),
 
     // ChatGroupMember
-    CHAT_GROUP_MEMBER_IS_NOT_EXIST("CHATGROUPMEMBER-10001","群成员不存在!"),
-    ;
+    CHAT_GROUP_MEMBER_IS_NOT_EXIST("CHATGROUPMEMBER-10001","群成员不存在!"),;
 
     // ----------- 业务异常状态码 -----------
 

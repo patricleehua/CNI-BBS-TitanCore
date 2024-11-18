@@ -1,14 +1,17 @@
 package com.titancore.controller;
 
+import com.titancore.domain.dto.PostCommentsDTO;
 import com.titancore.domain.dto.PostDTO;
 import com.titancore.domain.dto.PostUpdateDTO;
 import com.titancore.domain.param.PageResult;
+import com.titancore.domain.param.PostCommentParam;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.domain.vo.PostFrequencyVo;
 import com.titancore.domain.vo.PostUpdateInfoVo;
 import com.titancore.domain.vo.PostVo;
 import com.titancore.framework.common.response.Response;
+import com.titancore.service.PostCommentsService;
 import com.titancore.service.PostsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -26,6 +30,8 @@ import java.util.List;
 public class PostController {
     @Autowired
     private PostsService postsService;
+    @Autowired
+    private PostCommentsService postCommentsService;
     @PostMapping("/open/queryPostList")
     @Operation(summary = "查询帖子列表" , description = "支持分页查询")
     public Response<?> queryPostList(@RequestBody PostParam postParam ){
@@ -81,5 +87,30 @@ public class PostController {
     public Response<?> getPostFrequency(@RequestParam String userId) {
         List<PostFrequencyVo> frequencyData = postsService.getPostFrequency(userId);
         return Response.success(frequencyData);
+    }
+
+    /**
+     *  获取帖子评论分页
+     * @param postCommentParam
+     * @return
+     */
+    @PostMapping("/queryCommentListByPostId")
+    @Operation(summary = "获取帖子评论分页")
+    private Response<?> queryCommentListByPostId(@RequestBody PostCommentParam postCommentParam){
+        PageResult pageResult = postCommentsService.queryCommentListByPostId(postCommentParam);
+        return Response.success(pageResult);
+    }
+    @PostMapping("/addPostComment")
+    @Operation(summary = "新增帖子评论")
+    private Response<?> addPostComment(@RequestBody PostCommentsDTO postCommentsDTO){
+        Map<String,String> map=postCommentsService.addPostComment(postCommentsDTO);
+        return Response.success(map);
+    }
+    @DeleteMapping("/deletePostComment")
+    @Operation(summary = "删除帖子评论")
+    private Response<?> deletePostComment(@RequestBody PostCommentParam postCommentParam){
+
+        DMLVo dmlVo = postCommentsService.deletePostComment(postCommentParam);
+        return Response.success();
     }
 }

@@ -90,5 +90,12 @@ public interface UserService  extends IService<User> {
      * @return
      */
     DMLVo socialUserBindLocalUser(BindSocialUserDTO bindSocialUserDTO);
+
+    /**
+     * 根据用户id查找用户信息
+     * @param userId
+     * @return
+     */
+    UserVo findUserInfoByUserId(Long userId);
 }
 
