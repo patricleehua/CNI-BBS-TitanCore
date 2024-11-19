@@ -2,6 +2,7 @@ package com.titancore.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.titancore.domain.dto.ChatListDTO;
+import com.titancore.domain.dto.SetTopForChatListDTO;
 import com.titancore.domain.entity.ChatList;
 import com.titancore.domain.entity.ChatMessageContent;
 import com.titancore.domain.param.ChatListParam;
@@ -55,4 +56,33 @@ public interface ChatListService extends IService<ChatList> {
      * @return
      */
     ChatListDmlVo deleteChatList(ChatListDTO chatListDTO);
+
+    /**
+     * 聊天列表置顶
+     * @param setTopChatListDTO
+     * @return
+     */
+    ChatListDmlVo setTopChatList(SetTopForChatListDTO setTopChatListDTO);
+
+    /**
+     * 消息已读
+     * @param fromId
+     * @param toId
+     * @return
+     */
+    ChatListDmlVo messageRead(String fromId, String toId);
+
+    /**
+     * 全部已读
+     * @param userId
+     * @return
+     */
+    ChatListDmlVo messageReadAll(String userId);
+
+    /**
+     * 获取聊天列表详细信息
+     * @param chatListDTO
+     * @return
+     */
+    ChatListVo detailChartList(ChatListDTO chatListDTO);
 }

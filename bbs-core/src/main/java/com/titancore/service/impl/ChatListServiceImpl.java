@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.titancore.domain.dto.ChatListDTO;
+import com.titancore.domain.dto.SetTopForChatListDTO;
 import com.titancore.domain.entity.*;
 import com.titancore.domain.mapper.ChatListMapper;
 import com.titancore.domain.mapper.UserMapper;
@@ -18,12 +19,12 @@ import com.titancore.enums.SourceType;
 import com.titancore.service.ChatGroupMemberService;
 import com.titancore.service.ChatGroupService;
 import com.titancore.service.ChatListService;
+import com.titancore.util.AuthenticationUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -96,7 +97,7 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
         Page<ChatList> chatListPage = chatListMapper.selectPage(page, queryWrapper);
         PageResult pageResult = new PageResult();
         pageResult.setTotal(chatListPage.getTotal());
-        List<ChatListVo> chatListVoListDml = filterChatListToChatListVo(chatListPage.getRecords());
+        List<ChatListVo> chatListVoListDml = filterChatListsToChatListVos(chatListPage.getRecords());
         pageResult.setRecords(chatListVoListDml);
         return pageResult;
     }
@@ -111,9 +112,17 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
      * @param chatLists
      * @return
      */
-    private List<ChatListVo> filterChatListToChatListVo(List<ChatList> chatLists) {
-        return chatLists.stream().map(chatList -> {
-            ChatListVo chatListVo = new ChatListVo();
+    private List<ChatListVo> filterChatListsToChatListVos(List<ChatList> chatLists) {
+        return chatLists.stream().map(this::filterChatListToChatListVo).toList();
+    }
+
+    /**
+     * chatList 转 ChatListVo
+     * @param chatList
+     * @return
+     */
+    public ChatListVo filterChatListToChatListVo(ChatList chatList){
+         ChatListVo chatListVo = new ChatListVo();
             BeanUtils.copyProperties(chatList,chatListVo);
             chatListVo.setId(String.valueOf(chatList.getId()));
             chatListVo.setFromId(String.valueOf(chatList.getFromId()));
@@ -144,7 +153,6 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
                 chatListVo.setSourceType(sourceType.getValue());
             }
             return chatListVo;
-        }).toList();
     }
 
     @Override
@@ -199,6 +207,76 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
         }
 
         return null;
+    }
+
+    @Override
+    public ChatListDmlVo setTopChatList(SetTopForChatListDTO setTopChatListDTO) {
+        String fromId = setTopChatListDTO.getFromId();
+        String chatListId = setTopChatListDTO.getChatListId();
+        AuthenticationUtil.checkUserId(fromId);
+        LambdaUpdateWrapper<ChatList> updateWrapper = new LambdaUpdateWrapper<ChatList>()
+                .eq(ChatList::getFromId, fromId)
+                .eq(ChatList::getId, chatListId)
+                .set(ChatList::getIsTop, setTopChatListDTO.isTop());
+        boolean result = this.update(updateWrapper);
+       ChatListDmlVo chatListDmlVo = new ChatListDmlVo();
+       chatListDmlVo.setChatListId(chatListId);
+        if(result){
+            chatListDmlVo.setStatus(true);
+            chatListDmlVo.setMessage("更新成功");
+        }else{
+            chatListDmlVo.setStatus(false);
+            chatListDmlVo.setMessage("更新失败");
+        }
+        return chatListDmlVo;
+    }
+
+    @Override
+    public ChatListDmlVo messageRead(String fromId, String toId) {
+        AuthenticationUtil.checkUserId(fromId);
+        LambdaUpdateWrapper<ChatList> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.set(ChatList::getUnreadNum, 0).
+                    eq(ChatList::getFromId, fromId).
+                    eq(ChatList::getToId, toId);
+            boolean result = this.update(updateWrapper);
+               ChatListDmlVo chatListDmlVo = new ChatListDmlVo();
+            if(result){
+                chatListDmlVo.setStatus(true);
+                chatListDmlVo.setMessage("更新成功");
+            }else{
+                chatListDmlVo.setStatus(false);
+                chatListDmlVo.setMessage("更新失败");
+            }
+        return chatListDmlVo;
+    }
+
+    @Override
+    public ChatListDmlVo messageReadAll(String userId) {
+        AuthenticationUtil.checkUserId(userId);
+        LambdaUpdateWrapper<ChatList> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.set(ChatList::getUnreadNum, 0).
+                    eq(ChatList::getFromId, userId);
+            boolean result = this.update(updateWrapper);
+                   ChatListDmlVo chatListDmlVo = new ChatListDmlVo();
+            if(result){
+                chatListDmlVo.setStatus(true);
+                chatListDmlVo.setMessage("更新成功");
+            }else{
+                chatListDmlVo.setStatus(false);
+                chatListDmlVo.setMessage("更新失败");
+            }
+        return chatListDmlVo;
+    }
+
+    @Override
+    public ChatListVo detailChartList(ChatListDTO chatListDTO) {
+        String fromId = chatListDTO.getFromId();
+        String toId = chatListDTO.getToId();
+        ChatList chatList = this.getChatListByFromIdAndToId(fromId, toId);
+        if (chatList == null){
+            return null;
+        }
+        return filterChatListToChatListVo(chatList);
     }
 }
 

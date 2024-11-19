@@ -1,9 +1,11 @@
 package com.titancore.controller;
 
 import com.titancore.domain.dto.ChatListDTO;
+import com.titancore.domain.dto.SetTopForChatListDTO;
 import com.titancore.domain.param.ChatListParam;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.ChatListDmlVo;
+import com.titancore.domain.vo.ChatListVo;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.ChatListService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,4 +56,52 @@ public class ChatListController {
         return Response.success(result);
     }
 
+    /**
+     * 置顶会话
+     * @param setTopChatListDTO
+     * @return
+     */
+    @PostMapping("/setTopChatList")
+    @Operation(summary = "置顶会话")
+    public Response<?> setTopChatList(@RequestBody SetTopForChatListDTO setTopChatListDTO) {
+        ChatListDmlVo result = chatListService.setTopChatList(setTopChatListDTO);
+        return Response.success(result);
+    }
+
+    /**
+     * 消息已读
+     * @param fromId
+     * @param toId
+     * @return
+     */
+    @GetMapping("/read/{fromId}/{toId}")
+    @Operation(summary = "消息已读")
+    public Response<?> messageRead(@PathVariable String fromId,@PathVariable String toId) {
+        ChatListDmlVo result = chatListService.messageRead(fromId, toId);
+        return Response.success(result);
+    }
+
+    /**
+     * 全部已读
+     * @param userId
+     * @return
+     */
+    @GetMapping("/read/all")
+    @Operation(summary = "全部已读")
+    public Response<?> messageReadAll(@RequestParam String userId) {
+        ChatListDmlVo result = chatListService.messageReadAll(userId);
+        return Response.success(result);
+    }
+
+    /**
+     * 获取聊天列表详细信息
+     * @param chatListDTO
+     * @return
+     */
+    @PostMapping("/detail")
+    @Operation(summary = "获取聊天列表详细信息")
+    public Response<?> detailChatList(@RequestBody ChatListDTO chatListDTO) {
+        ChatListVo chatListVo = chatListService.detailChartList(chatListDTO);
+        return Response.success(chatListVo);
+    }
 }

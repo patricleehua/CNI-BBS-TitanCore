@@ -31,7 +31,7 @@ public class ChatList {
     private Long toId;
 
     /**
-     * 是否置顶
+     * 是否置顶 (0/1) 否/是
      */
     private Boolean isTop;
 
