@@ -108,7 +108,7 @@ titan:
   aes:
     secretKey: ${titan.aes.secretKey} #默认系统提供的为 eW1awsJiSLH7CGnmPGvBQZyPmACHTQYImNJPAu34fzs
   cloud:
-    provider: minio
+    provider: aliyun
     maxSize: 1000000     #上传文件大小10MB
     aliyun:
       aoss:
@@ -160,7 +160,7 @@ titan:
 # MyBatis配置
 mybatis-plus:
   # 搜索指定包别名
-  typeAliasesPackage: com.shumei.auth.domain.entity
+  typeAliasesPackage: com.titancore.domain.entity
   # 配置mapper的扫描，找到所有的mapper.xml映射文件
   mapperLocations: classpath*:mapper/*Mapper.xml
   # 加载全局的配置文件注释

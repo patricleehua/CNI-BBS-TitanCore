@@ -8,7 +8,7 @@ import com.titancore.domain.param.PageResult;
 
 public interface ChatGroupNoticeService extends IService<ChatGroupNotice> {
     /**
-     * 创建公告
+     * 创建/编辑公告
      * @param chatNoticeDTO
      * @return
      */

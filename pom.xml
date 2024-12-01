@@ -26,7 +26,7 @@
     <!-- Maven 相关版本号 -->
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <!-- 依赖包版本 -->
-    <spring-boot.version>3.1.5</spring-boot.version>
+    <spring-boot.version>3.2.5</spring-boot.version>
     <lombok.version>1.18.30</lombok.version>
     <mybatis.plus>3.5.7</mybatis.plus>
     <druid.version>1.2.21</druid.version>
@@ -38,9 +38,10 @@
     <commons-lang3.version>3.12.0</commons-lang3.version>
     <knife4j.version>4.5.0</knife4j.version>
     <minio.version>8.5.12</minio.version>
-    <aliyun.oss.version>3.17.4</aliyun.oss.version>
+    <aliyun.oss.version>3.18.1</aliyun.oss.version>
     <aliyun.sms.version>2.2.1</aliyun.sms.version>
     <justAuth.version>1.16.6</justAuth.version>
+    <spring-ai.version>1.0.0-M3</spring-ai.version>
   </properties>
   <!-- 统一依赖管理 -->
   <dependencyManagement>
@@ -193,6 +194,32 @@
       <id>aliyunmaven</id>
       <name>aliyun</name>
       <url>https://maven.aliyun.com/repository/public</url>
+    </repository>
+    <repository>
+      <id>central</id>
+      <url>https://repo.maven.apache.org/maven2/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+    <repository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>spring-snapshots</id>
+      <name>Spring Snapshots</name>
+      <url>https://repo.spring.io/snapshot</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
   </repositories>
 </project>
