@@ -52,7 +52,7 @@ public class UserController {
     @GetMapping({"/open/recommendedUser", "/recommendedUser/{userId}"})
     @ApiOperationLog
     @Operation(summary = "推荐关注用户（待改善推荐算法）")
-    public Response<?> recommendedUser(@PathVariable(required = false) String userId){
+    public Response<?> recommendedUser(@PathVariable(name="userId",required = false) String userId){
         List<UserVo> userVos = new ArrayList<>();
         if(userId == null){
             userVos =  userService.recommendedUserAll();
