@@ -1,7 +1,5 @@
 package com.titancore.service.impl;
 
-import cn.dev33.satoken.stp.StpUtil;
-
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.generator.SnowflakeGenerator;
 import com.alibaba.fastjson.JSON;
@@ -16,11 +14,8 @@ import com.titancore.domain.mapper.*;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.*;
-import com.titancore.enums.ResponseCodeEnum;
-import com.titancore.enums.RoleType;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.constant.RedisConstant;
-import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.*;
 import com.titancore.util.AuthenticationUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -118,16 +113,16 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         boolean thired = false;
         List<String> mediaUrls = stringRedisTemplate.opsForList().range(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + temporalPostId, 0, -1);
         if(mediaUrls!=null && !mediaUrls.isEmpty()) {
-            List<MediaUrl> mediaUrlList = new ArrayList<>();
+            List<PostMediaUrl> postMediaUrlList = new ArrayList<>();
             for (String mediaUrlJson : mediaUrls) {
-                Type type = new TypeReference<MediaUrl>(){}.getType();
-                MediaUrl mediaUrl = JSON.parseObject(mediaUrlJson, type);
-                mediaUrlList.add(mediaUrl);
+                Type type = new TypeReference<PostMediaUrl>(){}.getType();
+                PostMediaUrl postMediaUrl = JSON.parseObject(mediaUrlJson, type);
+                postMediaUrlList.add(postMediaUrl);
             }
             long count = mediaUrlService.queryMediaUrlListByPostId(Long.valueOf(temporalPostId)).size();
-            if (mediaUrlList.size() > count){
-                mediaUrlService.remove(new LambdaQueryWrapper<MediaUrl>().eq(MediaUrl::getPostId, Long.valueOf(temporalPostId)));
-                thired = mediaUrlService.saveBatch(mediaUrlList);
+            if (postMediaUrlList.size() > count){
+                mediaUrlService.remove(new LambdaQueryWrapper<PostMediaUrl>().eq(PostMediaUrl::getPostId, Long.valueOf(temporalPostId)));
+                thired = mediaUrlService.saveBatch(postMediaUrlList);
             }
         }
         //4、建立帖子标签

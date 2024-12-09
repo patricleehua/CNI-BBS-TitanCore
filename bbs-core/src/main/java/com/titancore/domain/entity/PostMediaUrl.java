@@ -13,12 +13,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-@TableName(value ="media_url")
+@TableName(value ="post_media_url")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MediaUrl {
+public class PostMediaUrl {
     /**
      * 主键
      */

@@ -5,7 +5,7 @@ import cn.hutool.core.lang.generator.SnowflakeGenerator;
 import com.alibaba.fastjson.JSON;
 import com.titancore.domain.dto.CaptchaCodeDTO;
 import com.titancore.domain.entity.Mail;
-import com.titancore.domain.entity.MediaUrl;
+import com.titancore.domain.entity.PostMediaUrl;
 import com.titancore.enums.CapchaEnum;
 import com.titancore.enums.LinkType;
 import com.titancore.enums.ResponseCodeEnum;
@@ -303,21 +303,21 @@ public class CommonService {
         String url = cloudStorageService.uploadImage(file, folderName, false);
 
         if (type.equals(LinkType.BACKGROUND.getValue()) || type.equals(LinkType.COVER.getValue()) || type.equals(LinkType.VIDEO.getValue())) {
-            MediaUrl mediaUrl = new MediaUrl();
-            mediaUrl.setMediaUrl(url);
-            mediaUrl.setPostId(Long.valueOf(postsId));
-            mediaUrl.setMediaType(linkType);
+            PostMediaUrl postMediaUrl = new PostMediaUrl();
+            postMediaUrl.setMediaUrl(url);
+            postMediaUrl.setPostId(Long.valueOf(postsId));
+            postMediaUrl.setMediaType(linkType);
             //保存进数据库
-            boolean save = mediaUrlService.save(mediaUrl);
+            boolean save = mediaUrlService.save(postMediaUrl);
 
             // 获取列表大小并进行非空检查
             Long size = stringRedisTemplate.opsForList().size(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId);
             // 如果列表不存在则设置过期时间
             if (size == null || size == 0) {
-                stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, JSON.toJSONString(mediaUrl));
+                stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, JSON.toJSONString(postMediaUrl));
                 stringRedisTemplate.expire(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, RedisConstant.TEMPORARYPOSTMEDIA_TTL, TimeUnit.HOURS);
             } else {
-                stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, JSON.toJSONString(mediaUrl));
+                stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId, JSON.toJSONString(postMediaUrl));
             }
         }
         return url;
