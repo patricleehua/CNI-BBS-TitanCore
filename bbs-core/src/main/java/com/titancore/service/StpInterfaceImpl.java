@@ -8,6 +8,7 @@ import com.titancore.domain.entity.Role;
 import com.titancore.domain.entity.UserRole;
 import com.titancore.domain.mapper.RolePermissionMapper;
 import com.titancore.domain.mapper.UserRoleMapper;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +21,9 @@ import java.util.List;
 @Component
 public class StpInterfaceImpl implements StpInterface {
 
-    @Autowired
+    @Resource
     private UserRoleMapper userRoleMapper;
-    @Autowired
+    @Resource
     private RolePermissionMapper rolePermissionMapper;
 
     /**

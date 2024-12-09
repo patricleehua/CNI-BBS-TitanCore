@@ -153,7 +153,10 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
     public DMLVo deletePost(String postId) {
         //删除帖子标签
         int first = postMapper.deletePostTagRelBypostId(postId);
-        //删除帖子链接 todo
+
+        //删除帖子链接
+        boolean second = postMediaUrlService.deleteMediaUrlByPostId(postId);
+
         //删除帖子内容
         int third = postContentMapper.delete(new LambdaQueryWrapper<PostContent>().eq(PostContent::getPostId, postId));
 
@@ -164,10 +167,10 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         if(last > 0){
             dmlVo.setId(postId);
             dmlVo.setStatus(true);
-            dmlVo.setMessage(CommonConstant.DML_CREATE_SUCCESS);
+            dmlVo.setMessage(CommonConstant.DML_DELETE_SUCCESS);
         }else{
             dmlVo.setStatus(false);
-            dmlVo.setMessage(CommonConstant.DML_CREATE_ERROR);
+            dmlVo.setMessage(CommonConstant.DML_DELETE_ERROR);
         }
         return dmlVo;
     }

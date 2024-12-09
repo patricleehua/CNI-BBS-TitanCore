@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,12 +41,16 @@ import java.util.concurrent.TimeUnit;
 public class CommonService {
     @Resource
     private CloudServiceFactory factory;
-    @Autowired
+    @Resource
     private StringRedisTemplate stringRedisTemplate;
-    @Autowired
+    @Resource
     private EmailService emailService;
+    private final PostMediaUrlService postMediaUrlService;
     @Autowired
-    private PostMediaUrlService postMediaUrlService;
+    @Lazy
+    public CommonService(@Lazy PostMediaUrlService postMediaUrlService) {
+        this.postMediaUrlService = postMediaUrlService;
+    }
     @Value("${titan.cloud.maxSize}")
     private int maxSize;
     /**

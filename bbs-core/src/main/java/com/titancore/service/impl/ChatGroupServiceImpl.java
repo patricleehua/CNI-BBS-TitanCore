@@ -24,6 +24,8 @@ import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.*;
 import com.titancore.util.AuthenticationUtil;
+import jakarta.annotation.Resource;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,14 +39,17 @@ import java.util.List;
 @Service
 public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup>
     implements ChatGroupService {
-    @Autowired
+    @Resource
     private ChatGroupMapper chatGroupMapper;
-    @Autowired
+    @Resource
     private UserMapper userMapper;
-    @Autowired
+    private final ChatListService chatListService;
     @Lazy
-    private ChatListService chatListService;
     @Autowired
+    public ChatGroupServiceImpl(@Lazy ChatListService chatListService) {
+        this.chatListService = chatListService;
+    }
+    @Resource
     private ChatMessageService chatMessageService;
     @Override
     public PageResult chatGroupList(ChatGroupParam chatGroupParam) {
@@ -67,8 +72,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         pageResult.setRecords(chatGroupPage.getRecords());
         return pageResult;
     }
-
-    @Autowired
+    @Resource
     private ChatGroupMemberService chatGroupMemberService;
     @Override
     @Transactional
@@ -91,7 +95,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         }
         return chatGroupVo;
     }
-    @Autowired
+    @Resource
     private ChatGroupNoticeService chatGroupNoticeService;
     @Override
     @Transactional
