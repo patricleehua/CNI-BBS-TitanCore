@@ -44,7 +44,7 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
     @Autowired
     private TagMapper tagMapper;
     @Autowired
-    private MediaUrlService mediaUrlService;
+    private PostMediaUrlService postMediaUrlService;
     @Autowired
     private PostContentMapper postContentMapper;
     @Autowired
@@ -119,10 +119,10 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
                 PostMediaUrl postMediaUrl = JSON.parseObject(mediaUrlJson, type);
                 postMediaUrlList.add(postMediaUrl);
             }
-            long count = mediaUrlService.queryMediaUrlListByPostId(Long.valueOf(temporalPostId)).size();
+            long count = postMediaUrlService.queryMediaUrlListByPostId(Long.valueOf(temporalPostId)).size();
             if (postMediaUrlList.size() > count){
-                mediaUrlService.remove(new LambdaQueryWrapper<PostMediaUrl>().eq(PostMediaUrl::getPostId, Long.valueOf(temporalPostId)));
-                thired = mediaUrlService.saveBatch(postMediaUrlList);
+                postMediaUrlService.remove(new LambdaQueryWrapper<PostMediaUrl>().eq(PostMediaUrl::getPostId, Long.valueOf(temporalPostId)));
+                thired = postMediaUrlService.saveBatch(postMediaUrlList);
             }
         }
         //4、建立帖子标签
@@ -236,7 +236,7 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
             postViewVo.setTagVos(tags);
         }
         if(isUrl){
-            List<MediaUrlVo> mediaUrlVos = mediaUrlService.queryMediaUrlListByPostId(posts.getId());
+            List<MediaUrlVo> mediaUrlVos = postMediaUrlService.queryMediaUrlListByPostId(posts.getId());
             postViewVo.setUrls(mediaUrlVos);
         }
         postViewVo.setType(posts.getType() != null ? posts.getType().toString() : null);
@@ -288,7 +288,7 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
             postVo.setTagVos(tags);
         }
         if(isUrl){
-            List<MediaUrlVo> mediaUrlVos = mediaUrlService.queryMediaUrlListByPostId(posts.getId());
+            List<MediaUrlVo> mediaUrlVos = postMediaUrlService.queryMediaUrlListByPostId(posts.getId());
             postVo.setUrls(mediaUrlVos);
         }
         postVo.setType(posts.getType() != null ? posts.getType().toString() : null);

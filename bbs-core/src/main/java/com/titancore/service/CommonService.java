@@ -45,7 +45,7 @@ public class CommonService {
     @Autowired
     private EmailService emailService;
     @Autowired
-    private MediaUrlService mediaUrlService;
+    private PostMediaUrlService postMediaUrlService;
     @Value("${titan.cloud.maxSize}")
     private int maxSize;
     /**
@@ -308,7 +308,7 @@ public class CommonService {
             postMediaUrl.setPostId(Long.valueOf(postsId));
             postMediaUrl.setMediaType(linkType);
             //保存进数据库
-            boolean save = mediaUrlService.save(postMediaUrl);
+            boolean save = postMediaUrlService.save(postMediaUrl);
 
             // 获取列表大小并进行非空检查
             Long size = stringRedisTemplate.opsForList().size(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postsId);

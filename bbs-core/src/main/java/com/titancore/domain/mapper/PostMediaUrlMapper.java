@@ -6,7 +6,7 @@ import com.titancore.domain.entity.PostMediaUrl;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface MediaUrlMapper extends BaseMapper<PostMediaUrl> {
+public interface PostMediaUrlMapper extends BaseMapper<PostMediaUrl> {
 
 }
 

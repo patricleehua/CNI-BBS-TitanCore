@@ -7,7 +7,7 @@ import com.titancore.domain.vo.MediaUrlVo;
 
 import java.util.List;
 
-public interface MediaUrlService extends IService<PostMediaUrl> {
+public interface PostMediaUrlService extends IService<PostMediaUrl> {
 
     List<MediaUrlVo> queryMediaUrlListByPostId(Long id);
 }
