@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/user")
@@ -89,8 +90,14 @@ public class UserController {
     @PostMapping("/open/socialUserBindLocalUser")
     @Operation(summary = "第三方用户绑定本地用户")
     public Response<?> socialUserBindLocalUser(@RequestBody BindSocialUserDTO bindSocialUserDTO){
-        boolean isVerify = userService.verifyTemporaryPassCode(bindSocialUserDTO.getSocialUserId(), bindSocialUserDTO.getTemporaryCode());
-        if(isVerify){
+        boolean isVerifySocialUser = userService.verifyTemporaryPassCode(bindSocialUserDTO.getSocialUserId(), bindSocialUserDTO.getSocialTemporaryCode());
+        boolean isVerifyAccount = false;
+        if (bindSocialUserDTO.getPhoneNumber() != null || !Objects.equals(bindSocialUserDTO.getEmailNumber(), "")){
+            isVerifyAccount = userService.verifyTemporaryPassCode(bindSocialUserDTO.getPhoneNumber(), bindSocialUserDTO.getAccountTemporaryCode());
+        }else{
+            isVerifyAccount = userService.verifyTemporaryPassCode(bindSocialUserDTO.getEmailNumber(), bindSocialUserDTO.getAccountTemporaryCode());
+        }
+        if(isVerifySocialUser&&isVerifyAccount){
             DMLVo dmlVo = userService.socialUserBindLocalUser(bindSocialUserDTO);
             return Response.success(dmlVo);
         }

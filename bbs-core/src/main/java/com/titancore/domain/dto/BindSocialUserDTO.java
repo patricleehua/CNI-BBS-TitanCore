@@ -18,12 +18,16 @@ public class BindSocialUserDTO extends BaseDTO {
     @Schema(description = "用户邮箱", example = "test@gmail.com")
     private String emailNumber;
 
+    @Schema(description = "用户邮箱/手机号临时通行码")
+    @NonNull
+    private String accountTemporaryCode;
+
     @Schema(description = "password", example = "123456")
     private String password;
 
-    @Schema(description = "临时通行码")
+    @Schema(description = "第三方用户临时通行码")
     @NonNull
-    private String temporaryCode;
+    private String socialTemporaryCode;
 
     @Schema(description = "第三方用户Id")
     @NonNull
