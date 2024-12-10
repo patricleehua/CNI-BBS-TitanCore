@@ -11,7 +11,6 @@ import com.titancore.service.CommonService;
 import com.titancore.service.PostMediaUrlService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +23,6 @@ import java.util.stream.Collectors;
 public class PostMediaUrlServiceImpl extends ServiceImpl<PostMediaUrlMapper, PostMediaUrl> implements PostMediaUrlService {
 
     private final PostMediaUrlMapper postMediaUrlMapper;
-    @Lazy
     private final CommonService commonService;
 
     @Override

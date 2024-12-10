@@ -14,8 +14,8 @@ import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.PointsRecordService;
 import com.titancore.service.PointsRuleService;
+import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,7 +30,7 @@ import java.util.Objects;
 public class PointsRecordServiceImpl extends ServiceImpl<PointsRecordMapper, PointsRecord>
     implements PointsRecordService {
 
-    @Autowired
+    @Resource
     private PointsRuleService pointsRuleService;
 
     @Override

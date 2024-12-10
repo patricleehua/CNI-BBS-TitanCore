@@ -1,7 +1,6 @@
 package com.titancore.service.impl;
 
 
-import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -15,15 +14,14 @@ import com.titancore.domain.param.TagParam;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.domain.vo.TagVo;
 import com.titancore.enums.ResponseCodeEnum;
-import com.titancore.enums.RoleType;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.CategoryService;
 import com.titancore.service.TagService;
 import com.titancore.util.AuthenticationUtil;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,9 +30,9 @@ import java.util.stream.Collectors;
 @Service
 public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagService {
 
-    @Autowired
+    @Resource
     private TagMapper tagMapper;
-    @Autowired
+    @Resource
     private CategoryService categoryService;
 
     @Override

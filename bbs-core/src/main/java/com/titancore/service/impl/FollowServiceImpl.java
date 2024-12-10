@@ -1,6 +1,5 @@
 package com.titancore.service.impl;
 
-import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -16,15 +15,13 @@ import com.titancore.domain.vo.DMLVo;
 import com.titancore.domain.vo.FollowerVo;
 import com.titancore.enums.FollowStatus;
 import com.titancore.enums.ResponseCodeEnum;
-import com.titancore.enums.RoleType;
 import com.titancore.enums.StatusEnum;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.FollowService;
 import com.titancore.domain.mapper.FollowMapper;
 import com.titancore.util.AuthenticationUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,9 +33,9 @@ import java.util.List;
 @Service
 public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
     implements FollowService{
-    @Autowired
+    @Resource
     private FollowMapper followMapper;
-    @Autowired
+    @Resource
     private UserMapper userMapper;
     @Override
     public PageResult queryList(FollowParam followParam) {

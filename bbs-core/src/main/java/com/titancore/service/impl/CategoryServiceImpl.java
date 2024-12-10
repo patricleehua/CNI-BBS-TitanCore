@@ -1,7 +1,6 @@
 package com.titancore.service.impl;
 
 
-import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -14,22 +13,21 @@ import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.CategoryVo;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.enums.ResponseCodeEnum;
-import com.titancore.enums.RoleType;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.CategoryService;
 import com.titancore.util.AuthenticationUtil;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 @Service
+@AllArgsConstructor
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
-    @Autowired
-    private CategoryMapper categoryMapper;
 
+    private final CategoryMapper categoryMapper;
     @Override
     public CategoryVo queryCategoryById(Long id) {
         //todo redis

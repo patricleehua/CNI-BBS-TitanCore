@@ -23,10 +23,10 @@ import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.common.properties.Md5Salt;
 import com.titancore.service.*;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,29 +38,19 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-
-    @Autowired
-    private Md5Salt md5Salt;
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-    @Autowired
-    private FollowService followService;
-    @Autowired
-    private UserInviteMapper userInviteMapper;
-    @Autowired
-    private UserRoleMapper userRoleMapper;
-    @Autowired
-    private PointsRuleService pointsRuleService;
-    @Autowired
-    private PointsRecordService pointsRecordService;
-    @Autowired
-    private EmailService emailService;
-    @Autowired
-    private SocialUserService socialUserService;
+    private final Md5Salt md5Salt;
+    private final UserMapper userMapper;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final FollowService followService;
+    private final UserInviteMapper userInviteMapper;
+    private final UserRoleMapper userRoleMapper;
+    private final PointsRuleService pointsRuleService;
+    private final PointsRecordService pointsRecordService;
+    private final EmailService emailService;
+    private final SocialUserService socialUserService;
 
     public UserLoginVo login(UserLoginDTO userLoginDto) {
         LoginEnum loginType = LoginEnum.valueOfAll(userLoginDto.getLoginType());

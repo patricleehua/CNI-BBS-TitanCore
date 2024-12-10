@@ -18,8 +18,8 @@ import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.service.*;
 import com.titancore.util.AuthenticationUtil;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,25 +32,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements PostsService {
-    @Autowired
-    private PostsMapper postMapper;
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private CategoryService categoryService;
-    @Autowired
-    private TagService tagService;
-    @Autowired
-    private TagMapper tagMapper;
-    @Autowired
-    private PostMediaUrlService postMediaUrlService;
-    @Autowired
-    private PostContentMapper postContentMapper;
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-    @Autowired
-    private FollowService followService;
+    private final PostsMapper postMapper;
+    private final UserMapper userMapper;
+    private final CategoryService categoryService;
+    private final TagService tagService;
+    private final TagMapper tagMapper;
+    private final PostMediaUrlService postMediaUrlService;
+    private final PostContentMapper postContentMapper;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final FollowService followService;
 
     @Override
     public PageResult queryPostList(PostParam postParam) {

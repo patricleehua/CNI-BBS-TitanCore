@@ -22,8 +22,8 @@ import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.*;
 import com.titancore.util.AuthenticationUtil;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,27 +37,19 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@AllArgsConstructor
 public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatMessage>
     implements ChatMessageService {
 
-    @Autowired
-    private ChatMessageMapper chatMessageMapper;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private RBMQProducerService rbmqProducerService;
-    @Autowired
-    private WebSocketService webSocketService;
-    @Autowired
-    private ChatMessageRetractionService chatMessageRetractionService;
-    @Autowired
-    private ChatListService chatListService;
-    @Autowired
-    private ChatGroupMemberService chatGroupMemberService;
-    @Autowired
-    private CommonService commonService;
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private final ChatMessageMapper chatMessageMapper;
+    private final UserService userService;
+    private final RBMQProducerService rbmqProducerService;
+    private final WebSocketService webSocketService;
+    private final ChatMessageRetractionService chatMessageRetractionService;
+    private final ChatListService chatListService;
+    private final ChatGroupMemberService chatGroupMemberService;
+    private final CommonService commonService;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     public DMLVo sendMessage(ChatMessageDTO chatMessageDTO) {

@@ -12,20 +12,20 @@ import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.param.ChatMemberParam;
 import com.titancore.domain.param.PageResult;
 import com.titancore.service.ChatGroupMemberService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 
 @Service
+@AllArgsConstructor
 public class ChatGroupMemberServiceImpl extends ServiceImpl<ChatGroupMemberMapper, ChatGroupMember>
     implements ChatGroupMemberService {
 
-    @Autowired
-    private ChatGroupMemberMapper chatGroupMemberMapper;
+    private final ChatGroupMemberMapper chatGroupMemberMapper;
+    private final UserMapper userMapper;
     @Override
     public PageResult memberList(ChatMemberParam chatMemberParam) {
         Page<ChatGroupMember> page = new Page<>(chatMemberParam.getPageNo(),chatMemberParam.getPageSize());
@@ -38,11 +38,6 @@ public class ChatGroupMemberServiceImpl extends ServiceImpl<ChatGroupMemberMappe
         pageResult.setRecords(chatGroupMemberPage.getRecords());
         return pageResult;
     }
-
-
-
-    @Autowired
-    private UserMapper userMapper;
     @Override
     public boolean addMemberToGroupByGroupId(ChatMemberDTO chatMemberDTO) {
         User user = userMapper.selectById(chatMemberDTO.getUserId());

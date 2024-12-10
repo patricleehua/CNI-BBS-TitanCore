@@ -1,12 +1,10 @@
 package com.titancore.service.impl;
 
-import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import com.titancore.domain.dto.ChatNoticeDTO;
 import com.titancore.domain.entity.ChatGroup;
 import com.titancore.domain.entity.ChatGroupNotice;
@@ -14,27 +12,22 @@ import com.titancore.domain.mapper.ChatGroupMapper;
 import com.titancore.domain.mapper.ChatGroupNoticeMapper;
 import com.titancore.domain.param.ChatGroupNoticeParam;
 import com.titancore.domain.param.PageResult;
-import com.titancore.enums.ResponseCodeEnum;
-import com.titancore.enums.RoleType;
-import com.titancore.framework.common.exception.BizException;
-import com.titancore.service.ChatGroupMemberService;
 import com.titancore.service.ChatGroupNoticeService;
-import com.titancore.service.ChatGroupService;
 import com.titancore.util.AuthenticationUtil;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 
 @Service
+@AllArgsConstructor
 public class ChatGroupNoticeServiceImpl extends ServiceImpl<ChatGroupNoticeMapper, ChatGroupNotice>
     implements ChatGroupNoticeService {
-    @Autowired
-    private ChatGroupNoticeMapper chatGroupNoticeMapper;
-    @Autowired
-    private ChatGroupMapper chatGroupMapper;
+
+    private final ChatGroupNoticeMapper chatGroupNoticeMapper;
+    private final ChatGroupMapper chatGroupMapper;
     @Override
     public boolean createNotice(ChatNoticeDTO chatNoticeDTO) {
         String userId = chatNoticeDTO.getOwnerUserId();

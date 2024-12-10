@@ -25,7 +25,6 @@ import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.*;
 import com.titancore.util.AuthenticationUtil;
 import jakarta.annotation.Resource;
-import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,14 +42,16 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
     private ChatGroupMapper chatGroupMapper;
     @Resource
     private UserMapper userMapper;
-    private final ChatListService chatListService;
     @Lazy
     @Autowired
-    public ChatGroupServiceImpl(@Lazy ChatListService chatListService) {
-        this.chatListService = chatListService;
-    }
-    @Resource
+    private ChatListService chatListService;
+    @Lazy
+    @Autowired
     private ChatMessageService chatMessageService;
+    @Resource
+    private ChatGroupNoticeService chatGroupNoticeService;
+    @Resource
+    private ChatGroupMemberService chatGroupMemberService;
     @Override
     public PageResult chatGroupList(ChatGroupParam chatGroupParam) {
         Page<ChatGroup> page = new Page<>(chatGroupParam.getPageNo(), chatGroupParam.getPageSize());
@@ -72,8 +73,6 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         pageResult.setRecords(chatGroupPage.getRecords());
         return pageResult;
     }
-    @Resource
-    private ChatGroupMemberService chatGroupMemberService;
     @Override
     @Transactional
     public ChatGroupVo createChatGroup(ChatGroupDTO chatGroupDTO) {
@@ -95,8 +94,6 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         }
         return chatGroupVo;
     }
-    @Resource
-    private ChatGroupNoticeService chatGroupNoticeService;
     @Override
     @Transactional
     public ChatGroupVo dissolveChatGroup(ChatGroupDTO chatGroupDTO) {

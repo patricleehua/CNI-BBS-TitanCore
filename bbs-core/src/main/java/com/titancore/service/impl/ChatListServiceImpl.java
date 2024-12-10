@@ -21,21 +21,22 @@ import com.titancore.service.ChatGroupService;
 import com.titancore.service.ChatListService;
 import com.titancore.util.AuthenticationUtil;
 import jakarta.annotation.Resource;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@AllArgsConstructor
 public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
     implements ChatListService {
-
-    private final ChatListMapper chatListMapper;
-    private final UserMapper userMapper;
+    @Resource
+    private ChatListMapper chatListMapper;
+    @Resource
+    private UserMapper userMapper;
+    @Resource
+    private  ChatGroupMemberService chatGroupMemberService;
+    @Resource
+    private  ChatGroupService cacheGroupService;
 
     @Override
     public void updateChatList(String fromId, String toId, ChatMessageContent chatMessageContent, SourceType sourceType) {
@@ -74,8 +75,7 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
             chatListMapper.update(updateWrapper);
         }
     }
-    private final ChatGroupMemberService chatGroupMemberService;
-    private final ChatGroupService cacheGroupService;
+
     @Override
     public void updateChatListGroup(String groupId, ChatMessageContent chatMessageContent) {
         List<ChatGroupMember> members = chatGroupMemberService.getGroupMemberByGroupId(groupId);
