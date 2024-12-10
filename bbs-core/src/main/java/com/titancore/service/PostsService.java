@@ -8,6 +8,7 @@ import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.domain.vo.PostFrequencyVo;
+import com.titancore.domain.vo.PostUpdateInfoVo;
 import com.titancore.domain.vo.PostVo;
 
 import java.util.List;
@@ -34,4 +35,6 @@ public interface PostsService extends IService<Posts> {
      * @return 用户发帖频率数据
      */
     List<PostFrequencyVo> getPostFrequency(String userId);
+
+    PostUpdateInfoVo getUpdatePostInfo(String postId,String userId);
 }

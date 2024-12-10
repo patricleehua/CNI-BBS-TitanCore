@@ -51,6 +51,9 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     FILE_DOWNLOAD_IS_FAIL("FILE-10006", "下载文件失败!"),
     //Redis
     REDIS_LOCK_KEY_FREE_ERROR("REDIS-10001","分布式锁释放失败"),
+    //Post
+    POST_POST_ID_CAN_NOT_BE_NULL("POST-10001","帖子ID不能为空!"),
+    POST_POST_IS_NOT_EXIST("POST-10002","帖子不存在!"),
 
     //Category
     CATEGORY_CATEGORYID_CAN_NOT_BE_NULL("CATEGORY-10001","板块ID不能为空!"),

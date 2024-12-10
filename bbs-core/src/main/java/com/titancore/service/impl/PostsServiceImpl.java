@@ -14,8 +14,10 @@ import com.titancore.domain.mapper.*;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.*;
+import com.titancore.enums.ResponseCodeEnum;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.constant.RedisConstant;
+import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.*;
 import com.titancore.util.AuthenticationUtil;
 import lombok.AllArgsConstructor;
@@ -192,6 +194,40 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
             })
             .collect(Collectors.toList());
     }
+
+    @Override
+    public PostUpdateInfoVo getUpdatePostInfo(String postId,String userId) {
+        AuthenticationUtil.checkUserId(userId);
+        //1、获取帖子对象
+        Posts posts = postMapper.selectById(postId);
+        if (posts == null){
+            throw new BizException(ResponseCodeEnum.POST_POST_IS_NOT_EXIST);
+        }
+        PostUpdateInfoVo postUpdateInfoVo = new PostUpdateInfoVo();
+        postUpdateInfoVo.setPostId(postId);
+        postUpdateInfoVo.setUserId(String.valueOf(posts.getAuthorId()));
+        postUpdateInfoVo.setTitle(posts.getTitle());
+        postUpdateInfoVo.setSummary(posts.getSummary());
+
+        PostContent postContent = postContentMapper.selectById(posts.getContentId());
+        HashMap<String,String> posthashmap =  new HashMap<>();
+        posthashmap.put("content",postContent.getContent());
+        posthashmap.put("contentHtml",postContent.getContentHtml());
+        postUpdateInfoVo.setPostContent(posthashmap);
+
+        postUpdateInfoVo.setCategoryId(String.valueOf(posts.getCategoryId()));
+
+        List<String> tags = tagMapper.queryTagListByPostId(posts.getId()).stream().map(tag -> String.valueOf(tag.getId())).toList();
+        postUpdateInfoVo.setTagIds(tags);
+
+        List<MediaUrlVo> mediaUrlVos = postMediaUrlService.queryMediaUrlListByPostId(posts.getId());
+        postUpdateInfoVo.setUrls(mediaUrlVos);
+
+        postUpdateInfoVo.setType(String.valueOf(posts.getType()));
+
+        return postUpdateInfoVo;
+    }
+
     /**
      * 将帖子对象转换为帖子视图对象
      * @param posts

@@ -5,6 +5,7 @@ import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.domain.vo.PostFrequencyVo;
+import com.titancore.domain.vo.PostUpdateInfoVo;
 import com.titancore.domain.vo.PostVo;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.PostsService;
@@ -43,6 +44,18 @@ public class PostController {
     public Response<?> createPost(@RequestBody PostDTO postDTO){
         DMLVo dmlVo = postsService.createPost(postDTO);
         return Response.success(dmlVo);
+    }
+    @GetMapping("/getUpdatePostInfo")
+    @Operation(summary ="获取需要更新的帖子信息")
+    public Response<?> getUpdatePostInfo(@RequestParam String postId,@RequestParam String userId){
+        PostUpdateInfoVo postUpdateInfoVo = postsService.getUpdatePostInfo(postId,userId);
+        return Response.success(postUpdateInfoVo);
+    }
+    @PostMapping("/updatePost")
+    @Operation(summary ="更新帖子")
+    public Response<?> updatePost(){
+    //todo
+        return Response.success();
     }
     @DeleteMapping("/deletePost/{postId}")
     @Operation(summary ="删除帖子")
