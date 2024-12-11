@@ -117,7 +117,7 @@ public class CommonController {
         }
     }*/
     @PostMapping("/upload/media")
-    @Operation(summary = "媒体上传(图片/视频)")
+    @Operation(summary = "帖子媒体上传(图片/视频)")
     public Response<?> uploadMedia(MultipartFile file,String userId,String type){
         return Response.success(commonService.uploadMedia(file, userId, type));
     }

@@ -84,12 +84,13 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         //当前作者是否与帖子作者一致
         String authorId = postDTO.getAuthorId();
         AuthenticationUtil.checkUserId(authorId);
-        //1、帖子主题 从redis获取
+        //1、帖子ID 从redis获取
         String temporalPostId = stringRedisTemplate.opsForValue().get(RedisConstant.TEMPORARYPOSTID_PRIX + authorId);
         if(StringUtils.isEmpty(temporalPostId)){
-            // 生成新的临时文章ID
-            SnowflakeGenerator snowflakeGenerator = new SnowflakeGenerator();
-            temporalPostId = String.valueOf(snowflakeGenerator.next());
+            throw new BizException(ResponseCodeEnum.TEMPORARY_POST_ID_NOT_EXISTS);
+//            // 生成新的临时文章ID
+//            SnowflakeGenerator snowflakeGenerator = new SnowflakeGenerator();
+//            temporalPostId = String.valueOf(snowflakeGenerator.next());
         }
         //2、帖子内容
         PostContent postContent = new PostContent();
@@ -137,7 +138,7 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
             dmlVo.setStatus(true);
             dmlVo.setMessage(CommonConstant.DML_CREATE_SUCCESS);
             //删除redis缓存
-            stringRedisTemplate.delete(RedisConstant.TEMPORARYPOSTID_PRIX + authorId);
+            removeTemporaryPostId(authorId);
             stringRedisTemplate.delete(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + temporalPostId);
         }else{
             dmlVo.setStatus(false);
@@ -172,6 +173,34 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         return dmlVo;
     }
 
+
+    @Override
+    public String createTemporaryPostId(String userId,String postId) {
+        String existingPostId = stringRedisTemplate.opsForValue().get(RedisConstant.TEMPORARYPOSTID_PRIX + userId);
+        if (existingPostId != null) {
+            stringRedisTemplate.expire(RedisConstant.TEMPORARYPOSTID_PRIX + userId, RedisConstant.TEMPORARYPOSTID_TTL, TimeUnit.DAYS);
+            return existingPostId;
+        }
+        if (postId == null || postId.isEmpty()){
+            SnowflakeGenerator snowflakeGenerator = new SnowflakeGenerator();
+            String newPostId = String.valueOf(snowflakeGenerator.next());
+            stringRedisTemplate.opsForValue().set(RedisConstant.TEMPORARYPOSTID_PRIX + userId, newPostId, RedisConstant.TEMPORARYPOSTID_TTL, TimeUnit.DAYS);
+            return newPostId;
+        }
+        stringRedisTemplate.opsForValue().set(RedisConstant.TEMPORARYPOSTID_PRIX + userId, postId, RedisConstant.TEMPORARYPOSTID_TTL, TimeUnit.DAYS);
+        return postId;
+    }
+
+    private String checkTemporaryPostIdIsExist(String userId) {
+        String existingPostId = stringRedisTemplate.opsForValue().get(RedisConstant.TEMPORARYPOSTID_PRIX + userId);
+        if (existingPostId == null){
+            throw new BizException(ResponseCodeEnum.TEMPORARY_POST_ID_NOT_EXISTS);
+        }
+        return existingPostId;
+    }
+    public boolean removeTemporaryPostId(String userId) {
+        return Boolean.TRUE.equals(stringRedisTemplate.delete(RedisConstant.TEMPORARYPOSTID_PRIX + userId));
+    }
     @Override
     public List<PostFrequencyVo> getPostFrequency(String userId) {
         AuthenticationUtil.checkUserId(userId);
@@ -201,10 +230,16 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
     @Override
     public PostUpdateInfoVo getUpdatePostInfo(String postId,String userId) {
         AuthenticationUtil.checkUserId(userId);
+        String temporalPostId = stringRedisTemplate.opsForValue().get(RedisConstant.TEMPORARYPOSTID_PRIX + userId);
+        if(StringUtils.isEmpty(temporalPostId)){
+            throw new BizException(ResponseCodeEnum.TEMPORARY_POST_ID_NOT_EXISTS);
+        }
         //1、获取帖子对象
         Posts posts = postMapper.selectById(postId);
         if (posts == null){
             throw new BizException(ResponseCodeEnum.POST_POST_IS_NOT_EXIST);
+        }else if(!postId.equals(temporalPostId)){
+            throw new BizException(ResponseCodeEnum.POST_POST_ID_NOT_CORRECT);
         }
         PostUpdateInfoVo postUpdateInfoVo = new PostUpdateInfoVo();
         postUpdateInfoVo.setPostId(postId);
@@ -227,12 +262,6 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         postUpdateInfoVo.setUrls(postMediaUrlVos);
 
         postUpdateInfoVo.setType(String.valueOf(posts.getType()));
-        //将当前postId放入redis中为临时帖子Id使得上传功能可以使用
-        stringRedisTemplate.opsForValue()
-                .set(RedisConstant.TEMPORARYPOSTID_PRIX + posts.getAuthorId(),
-                        postId,
-                        RedisConstant.TEMPORARYPOSTID_TTL,
-                        TimeUnit.DAYS);
         return postUpdateInfoVo;
     }
 
@@ -240,12 +269,16 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
     @Override
     public DMLVo updatePost(PostUpdateDTO postUpdateDTO) {
         String authorId = postUpdateDTO.getAuthorId();
-//        AuthenticationUtil.checkUserId(authorId);
+        AuthenticationUtil.checkUserId(authorId);
         // 获取分布式锁
         String lockKey = RedisConstant.POST_UPDATE_LOCK_PRIX + postUpdateDTO.getPostId();
         String lockValue = UUID.randomUUID().toString();
         try {
             if (Boolean.TRUE.equals(stringRedisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, 1, TimeUnit.MINUTES))) {
+                String temporaryPostId = checkTemporaryPostIdIsExist(authorId);
+                if (!temporaryPostId.equals(postUpdateDTO.getPostId())) {
+                    throw new BizException(ResponseCodeEnum.POST_POST_ID_NOT_CORRECT);
+                }
                 //修改帖子信息
                 LambdaUpdateWrapper<Posts> postsLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
                 postsLambdaUpdateWrapper.set(Posts::getTitle, postUpdateDTO.getTitle());
@@ -340,6 +373,8 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
                 if (first*second*third*fourth>0){
                     dmlVo.setMessage(CommonConstant.DML_UPDATE_SUCCESS);
                     dmlVo.setStatus(true);
+                    //删除redis缓存
+                    removeTemporaryPostId(authorId);
                 }else {
                     dmlVo.setMessage(CommonConstant.DML_UPDATE_ERROR);
                     dmlVo.setStatus(false);

@@ -40,4 +40,6 @@ public interface PostsService extends IService<Posts> {
     PostUpdateInfoVo getUpdatePostInfo(String postId,String userId);
 
     DMLVo updatePost(PostUpdateDTO postUpdateDTO);
+
+    String createTemporaryPostId(String userId,String postId);
 }

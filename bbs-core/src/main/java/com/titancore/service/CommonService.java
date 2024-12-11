@@ -293,12 +293,13 @@ public class CommonService {
             postsId = stringRedisTemplate.opsForValue().get(RedisConstant.TEMPORARYPOSTID_PRIX + userId);
             FOLDER_PATH = type ;
             if (postsId == null) {
-                // 生成新的临时帖子ID
-                SnowflakeGenerator snowflakeGenerator = new SnowflakeGenerator();
-                postsId = String.valueOf(snowflakeGenerator.next());
-                // 设置 Redis 中的临时帖子ID
-                stringRedisTemplate.opsForValue().set(RedisConstant.TEMPORARYPOSTID_PRIX + userId, postsId, RedisConstant.TEMPORARYPOSTID_TTL, TimeUnit.DAYS);
-                FOLDER_PATH = postsId + "/" + FOLDER_PATH;
+                throw new BizException(ResponseCodeEnum.TEMPORARY_POST_ID_NOT_EXISTS);
+//                // 生成新的临时帖子ID
+//                SnowflakeGenerator snowflakeGenerator = new SnowflakeGenerator();
+//                postsId = String.valueOf(snowflakeGenerator.next());
+//                // 设置 Redis 中的临时帖子ID
+//                stringRedisTemplate.opsForValue().set(RedisConstant.TEMPORARYPOSTID_PRIX + userId, postsId, RedisConstant.TEMPORARYPOSTID_TTL, TimeUnit.DAYS);
+//                FOLDER_PATH = postsId + "/" + FOLDER_PATH;
             }else{
                 FOLDER_PATH = postsId + "/" + FOLDER_PATH;
             }

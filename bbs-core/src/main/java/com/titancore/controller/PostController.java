@@ -41,19 +41,25 @@ public class PostController {
         return Response.success(postVo);
     }
     @PostMapping("/createPost")
-    @Operation(summary ="创建帖子")
+    @Operation(summary ="创建帖子(第二步)")
     public Response<?> createPost(@RequestBody PostDTO postDTO){
         DMLVo dmlVo = postsService.createPost(postDTO);
         return Response.success(dmlVo);
     }
+    @GetMapping("/createTemporaryPostId")
+    @Operation(summary ="创建获取临时帖子ID用作新增/更新(必须第一步)")
+    public Response<?> createTemporaryPostId(@RequestParam String userId, @RequestParam(required = false) String postId){
+        String temporaryPostId = postsService.createTemporaryPostId(userId,postId);
+        return Response.success(temporaryPostId);
+    }
     @GetMapping("/getUpdatePostInfo")
-    @Operation(summary ="获取需要更新的帖子信息")
+    @Operation(summary ="获取需要更新帖子的原始信息(第二步)")
     public Response<?> getUpdatePostInfo(@RequestParam String postId,@RequestParam String userId){
         PostUpdateInfoVo postUpdateInfoVo = postsService.getUpdatePostInfo(postId,userId);
         return Response.success(postUpdateInfoVo);
     }
     @PostMapping("/updatePost")
-    @Operation(summary ="更新帖子")
+    @Operation(summary ="更新帖子(第三步)")
     public Response<?> updatePost(@RequestBody PostUpdateDTO postUpdateDTO){
         DMLVo dmlVo = postsService.updatePost(postUpdateDTO);
         return Response.success(dmlVo);
