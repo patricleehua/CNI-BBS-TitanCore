@@ -49,7 +49,7 @@ public class GlobalFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
         // 上传文件不做解密处理
-        if ("multipart/form-data".equals(httpRequest.getHeader("Content-Type"))) {
+        if (httpRequest.getHeader("Content-Type").startsWith("multipart/form-data")) {
             chain.doFilter(request, response);
             return;
         }
