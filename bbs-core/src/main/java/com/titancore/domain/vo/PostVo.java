@@ -23,7 +23,7 @@ public class PostVo {
 
     private CategoryVo categoryVo;
     private List<TagVo> tagVos;
-    private List<MediaUrlVo> urls;
+    private List<PostMediaUrlVo> urls;
 
     private String type;
     private String view_counts;

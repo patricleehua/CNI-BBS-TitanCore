@@ -21,5 +21,11 @@
             </foreach>
 
     </insert>
+
+    <delete id="deleteRelByPostId" parameterType="java.lang.Long">
+        DELETE FROM post_tag_rel
+        WHERE post_id  = #{postId}
+    </delete>
+
 </mapper>
 

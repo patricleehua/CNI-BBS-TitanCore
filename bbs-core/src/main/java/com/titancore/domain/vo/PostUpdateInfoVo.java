@@ -16,7 +16,7 @@ public class PostUpdateInfoVo {
 
     private String categoryId;
     private List<String> tagIds;
-    private List<MediaUrlVo> urls;
+    private List<PostMediaUrlVo> urls;
 
     private String type;
 }

@@ -29,7 +29,7 @@ public class RedisConstant {
     /**
      * 临时帖子ID前缀
      */
-    public final static String TEMPORARYPOSTID_PRIX="temporary:user:";
+    public final static String TEMPORARYPOSTID_PRIX="temporary:post:postId:user:";
     /**
      * 临时帖子ID保存时间
      */
@@ -70,4 +70,8 @@ public class RedisConstant {
      * 消息媒体临时链接时长
      */
     public static final Long MESSAGE_MEDIA_TEMPORARY_URL_TTL = 7L;
+    /**
+     * 帖子更新分布式锁前缀
+     */
+    public static final String POST_UPDATE_LOCK_PRIX = "post_update_lock:";
 }

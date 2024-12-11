@@ -35,6 +35,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -414,6 +416,53 @@ public class CommonService {
     public String createTemporaryUrl(String filePath,int expiresIn,boolean isPrivate) {
         var cloudStorageService = factory.createService();
         return cloudStorageService.createTemplateUrlOfFile(filePath,expiresIn,isPrivate);
+    }
+
+    /**
+     * 将url转为系统可识别的删除url
+     * @param url
+     * @return
+     */
+    public FileDelDTO urlToFileDelDTO(String url){
+        FileDelDTO fileDelDTO = new FileDelDTO();
+        fileDelDTO.setFileName(getFileName(url));
+        fileDelDTO.setUserId(getUserId(url));
+        fileDelDTO.setPath(getFilePath(url));
+        fileDelDTO.setPrivate(isPrivate(url));
+        return fileDelDTO;
+    }
+
+    private String getFileName(String fullPath){
+        return fullPath.substring(fullPath.lastIndexOf("/")+1);
+    }
+
+    /**
+     * 如果你的路径格式不固定，使用正则表达式会更灵活且易于维护。
+     * @param fullPath
+     * @return
+     */
+    private String getUserId(String fullPath){
+        String regex = CloudStorePath.BASE_PATH+"(.*?)/";     // 正则表达式
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(fullPath);
+        if (matcher.find()) {
+            return matcher.group(1); // 提取 user id
+        }
+        return "";
+    }
+    private String getFilePath(String mediaUrl) {
+        int startIndex = mediaUrl.indexOf(CloudStorePath.BASE_PATH);
+        if (startIndex == -1) {
+            return "";
+        }
+        int endIndex = mediaUrl.lastIndexOf("/");
+        if (endIndex == -1 || endIndex <= startIndex) {
+            return "";
+        }
+        return mediaUrl.substring(startIndex, endIndex + 1);
+    }
+    private boolean isPrivate(String mediaUrl) {
+        return mediaUrl.contains("private");
     }
 }
 

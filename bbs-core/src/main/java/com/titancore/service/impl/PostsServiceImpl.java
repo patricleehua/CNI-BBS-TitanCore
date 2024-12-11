@@ -6,15 +6,19 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import java.lang.reflect.Type;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.titancore.domain.dto.PostDTO;
+import com.titancore.domain.dto.PostUpdateDTO;
 import com.titancore.domain.entity.*;
 import com.titancore.domain.mapper.*;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.*;
+import com.titancore.enums.LinkType;
 import com.titancore.enums.ResponseCodeEnum;
+import com.titancore.framework.cloud.manager.domain.dto.FileDelDTO;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
@@ -27,10 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +47,7 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
     private final PostContentMapper postContentMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final FollowService followService;
+    private final CommonService commonService;
 
     @Override
     public PageResult queryPostList(PostParam postParam) {
@@ -220,12 +223,145 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         List<String> tags = tagMapper.queryTagListByPostId(posts.getId()).stream().map(tag -> String.valueOf(tag.getId())).toList();
         postUpdateInfoVo.setTagIds(tags);
 
-        List<MediaUrlVo> mediaUrlVos = postMediaUrlService.queryMediaUrlListByPostId(posts.getId());
-        postUpdateInfoVo.setUrls(mediaUrlVos);
+        List<PostMediaUrlVo> postMediaUrlVos = postMediaUrlService.queryMediaUrlListByPostId(posts.getId());
+        postUpdateInfoVo.setUrls(postMediaUrlVos);
 
         postUpdateInfoVo.setType(String.valueOf(posts.getType()));
-
+        //将当前postId放入redis中为临时帖子Id使得上传功能可以使用
+        stringRedisTemplate.opsForValue()
+                .set(RedisConstant.TEMPORARYPOSTID_PRIX + posts.getAuthorId(),
+                        postId,
+                        RedisConstant.TEMPORARYPOSTID_TTL,
+                        TimeUnit.DAYS);
         return postUpdateInfoVo;
+    }
+
+    @Transactional
+    @Override
+    public DMLVo updatePost(PostUpdateDTO postUpdateDTO) {
+        String authorId = postUpdateDTO.getAuthorId();
+//        AuthenticationUtil.checkUserId(authorId);
+        // 获取分布式锁
+        String lockKey = RedisConstant.POST_UPDATE_LOCK_PRIX + postUpdateDTO.getPostId();
+        String lockValue = UUID.randomUUID().toString();
+        try {
+            if (Boolean.TRUE.equals(stringRedisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, 1, TimeUnit.MINUTES))) {
+                //修改帖子信息
+                LambdaUpdateWrapper<Posts> postsLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+                postsLambdaUpdateWrapper.set(Posts::getTitle, postUpdateDTO.getTitle());
+                postsLambdaUpdateWrapper.set(Posts::getSummary, postUpdateDTO.getSummary());
+                postsLambdaUpdateWrapper.set(Posts::getCategoryId, postUpdateDTO.getCategoryId());
+                postsLambdaUpdateWrapper.set(Posts::getType, postUpdateDTO.getType());
+                postsLambdaUpdateWrapper.eq(Posts::getId, postUpdateDTO.getPostId());
+                int first = postMapper.update(postsLambdaUpdateWrapper);
+                //修改帖子内容
+                LambdaUpdateWrapper<PostContent> postContentLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+                postContentLambdaUpdateWrapper.set(PostContent::getContent, postUpdateDTO.getContent());
+                postContentLambdaUpdateWrapper.set(PostContent::getContentHtml, postUpdateDTO.getContentHtml());
+                postContentLambdaUpdateWrapper.eq(PostContent::getPostId, postUpdateDTO.getPostId());
+                int second = postContentMapper.update(postContentLambdaUpdateWrapper);
+                //删除旧标签
+                int third = tagMapper.deleteRelByPostId(Long.valueOf(postUpdateDTO.getPostId()));
+                //插入新标签
+                List<Long> tagIds = postUpdateDTO.getTagIds().stream().map(Long::valueOf).toList();
+                int fourth = tagMapper.buildRelWithTagIds(Long.valueOf(postUpdateDTO.getPostId()), tagIds);
+
+                // 更新媒体库业务逻辑
+                //获取数据库中的媒体列表
+                List<PostMediaUrlVo> rawPostMediaUrlVos = postMediaUrlService.queryMediaUrlListByPostId(Long.valueOf(postUpdateDTO.getPostId()));
+
+                // 从 Redis 获取媒体 URL 列表
+                List<String> mediaUrls = stringRedisTemplate.opsForList().range(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + postUpdateDTO.getPostId(), 0, -1);
+                if (mediaUrls != null && !mediaUrls.isEmpty()) {
+                    List<PostMediaUrl> redisPostMediaUrlList = mediaUrls.stream()
+                            .map(mediaUrlJson -> JSON.parseObject(mediaUrlJson, PostMediaUrl.class))
+                            .toList();
+
+                    // 获取用户上传的新媒体 URL 列表
+                    List<PostMediaUrlVo> userUploadedMediaUrls = postUpdateDTO.getPostMediaUrls();
+                    HashSet<String> userUploadedSet = userUploadedMediaUrls.stream()
+                            .map(PostMediaUrlVo::getMediaUrl)
+                            .collect(Collectors.toCollection(HashSet::new));
+
+                    // 把不在用户上传列表中的 Redis 的URL删除
+                    for (PostMediaUrl redisPostMediaUrl : redisPostMediaUrlList) {
+                        String url = redisPostMediaUrl.getMediaUrl();
+                        if (!userUploadedSet.contains(url)) {
+                            FileDelDTO fileDelDTO = commonService.urlToFileDelDTO(url);
+                            commonService.deleteFile(fileDelDTO);
+                            postMediaUrlService.deleteMediaUrlById(redisPostMediaUrl.getId());
+                        }
+                    }
+
+                    // 对用户上传的 URL 进行检查
+                    Set<String> rawMediaUrlsForCoverSet = rawPostMediaUrlVos.stream()
+                            .filter(postMediaUrlVo -> LinkType.COVER.getValue().equals(postMediaUrlVo.getMediaType()))
+                            .sorted(Comparator.comparing(PostMediaUrlVo::getCreateTime))
+                            .map(PostMediaUrlVo::getMediaUrl)
+                            .collect(Collectors.toSet());
+
+                    String content = postUpdateDTO.getContent();
+                    for (PostMediaUrlVo userUploadedUrl : userUploadedMediaUrls) {
+                        String uploadedUrl = userUploadedUrl.getMediaUrl();
+                        LinkType linkType = LinkType.valueOfAll(userUploadedUrl.getMediaType());
+
+                        if (linkType != null) {
+                            switch (linkType) {
+                                case BACKGROUND,VIDEO -> {
+                                    if (!content.contains(uploadedUrl)) {
+                                        // 如果 content 中没有包含该 URL，则删除它
+                                        FileDelDTO fileDelDTO = commonService.urlToFileDelDTO(uploadedUrl);
+                                        commonService.deleteFile(fileDelDTO);
+                                        postMediaUrlService.deleteMediaUrlByUrl(uploadedUrl);
+                                    }
+                                }
+                                case COVER -> {
+                                    if (!rawMediaUrlsForCoverSet.contains(uploadedUrl)) {
+                                        // 如果用户上传的 cover URL 在原始媒体库中不存在，则删除它
+                                        FileDelDTO fileDelDTO = commonService.urlToFileDelDTO(uploadedUrl);
+                                        commonService.deleteFile(fileDelDTO);
+                                        postMediaUrlService.deleteMediaUrlByUrl(uploadedUrl);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    for (PostMediaUrlVo rawPostMediaUrlVo : rawPostMediaUrlVos) {
+                        String rawUrl = rawPostMediaUrlVo.getMediaUrl();
+                        if (!userUploadedSet.contains(rawUrl)) {
+                            FileDelDTO fileDelDTO = commonService.urlToFileDelDTO(rawUrl);
+                            commonService.deleteFile(fileDelDTO);
+                            postMediaUrlService.deleteMediaUrlByUrl(rawUrl);
+                        }
+                    }
+                }
+                DMLVo dmlVo = new DMLVo();
+                dmlVo.setId(postUpdateDTO.getPostId());
+                if (first*second*third*fourth>0){
+                    dmlVo.setMessage(CommonConstant.DML_UPDATE_SUCCESS);
+                    dmlVo.setStatus(true);
+                }else {
+                    dmlVo.setMessage(CommonConstant.DML_UPDATE_ERROR);
+                    dmlVo.setStatus(false);
+                }
+                return dmlVo;
+            }
+            else {
+                Thread.sleep(100);
+            }
+        }catch (InterruptedException e){
+            throw new BizException(ResponseCodeEnum.REDIS_LOCK_KEY_FREE_ERROR);
+        }finally {
+            try{
+                String currentValue = stringRedisTemplate.opsForValue().get(lockKey);
+                if (!StringUtils.isEmpty(currentValue) && currentValue.equals(lockValue)) {
+                    stringRedisTemplate.delete(lockKey);
+                }
+            }catch (Exception e){
+                throw new BizException(ResponseCodeEnum.REDIS_LOCK_KEY_FREE_ERROR);
+            }
+        }
+        throw new BizException(ResponseCodeEnum.POST_UPDATE_ERROR);
     }
 
     /**
@@ -267,8 +403,8 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
             postViewVo.setTagVos(tags);
         }
         if(isUrl){
-            List<MediaUrlVo> mediaUrlVos = postMediaUrlService.queryMediaUrlListByPostId(posts.getId());
-            postViewVo.setUrls(mediaUrlVos);
+            List<PostMediaUrlVo> postMediaUrlVos = postMediaUrlService.queryMediaUrlListByPostId(posts.getId());
+            postViewVo.setUrls(postMediaUrlVos);
         }
         postViewVo.setType(posts.getType() != null ? posts.getType().toString() : null);
         postViewVo.setView_counts(posts.getViewCounts() != null ? posts.getViewCounts().toString() : null);
@@ -319,8 +455,8 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
             postVo.setTagVos(tags);
         }
         if(isUrl){
-            List<MediaUrlVo> mediaUrlVos = postMediaUrlService.queryMediaUrlListByPostId(posts.getId());
-            postVo.setUrls(mediaUrlVos);
+            List<PostMediaUrlVo> postMediaUrlVos = postMediaUrlService.queryMediaUrlListByPostId(posts.getId());
+            postVo.setUrls(postMediaUrlVos);
         }
         postVo.setType(posts.getType() != null ? posts.getType().toString() : null);
         postVo.setView_counts(posts.getViewCounts() != null ? posts.getViewCounts().toString() : null);

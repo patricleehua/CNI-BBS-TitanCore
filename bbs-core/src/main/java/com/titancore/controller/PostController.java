@@ -1,6 +1,7 @@
 package com.titancore.controller;
 
 import com.titancore.domain.dto.PostDTO;
+import com.titancore.domain.dto.PostUpdateDTO;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.DMLVo;
@@ -53,9 +54,9 @@ public class PostController {
     }
     @PostMapping("/updatePost")
     @Operation(summary ="更新帖子")
-    public Response<?> updatePost(){
-    //todo
-        return Response.success();
+    public Response<?> updatePost(@RequestBody PostUpdateDTO postUpdateDTO){
+        DMLVo dmlVo = postsService.updatePost(postUpdateDTO);
+        return Response.success(dmlVo);
     }
     @DeleteMapping("/deletePost/{postId}")
     @Operation(summary ="删除帖子")

@@ -3,6 +3,7 @@ package com.titancore.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.titancore.domain.dto.PostDTO;
+import com.titancore.domain.dto.PostUpdateDTO;
 import com.titancore.domain.entity.Posts;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
@@ -37,4 +38,6 @@ public interface PostsService extends IService<Posts> {
     List<PostFrequencyVo> getPostFrequency(String userId);
 
     PostUpdateInfoVo getUpdatePostInfo(String postId,String userId);
+
+    DMLVo updatePost(PostUpdateDTO postUpdateDTO);
 }

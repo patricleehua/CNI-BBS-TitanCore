@@ -54,7 +54,7 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     //Post
     POST_POST_ID_CAN_NOT_BE_NULL("POST-10001","帖子ID不能为空!"),
     POST_POST_IS_NOT_EXIST("POST-10002","帖子不存在!"),
-
+    POST_UPDATE_ERROR("POST-10002","帖子更新失败" ),
     //Category
     CATEGORY_CATEGORYID_CAN_NOT_BE_NULL("CATEGORY-10001","板块ID不能为空!"),
     CATEGORY_CATEGORYNAME_IS_EXIST("CATEGORY-10002","板块名称已存在!" ),

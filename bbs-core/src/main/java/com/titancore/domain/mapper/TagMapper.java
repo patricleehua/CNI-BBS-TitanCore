@@ -25,6 +25,12 @@ public interface TagMapper extends BaseMapper<Tag> {
      */
     int buildRelWithTagIds(@Param("postId") Long postId, @Param("tagIds") List<Long> tagIds);
 
+    /**
+     * 根据PostId删除与Tag的关联
+     * @param postId
+     * @return
+     */
+    int deleteRelByPostId(@Param("postId") Long postId);
 }
 
 

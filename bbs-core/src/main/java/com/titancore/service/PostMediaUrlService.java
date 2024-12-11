@@ -3,7 +3,7 @@ package com.titancore.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.titancore.domain.entity.PostMediaUrl;
-import com.titancore.domain.vo.MediaUrlVo;
+import com.titancore.domain.vo.PostMediaUrlVo;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public interface PostMediaUrlService extends IService<PostMediaUrl> {
      * @param id
      * @return
      */
-    List<MediaUrlVo> queryMediaUrlListByPostId(Long id);
+    List<PostMediaUrlVo> queryMediaUrlListByPostId(Long id);
 
     /**
      * 根据postId删除媒体文件
@@ -21,4 +21,8 @@ public interface PostMediaUrlService extends IService<PostMediaUrl> {
      * @return
      */
     boolean deleteMediaUrlByPostId(String postId);
+
+    void deleteMediaUrlById(Long id);
+
+    void deleteMediaUrlByUrl(String url);
 }

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 
 @Data
-public class MediaUrlVo {
+public class PostMediaUrlVo {
 
     private String id;
 
