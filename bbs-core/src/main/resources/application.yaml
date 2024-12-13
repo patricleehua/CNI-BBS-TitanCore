@@ -224,3 +224,8 @@ knife4j:
     username: user
     # Basic认证密码
     password: 123456
+
+# Elasticsearch的配置
+elasticsearch:
+  host: ${titan.es.host}
+  port: ${titan.es.port}

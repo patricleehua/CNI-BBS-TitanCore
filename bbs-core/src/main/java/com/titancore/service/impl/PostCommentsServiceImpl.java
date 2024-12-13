@@ -135,7 +135,6 @@ public class PostCommentsServiceImpl extends ServiceImpl<PostCommentsMapper, Pos
         postCommentVo.setId(String.valueOf(postComments.getId()));
         //评论者信息
         Long userId = postComments.getUserId();
-        //todo 用户的邮箱信息需要移除？
         UserVo userVo = userService.findUserInfoByUserId(userId);
         postCommentVo.setUser(userVo);
 
