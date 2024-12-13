@@ -47,9 +47,9 @@ public class GlobalFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-
+        String contentType = httpRequest.getHeader("Content-Type");
         // 上传文件不做解密处理
-        if (httpRequest.getHeader("Content-Type").startsWith("multipart/form-data")) {
+        if (contentType!=null && contentType.startsWith("multipart/form-data")) {
             chain.doFilter(request, response);
             return;
         }
