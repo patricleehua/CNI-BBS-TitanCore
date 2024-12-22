@@ -17,6 +17,8 @@ public class PostDoc extends BaseEntity{
     private String summary;
     //文章内容
     private String content;
+    //作者Id
+    private Long authorId;
     //作者名称
     private String authorName;
 
@@ -38,7 +40,7 @@ public class PostDoc extends BaseEntity{
     private String coverUrl;
 
     //创建时间
-    private Long createdTime;
+    private Long createTime;
     //更新时间
     private Long updateTime;
     //最后评论时间

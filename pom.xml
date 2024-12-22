@@ -5,7 +5,11 @@
   <groupId>com.titancore</groupId>
   <artifactId>CNI-BBS-TitanCore</artifactId>
   <version>${revision}</version>
-
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.5</version>
+  </parent>
   <packaging>pom</packaging>
 
   <name>CNI-BBS-TitanCore</name>
@@ -41,7 +45,7 @@
     <aliyun.oss.version>3.18.1</aliyun.oss.version>
     <aliyun.sms.version>2.2.1</aliyun.sms.version>
     <justAuth.version>1.16.6</justAuth.version>
-    <elasticsearch.version>7.12.1</elasticsearch.version>
+    <elasticsearch.version>8.16.1</elasticsearch.version>
     <spring-ai.version>1.0.0-M3</spring-ai.version>
   </properties>
   <!-- 统一依赖管理 -->

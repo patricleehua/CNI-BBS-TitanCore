@@ -3,7 +3,7 @@ package com.titancore.task;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.titancore.domain.entity.Posts;
 import com.titancore.domain.mapper.PostsMapper;
-import com.titancore.service.ElasticSearchService;
+import com.titancore.service.ElasticSearch8Service;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.io.IOException;
 @Slf4j
 @AllArgsConstructor
 public class ElasticSearchDataSyncTask {
-    private final ElasticSearchService elasticSearchService;
+    private final ElasticSearch8Service elasticSearchService;
     private final PostsMapper postsMapper;
     private final String CNI_POST_INDEX = "cni-post";
 
@@ -27,12 +27,12 @@ public class ElasticSearchDataSyncTask {
         if(elasticSearchService.checkIndexExists(CNI_POST_INDEX)){
            return;
        }else {
-           elasticSearchService.createIndex(CNI_POST_INDEX, ElasticSearchService.CNI_POSTS_MAPPING);
+           elasticSearchService.createIndexByReader(CNI_POST_INDEX, ElasticSearch8Service.CNI_POST_MAPPINGS);
        }
         Long postsDatabaseCount = postsMapper.selectCount(
                 new LambdaQueryWrapper<Posts>().eq(Posts::getIsPublish, "0"));
 
-        Long postsElasticSearchCount = elasticSearchService.countEsData(CNI_POST_INDEX);
+        Long postsElasticSearchCount = elasticSearchService.countIndexData(CNI_POST_INDEX);
         //设定阈值
         double thresholdPercentage = 0.05;//5%的差异
         long fixedThreshold = 30L;//固定数量的差异
