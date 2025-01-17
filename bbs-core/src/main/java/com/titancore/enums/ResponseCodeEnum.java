@@ -89,7 +89,11 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     CHAT_GROUP_IS_NOT_EXIST("CHATGROUP-10001","群聊不存在!"),
 
     // ChatGroupMember
-    CHAT_GROUP_MEMBER_IS_NOT_EXIST("CHATGROUPMEMBER-10001","群成员不存在!"),;
+    CHAT_GROUP_MEMBER_IS_NOT_EXIST("CHATGROUPMEMBER-10001","群成员不存在!"),
+
+    //AiMessage
+    AI_MESSAGE_TYPE_IS_ERROR("AI-MESSAGE-10001","消息类型错误" )
+    ;
 
     // ----------- 业务异常状态码 -----------
 

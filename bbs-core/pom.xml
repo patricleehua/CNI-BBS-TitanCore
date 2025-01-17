@@ -65,7 +65,10 @@
             <groupId>com.titancore.framework.biz.operationlog</groupId>
             <artifactId>bbs-spring-boot-starter-biz-operationlog</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.titancore</groupId>
+            <artifactId>bbs-spring-ai-starter-aimanager</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.mysql</groupId>

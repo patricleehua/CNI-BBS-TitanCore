@@ -9,7 +9,7 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
-import com.alibaba.fastjson.JSON;
+import co.elastic.clients.json.JsonData;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.titancore.domain.entity.*;
@@ -274,21 +274,28 @@ public class ElasticSearch8Service {
             if(postSearchParam.getBeforeTime() != null){
 
                 long beforeTime = postSearchParam.getBeforeTime().atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
-                boolQueryBuilder.filter(RangeQuery.of(r -> r
-                        .date(d -> d
+                boolQueryBuilder.filter(RangeQuery.of(r ->r
                                 .field("createTime")
-                                .lte(String.valueOf(beforeTime))
-                        )
-                )._toQuery());
+                                .lte(JsonData.of(beforeTime)))._toQuery());
+                //8.16.1以下不支持
+//                boolQueryBuilder.filter(RangeQuery.of(r -> r
+//                        .date(d -> d
+//                                .field("createTime")
+//                                .lte(String.valueOf(beforeTime))
+//                        )
+//                )._toQuery());
             }
             if(postSearchParam.getAfterTime() != null ){
                 long afterTime = postSearchParam.getAfterTime().atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
-                boolQueryBuilder.filter(RangeQuery.of(r -> r
-                        .date(d -> d
-                                .field("createTime")
-                                .gte(String.valueOf(afterTime))
-                        )
-                )._toQuery());
+                boolQueryBuilder.filter(RangeQuery.of(r ->r
+                        .field("createTime")
+                        .gte(JsonData.of(afterTime)))._toQuery());
+//                boolQueryBuilder.filter(RangeQuery.of(r -> r
+//                        .date(d -> d
+//                                .field("createTime")
+//                                .gte(String.valueOf(afterTime))
+//                        )
+//                )._toQuery());
             }
             int from  = postSearchParam.getPageNo() > 0 ? (postSearchParam.getPageNo() - 1) * postSearchParam.getPageSize() : 0;
             String sortBy = postSearchParam.getSortBy() == null || postSearchParam.getSortBy().isEmpty() ? "createTime" : postSearchParam.getSortBy();

@@ -100,6 +100,32 @@ spring:
         acknowledge-mode: manual #默认情况下消息消费者是自动确认消息的，如果要手动确认消息则需要修改确认模式为manual
         prefetch: 1 # 消费者每次从队列获取的消息数量。此属性当不设置时为：轮询分发，设置为1为：公平分发
 
+  #AI配置
+  ai:
+    openai:
+      api-key: ${titan.ai.openai.api-key}
+      base-url: ${titan.ai.openai.base-url}
+      chat:
+        options:
+          model: ${titan.ai.openai.chat.options.model}
+      embedding:
+        options:
+          model: ${titan.ai.openai.embedding.options.model}
+        enabled: true
+    dashscope:
+      api-key: ${titan.ai.dashscope.api-key}
+      base-url: ${titan.ai.dashscope.base-url}
+      chat:
+        options:
+          model: ${titan.ai.dashscope.chat.options.model}
+      embedding:
+        options:
+          model: ${titan.ai.openai.embedding.options.model}
+        enabled: false
+#  vectorstore:
+#    redis:
+#      initialize-schema: true
+
 
 titan:
   md5:
