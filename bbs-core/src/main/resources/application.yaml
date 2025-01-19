@@ -4,7 +4,7 @@ spring:
   application:
     name: core
   profiles:
-    active: dev
+    active: temp
   datasource:
     driver-class-name: ${titan.datasource.driver-class-name}
     # 数据库连接信息
