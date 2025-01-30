@@ -20,6 +20,8 @@ public class ChatClientFactory {
             case AGENT -> ChatClient.builder(model)
                     .defaultSystem(agentResource)
                     .build();
+            case DETECTTEXTAGENT -> ChatClient.builder(model)
+                    .build();
             case ASSISTANT -> ChatClient.builder(model)
                     .defaultSystem(assistantResource)
                     .build();
