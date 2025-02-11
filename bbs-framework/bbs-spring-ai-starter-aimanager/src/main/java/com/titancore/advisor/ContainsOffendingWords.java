@@ -4,10 +4,11 @@ import org.springframework.ai.chat.client.advisor.api.*;
 import reactor.core.publisher.Flux;
 
 import java.util.Arrays;
+import java.util.Set;
 
 public class ContainsOffendingWords  implements CallAroundAdvisor, StreamAroundAdvisor {
 
-    private String [] offendingWords;
+    private Set<String> offendingWords;
 
     private static final String SYSTEM_PROMPT_TEMPLATE = """
              执行内容安全检查（优先级顺序）：
@@ -27,14 +28,14 @@ public class ContainsOffendingWords  implements CallAroundAdvisor, StreamAroundA
                  检查后需记录日志！
         """;
 
-    public ContainsOffendingWords(String [] offendingWords){
+    public ContainsOffendingWords(Set<String> offendingWords){
         this.offendingWords = offendingWords;
     }
     /**
      * 整合违禁词检查的请求处理
      */
     private AdvisedRequest processRequest(AdvisedRequest advisedRequest) {
-        String prompt = SYSTEM_PROMPT_TEMPLATE.formatted(Arrays.toString(offendingWords));
+        String prompt = SYSTEM_PROMPT_TEMPLATE.formatted(offendingWords);
         return AdvisedRequest.from(advisedRequest)
                 .withSystemText(prompt)
                 .build();

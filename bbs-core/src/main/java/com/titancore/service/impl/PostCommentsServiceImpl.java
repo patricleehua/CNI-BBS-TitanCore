@@ -3,7 +3,10 @@ package com.titancore.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
+import com.github.houbb.sensitive.word.core.SensitiveWordHelper;
 import com.titancore.domain.dto.PostCommentsDTO;
+import com.titancore.domain.entity.AiCheckOffendingWordsResponse;
 import com.titancore.domain.entity.PostComments;
 import com.titancore.domain.entity.Posts;
 import com.titancore.domain.mapper.PostCommentsMapper;
@@ -16,6 +19,7 @@ import com.titancore.domain.vo.UserVo;
 import com.titancore.enums.ResponseCodeEnum;
 import com.titancore.framework.common.constant.CommonConstant;
 import com.titancore.framework.common.exception.BizException;
+import com.titancore.service.AiDetectTextService;
 import com.titancore.service.PostCommentsService;
 import com.titancore.service.PostsService;
 import com.titancore.service.UserService;
@@ -24,10 +28,7 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
 * @author leehua
@@ -41,6 +42,10 @@ public class PostCommentsServiceImpl extends ServiceImpl<PostCommentsMapper, Pos
     private UserService userService;
     @Resource
     private PostsMapper postsMapper;
+    @Resource
+    private AiDetectTextService aiDetectTextService;
+    @Resource
+    private SensitiveWordBs sensitiveWordBs;
     @Override
     public PageResult queryCommentListByPostId(PostCommentParam postCommentParam) {
         Page<PostComments> page = new Page<>(postCommentParam.getPageNo(), postCommentParam.getPageSize());
@@ -57,12 +62,19 @@ public class PostCommentsServiceImpl extends ServiceImpl<PostCommentsMapper, Pos
         AuthenticationUtil.checkUserId(userId);
         String postCommentContent = postCommentsDTO.getContent();
         //todo 敏感词过滤
-        boolean isPassedFilter = false;
         Map<String,String> map = new HashMap<>();
-//        if (!isPassedFilter){
-//            map.put("badWord","reason");
-//            return map;
-//        }
+        Set<String> badWordSet = new HashSet<>();
+
+        //setup1 是否匹配自定义规则库1
+        badWordSet.addAll(sensitiveWordBs.findAll(postCommentContent));
+        //setup2 是否匹配系统规则库2
+        badWordSet.addAll(SensitiveWordHelper.findAll(postCommentContent));
+        //setup3 Ai智能审核
+        AiCheckOffendingWordsResponse response = aiDetectTextService.isContainsOffendingWords(postCommentContent, badWordSet);
+        if(response.isViolation()){
+            map.put("badWord",response.getReason());
+            return map;
+        }
         Posts posts = postsMapper.selectOne(new LambdaQueryWrapper<Posts>().eq(Posts::getId, postCommentsDTO.getPostId()));
         PostComments postComments = new PostComments();
         postComments.setUserId(Long.valueOf(userId));
