@@ -16,6 +16,7 @@ import com.titancore.domain.mapper.*;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.*;
+import com.titancore.enums.FollowStatus;
 import com.titancore.enums.LinkType;
 import com.titancore.enums.ResponseCodeEnum;
 import com.titancore.framework.cloud.manager.domain.dto.FileDelDTO;
@@ -67,7 +68,7 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         pageResult.setTotal(postsPage.getTotal());
         //过滤
         List<PostViewVo> postViewVos = postsPage.getRecords().stream()
-                .map(posts-> PostsToPostViewVo(posts,true,true,true,true)).collect(Collectors.toList());
+                .map(posts-> PostsToPostViewVo(posts,true,true,true,true,postParam.getUserId())).collect(Collectors.toList());
         pageResult.setRecords(postViewVos);
         return pageResult;
     }
@@ -408,12 +409,20 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
      * @param isUrl
      * @return
      */
-    private PostViewVo PostsToPostViewVo (Posts posts,boolean isAuthor,boolean isTag,boolean isCategory,boolean isUrl){
+    private PostViewVo PostsToPostViewVo (Posts posts,boolean isAuthor,boolean isTag,boolean isCategory,boolean isUrl,String userId){
         PostViewVo postViewVo = new PostViewVo();
         postViewVo.setPostId(posts.getId().toString());
         if(isAuthor){
             User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, posts.getAuthorId()));
             UserVo userVo = new UserVo();
+            if (StringUtils.isNotBlank(userId)) {
+                FollowStatus userFollowStatus = followService.getUserFollowStatus(String.valueOf(user.getUserId()), userId);
+                if(user.getUserId().toString().equals(userId)){
+                    userVo.setFollowStatus(FollowStatus.CONFIRMED.getValue());
+                }else{
+                    userVo.setFollowStatus(userFollowStatus.getValue());
+                }
+            }
             userVo.setUserId(String.valueOf(user.getUserId()));
             userVo.setUserName(user.getUserName());
             userVo.setAvatar(user.getAvatar());

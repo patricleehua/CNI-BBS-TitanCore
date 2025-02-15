@@ -16,7 +16,8 @@ public enum FollowStatus implements IEnum<String> {
 
     PENDING("pending"),
     CONFIRMED("confirmed"),
-    REJECTED("rejected");
+    REJECTED("rejected"),
+    NONE("none");
     private final String value;
     public static FollowStatus valueOfAll(String value) {
         for (FollowStatus followStatus : FollowStatus.values()) {

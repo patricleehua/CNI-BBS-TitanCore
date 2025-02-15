@@ -173,12 +173,14 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
         String userId = followDTO.getUserId();
         AuthenticationUtil.checkUserId(userId);
         //查询原始数据
-        Follow followFromMe = followMapper.selectOne(new LambdaQueryWrapper<Follow>().eq(Follow::getUserId, followDTO.getUserId()).eq(Follow::getFollowerId, followDTO.getFollowerId()).last("limit 1"));
-        Follow followFromOther = followMapper.selectOne(new LambdaQueryWrapper<Follow>().eq(Follow::getFollowerId, followDTO.getUserId()).eq(Follow::getUserId, followDTO.getFollowerId()).last("limit 1"));
+        //我关注别人
+        Follow followFromMe = followMapper.selectOne(new LambdaQueryWrapper<Follow>().eq(Follow::getUserId, followDTO.getFollowerId()).eq(Follow::getFollowerId, followDTO.getUserId()).last("limit 1"));
+        //别人关注我
+        Follow followFromOther = followMapper.selectOne(new LambdaQueryWrapper<Follow>().eq(Follow::getFollowerId, followDTO.getFollowerId()).eq(Follow::getUserId, followDTO.getUserId()).last("limit 1"));
         if(followFromMe == null || followFromMe.getFollowStatus().getValue().equals(FollowStatus.PENDING.getValue()) || followFromMe.getFollowStatus().getValue().equals(FollowStatus.REJECTED.getValue())){
             throw new BizException(ResponseCodeEnum.FOLLOW_STATUS_ERROR);
         }
-        int first = followMapper.delete(new LambdaQueryWrapper<Follow>().eq(Follow::getUserId, followDTO.getUserId()).eq(Follow::getFollowerId, followDTO.getFollowerId()));
+        int first = followMapper.delete(new LambdaQueryWrapper<Follow>().eq(Follow::getUserId, followDTO.getFollowerId()).eq(Follow::getFollowerId, followDTO.getUserId()));
 
         //对方的状态为confirmed 以及状态不为拉黑才可以删除对方状态
         if(followFromOther != null && followFromOther.getFollowStatus().getValue().equals(FollowStatus.CONFIRMED.getValue()) && followFromOther.getIsBlocked().equals(StatusEnum.DISABLED.getValue())){
@@ -228,6 +230,18 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
         Long followingCount = followMapper.selectCount(new LambdaQueryWrapper<Follow>().eq(Follow::getFollowerId, userId));
         map.put("followingCount", followingCount);
         return map;
+    }
+
+    @Override
+    public FollowStatus getUserFollowStatus(String targetUserId, String beFollowedUserId) {
+        Follow follow = followMapper.selectOne(new LambdaQueryWrapper<Follow>()
+                .eq(Follow::getUserId, targetUserId)
+                .eq(Follow::getFollowerId, beFollowedUserId));
+        if(follow == null){
+            return FollowStatus.NONE;
+        }else{
+            return follow.getFollowStatus();
+        }
     }
 
     private List<FollowerVo> filterFollowListToFollowerVoList(List<Follow> follows, boolean isGroup,boolean isCheckFollower) {

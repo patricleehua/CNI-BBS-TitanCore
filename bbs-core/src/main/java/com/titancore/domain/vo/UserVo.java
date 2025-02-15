@@ -14,4 +14,5 @@ public class UserVo implements Serializable {
     private String bio;
     private String followingCount;
     private String fansCount;
+    private String followStatus;
 }

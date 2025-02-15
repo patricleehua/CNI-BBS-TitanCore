@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.titancore.domain.param.FollowParam;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.DMLVo;
+import com.titancore.enums.FollowStatus;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,4 +34,12 @@ public interface FollowService extends IService<Follow> {
      * @return
      */
     HashMap<String, Long> queryFollowCount(String userId);
+
+    /**
+     * 检查用户对目标用户的关注状态
+     * @param targetUserId
+     * @param beFollowedUserId
+     * @return
+     */
+    FollowStatus getUserFollowStatus(String targetUserId, String beFollowedUserId);
 }
