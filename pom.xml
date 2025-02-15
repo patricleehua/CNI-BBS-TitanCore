@@ -20,7 +20,7 @@
 
   <properties>
     <!-- 项目版本号 -->
-    <revision>0.0.1-SNAPSHOT</revision>
+    <revision>1.0.0-SNAPSHOT</revision>
     <!-- JDK 版本 -->
     <java.version>17</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>

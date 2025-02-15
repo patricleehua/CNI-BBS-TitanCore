@@ -2,7 +2,7 @@
 
 **Welcome to CNI-BBS-TitanCore! / 欢迎使用 CNI-BBS-TitanCore！** 🚀
 
-🌏 [English](https://github.com/patricleehua/CNI-BBS-TitanCore/blob/main/README.md)
+#### 🌏 [English](https://github.com/patricleehua/CNI-BBS-TitanCore/blob/main/README.md)
 
 ------
 
@@ -42,6 +42,8 @@
 
 ### 如何使用 Dockerfile？
 
+> 以下命令均在项目根目录`CNI-BBS-TitanCore`下执行
+
 #### 打包应用
 
 ```bash
@@ -53,6 +55,8 @@ mvn clean package
 ```bash
 docker build -t cni-bbs-core:1.0 .
 ```
+
+如果你需要运行在Arm机器上，你需要使用`Docker buildx`进行构建
 
 #### 运行 Docker 容器
 
@@ -75,4 +79,4 @@ docker run -d -p 8080:8080 --network host --name cni-bbs-core cni-bbs-core:1.0
 
 ------
 
-最后更新：2025.01.19
+最后更新：2025.02.15

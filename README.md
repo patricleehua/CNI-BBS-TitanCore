@@ -38,6 +38,8 @@ Once these steps are completed, start the backend and enjoy using CNI-BBS-TitanC
 
 ### How to Use the Dockerfile?
 
+> The following commands are all executed in the project root directory `CNI-BBS-TitanCore`
+
 #### Package the Application
 
 ```bash
@@ -49,6 +51,8 @@ mvn clean package
 ```bash
 docker build -t cni-bbs-core:1.0 .
 ```
+
+If you need to run on an Arm machine, you need to build using `Docker buildx`
 
 #### Run the Docker Container
 
@@ -71,4 +75,4 @@ docker run -d -p 8080:8080 --network host --name cni-bbs-core cni-bbs-core:1.0
 
 ------
 
-Last Update: 2025.01.19
+Last Update: 2025.02.15
