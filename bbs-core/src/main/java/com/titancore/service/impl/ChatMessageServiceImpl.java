@@ -33,6 +33,8 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -195,17 +197,16 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
                 .eq(ChatMessage::getSourceType, SourceType.GROUP)
                 .eq(ChatMessage::getToId, chatMessageParam.getTargetId());
 
-        if(chatMessageParam.getIsDesc().equals(String.valueOf(StatusEnum.DISABLED.getValue()))){
-            queryWrapper.orderByDesc(ChatMessage::getCreateTime);
-        }else {
-            queryWrapper.orderByAsc(ChatMessage::getCreateTime);
-        }
-
-
+        queryWrapper.orderByDesc(ChatMessage::getCreateTime);
         Page<ChatMessage> chatMessagePage = chatMessageMapper.selectPage(page, queryWrapper);
+        List<ChatMessage> records = chatMessagePage.getRecords();
+        //对结果进行升序
+        if(chatMessageParam.getIsDesc().equals(String.valueOf(StatusEnum.ENABLE.getValue()))) {
+            records.sort(Comparator.comparing(ChatMessage::getCreateTime));
+        }
         PageResult pageResult = new PageResult();
         pageResult.setTotal(chatMessagePage.getTotal());
-        pageResult.setRecords(chatMessagePage.getRecords());
+        pageResult.setRecords(records);
         return pageResult;
     }
 
