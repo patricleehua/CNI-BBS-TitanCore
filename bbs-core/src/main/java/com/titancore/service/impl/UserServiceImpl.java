@@ -23,6 +23,7 @@ import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.common.properties.Md5Salt;
 import com.titancore.service.*;
+import com.titancore.util.AuthenticationUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -303,7 +304,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (user == null){
             return null;
         }
-        return userToUserVo(user,false);
+        return userToUserVo(user,false,null);
+    }
+
+    public List<UserVo> recommendedUserByUserId(String userId) {
+        AuthenticationUtil.checkUserId(userId);
+        //查找关注度最多的10个用户
+        List<Long> userIds = followService.highFollowedTop10();
+        if(userIds.isEmpty()){
+            return List.of();
+        }
+        List<User> userList =  userMapper.selectListByIds(userIds);
+        return userList.stream().map(user -> userToUserVo(user, true,userId)).toList();
     }
 
 
@@ -344,7 +356,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return List.of();
         }
         List<User> userList =  userMapper.selectListByIds(userIds);
-        return userList.stream().map(user -> userToUserVo(user, true)).toList();
+        return userList.stream().map(user -> userToUserVo(user, true,null)).toList();
     }
     @Transactional
     @Override
@@ -500,13 +512,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param user
      * @return
      */
-    private UserVo userToUserVo(User user,boolean isFollowCount) {
+    private UserVo userToUserVo(User user,boolean isFollowCount,String userId) {
         UserVo userVo = new UserVo();
         BeanUtils.copyProperties(user, userVo);
         userVo.setUserId(String.valueOf(user.getUserId()));
         if(isFollowCount){
             userVo.setFansCount(String.valueOf(followService.followNumCount(user.getUserId(), true)));
             userVo.setFollowingCount(String.valueOf(followService.followNumCount(user.getUserId(), false)));
+        }
+        if(StringUtils.isNotEmpty(userId)){
+            FollowStatus userFollowStatus = followService.getUserFollowStatus(userVo.getUserId(), userId);
+            userVo.setFollowStatus(userFollowStatus.getValue());
         }
         return userVo;
     }

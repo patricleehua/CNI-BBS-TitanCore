@@ -86,7 +86,7 @@ public class RabbitMqHelper {
      * @return
      */
     public boolean sendMessageRetry(String exchange, String routingKey, Object msg){
-        log.debug("发送可重试消息，exchange:{}, routingKey:{}, msg:{}", exchange, routingKey, msg);
+        log.info("发送可重试消息，exchange:{}, routingKey:{}, msg:{}", exchange, routingKey, msg);
         //1.创建自定义相关消息对象-包含业务数据本身，交换器名称，路由键，队列类型，延迟时间,重试次数
         CNICorrelationData correlationData = new CNICorrelationData();
         String redisKey = TEMPORARY_MESSAGE_PRIX + UUID.randomUUID().toString().replace("-", "");

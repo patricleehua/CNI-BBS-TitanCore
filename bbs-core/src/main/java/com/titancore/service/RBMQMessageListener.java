@@ -87,6 +87,7 @@ public class RBMQMessageListener {
     @RabbitListener(queues = RabbitMqConstant.QUEUE_TOPIC_GROUP_CHAT)
     public void receiveMessageFromGroupChat(Message message, Channel channel) {
         try {
+            log.debug("接收到群组队列的消息message:{},channel:{}", message, channel);
             ChatMessageDTO chatMessageDTO = messageParseToChatMessageDTO(message);
             //获取发送方用户信息
             User user = userService.getById(chatMessageDTO.getFromId());

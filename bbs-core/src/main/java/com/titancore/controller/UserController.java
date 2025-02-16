@@ -58,7 +58,7 @@ public class UserController {
         if(userId == null){
             userVos =  userService.recommendedUserAll();
         }else{
-//            userVos =  userService.recommendedUserByUserId(userId);
+            userVos =  userService.recommendedUserByUserId(userId);
         }
 
         return Response.success(userVos);
