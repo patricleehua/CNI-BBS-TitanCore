@@ -36,6 +36,13 @@ public interface UserService  extends IService<User> {
     List<UserVo> recommendedUserAll();
 
     /**
+     * 根据用户id推荐用户
+     * @param userId
+     * @return
+     */
+    List<UserVo> recommendedUserByUserId(String userId);
+
+    /**
      * 用户注册
      * @param registerUserDTO
      * @return
