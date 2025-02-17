@@ -522,7 +522,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         if(StringUtils.isNotEmpty(userId)){
             FollowStatus userFollowStatus = followService.getUserFollowStatus(userVo.getUserId(), userId);
-            userVo.setFollowStatus(userFollowStatus.getValue());
+            if(user.getUserId().toString().equals(userId)){
+                userVo.setFollowStatus(FollowStatus.CONFIRMED.getValue());
+            }else{
+                userVo.setFollowStatus(userFollowStatus.getValue());
+            }
         }
         return userVo;
     }
