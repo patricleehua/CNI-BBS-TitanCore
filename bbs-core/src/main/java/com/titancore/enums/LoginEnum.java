@@ -11,6 +11,7 @@ public enum LoginEnum {
 
     VERIFICATION_CODE("v_code"),
     PASSWORD("password"),
+    TEMPORARYCODE("t_code"),
     REMEMBERME("0"),
     NOTREMEMBERME("1");
 

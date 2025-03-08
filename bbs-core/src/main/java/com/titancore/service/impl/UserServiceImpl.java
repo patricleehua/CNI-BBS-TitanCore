@@ -103,6 +103,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     }
                     user = getOne(queryWrapper);
                 }
+                case TEMPORARYCODE ->{
+                    boolean isVerify = verifyTemporaryPassCode(userLoginDto.getEmailNumber() != null ? userLoginDto.getEmailNumber() : userLoginDto.getPhoneNumber(), userLoginDto.getCaptchaCode());
+                    if(isVerify){
+                        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
+                                .eq(User::getDelFlag, "0")
+                                .last("limit 1");
+                        if (!userLoginDto.getEmailNumber().isEmpty()){
+                            queryWrapper.eq(User::getEmail, userLoginDto.getEmailNumber());
+                        }else if(!userLoginDto.getPhoneNumber().isEmpty()){
+                            queryWrapper.eq(User::getPhoneNumber, userLoginDto.getPhoneNumber());
+                        }
+                        user = getOne(queryWrapper);
+                    }else{
+                        throw new BizException(ResponseCodeEnum.PASSCODE_IS_NOT_CORRECT);
+                    }
+                }
             }
         } else {
             throw new BizException(ResponseCodeEnum.ACCOUNT_VERIFICATION_TYPE_ISNULL);
@@ -250,14 +266,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public DMLVo socialUserBindLocalUser(BindSocialUserDTO bindSocialUserDTO) {
         String phoneNumber = bindSocialUserDTO.getPhoneNumber();
         String emailNumber = bindSocialUserDTO.getEmailNumber();
-        if (emailNumber == null && phoneNumber == null) {
+        if (StringUtils.isEmpty(phoneNumber) && StringUtils.isEmpty(emailNumber)) {
             throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
         }
         User user = null;
         if(bindSocialUserDTO.getHasLocalUser()){
-            if(!phoneNumber.isEmpty()){
+            if (StringUtils.isNotEmpty(phoneNumber)) {
                 user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getPhoneNumber, phoneNumber));
-            }else{
+            } else if (StringUtils.isNotEmpty(emailNumber)) {
                 user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, emailNumber));
             }
         }else{
@@ -267,7 +283,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             temporaryPassword += md5Salt.getSalt();
             String md5temporaryPassword = DigestUtils.md5DigestAsHex(temporaryPassword.getBytes());
             user.setPassword(md5temporaryPassword);
-
+            if (StringUtils.isNotEmpty(phoneNumber)) {
+                user.setPhoneNumber(phoneNumber);
+            } else if (StringUtils.isNotEmpty(emailNumber)) {
+                user.setEmail(emailNumber);
+            }
             int userResult = userMapper.insert(user);
             if (!(userResult > 0)) {
                 throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_TEMPORARY_USER_CREATED_FAIL);
@@ -278,14 +298,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_ROLE_REL_CREATE_FALL);
             }
         }
-        int result = 0;
-        Long snowflakeId = new SnowflakeGenerator().next();
 
-        if (user != null){
-            result = socialUserService.buildRelForSocialUserWithUserByUserIdAndSocialUserId(snowflakeId, user.getUserId(), bindSocialUserDTO.getSocialUserId());
-        }else{
+        if (user == null) {
             throw new BizException(ResponseCodeEnum.ACCOUNT_CAN_NOT_FOUND);
         }
+        Long snowflakeId = new SnowflakeGenerator().next();
+        int result = socialUserService.buildRelForSocialUserWithUserByUserIdAndSocialUserId(snowflakeId, user.getUserId(), bindSocialUserDTO.getSocialUserId());
+
         DMLVo dmlVo = new DMLVo();
         if (result > 0){
             dmlVo.setId(String.valueOf(snowflakeId));

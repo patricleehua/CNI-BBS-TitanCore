@@ -25,7 +25,7 @@ public class UserLoginDTO  extends BaseDTO {
     @NonNull
     private String rememberMe;
 
-    @Schema(description = "登录类型 值为'v_code'或'password'", example = "password", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "登录类型 值为'v_code'或'password或t_code'", example = "password", requiredMode = Schema.RequiredMode.REQUIRED)
     @NonNull
     private String loginType;
 

@@ -83,7 +83,7 @@ public class RestAuthController {
                 //系统用户为空(未绑定
                 //给用户生成临时通行码进行绑定邮箱 or 手机号 or 系统中存在的用户
                 int temporaryPassCode = userService.getTemporaryPassCode(String.valueOf(socialUser.getId()));
-                String redirectUrl = "https://baidu.com/auth/callback?passcode="+temporaryPassCode+"?socialUserId="+socialUser.getId();
+                String redirectUrl = "http://localhost:3000/bind?passcode="+temporaryPassCode+"&socialUserId="+socialUser.getId();
                 response.sendRedirect(redirectUrl);
             }else if(systemUser.getDelFlag().equals("2")){
                 //账号被删除
@@ -94,7 +94,7 @@ public class RestAuthController {
                 //用户登入
                 StpUtil.login(systemUser.getUserId());
                 String token = StpUtil.getTokenValue();
-                String redirectUrl = "https://baidu.com/auth/callback?token="+token;
+                String redirectUrl = "http://localhost:3000/home?token="+token;
                 response.sendRedirect(redirectUrl);
             }
             return null;
