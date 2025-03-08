@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.titancore.domain.dto.CleanCoverDTO;
 import com.titancore.domain.dto.PostDTO;
 import com.titancore.domain.dto.PostUpdateDTO;
 import com.titancore.domain.entity.*;
@@ -190,6 +191,40 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         }
         stringRedisTemplate.opsForValue().set(RedisConstant.TEMPORARYPOSTID_PRIX + userId, postId, RedisConstant.TEMPORARYPOSTID_TTL, TimeUnit.DAYS);
         return postId;
+    }
+
+    @Override
+    public DMLVo cleanTemporaryCover(CleanCoverDTO cleanCoverDTO) {
+        String userId = cleanCoverDTO.getAuthorId();
+        AuthenticationUtil.checkUserId(userId);
+        String key = RedisConstant.TEMPORARYPOSTMEDIA_PRIX + cleanCoverDTO.getPostId();
+        List<String> mediaUrls = stringRedisTemplate.opsForList().range(key, 0, -1);
+        if(mediaUrls!=null && !mediaUrls.isEmpty()) {
+            List<PostMediaUrl> postMediaUrlList = new ArrayList<>();
+            for (String mediaUrlJson : mediaUrls) {
+                Type type = new TypeReference<PostMediaUrl>(){}.getType();
+                PostMediaUrl postMediaUrl = JSON.parseObject(mediaUrlJson, type);
+                postMediaUrlList.add(postMediaUrl);
+            }
+            List<PostMediaUrl> newLiit = postMediaUrlList.stream().filter(postMediaUrl -> !postMediaUrl.getMediaUrl().equals(cleanCoverDTO.getCoverUrl())).toList();
+            Long size = stringRedisTemplate.opsForList().size(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + cleanCoverDTO.getPostId());
+            stringRedisTemplate.delete(key);
+            for (PostMediaUrl postMediaUrl : newLiit) {
+                if (size == null || size == 0) {
+                    stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX +  cleanCoverDTO.getPostId(), JSON.toJSONString(postMediaUrl));
+                    stringRedisTemplate.expire(RedisConstant.TEMPORARYPOSTMEDIA_PRIX +  cleanCoverDTO.getPostId(), RedisConstant.TEMPORARYPOSTMEDIA_TTL, TimeUnit.HOURS);
+                } else {
+                    stringRedisTemplate.opsForList().rightPush(RedisConstant.TEMPORARYPOSTMEDIA_PRIX +  cleanCoverDTO.getPostId(), JSON.toJSONString(postMediaUrl));
+                }
+            }
+        }
+        postMediaUrlService.remove(new LambdaQueryWrapper<PostMediaUrl>().eq(PostMediaUrl::getMediaUrl, cleanCoverDTO.getCoverUrl()));
+
+        DMLVo dmlVo = new DMLVo();
+        dmlVo.setId(cleanCoverDTO.getPostId());
+        dmlVo.setStatus(true);
+        dmlVo.setMessage(CommonConstant.DML_DELETE_SUCCESS);
+        return dmlVo;
     }
 
     private String checkTemporaryPostIdIsExist(String userId) {

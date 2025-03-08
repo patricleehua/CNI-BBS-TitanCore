@@ -1,5 +1,6 @@
 package com.titancore.controller;
 
+import com.titancore.domain.dto.CleanCoverDTO;
 import com.titancore.domain.dto.PostCommentsDTO;
 import com.titancore.domain.dto.PostDTO;
 import com.titancore.domain.dto.PostUpdateDTO;
@@ -50,6 +51,12 @@ public class PostController {
     @Operation(summary ="创建帖子(第二步)")
     public Response<?> createPost(@RequestBody PostDTO postDTO){
         DMLVo dmlVo = postsService.createPost(postDTO);
+        return Response.success(dmlVo);
+    }
+    @PostMapping("/cleanTemporaryCover")
+    @Operation(summary ="清除创建帖子中反复上传的封面")
+    public Response<?> cleanTemporaryCover(@RequestBody CleanCoverDTO cleanCoverDTO) {
+        DMLVo dmlVo = postsService.cleanTemporaryCover(cleanCoverDTO);
         return Response.success(dmlVo);
     }
     @GetMapping("/createTemporaryPostId")
