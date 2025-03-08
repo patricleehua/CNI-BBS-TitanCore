@@ -92,7 +92,7 @@ public class UserController {
     public Response<?> socialUserBindLocalUser(@RequestBody BindSocialUserDTO bindSocialUserDTO){
         boolean isVerifySocialUser = userService.verifyTemporaryPassCode(bindSocialUserDTO.getSocialUserId(), bindSocialUserDTO.getSocialTemporaryCode());
         boolean isVerifyAccount = false;
-        if (bindSocialUserDTO.getPhoneNumber() != null || !Objects.equals(bindSocialUserDTO.getEmailNumber(), "")){
+        if (bindSocialUserDTO.getPhoneNumber() != null && !bindSocialUserDTO.getPhoneNumber().isEmpty()){
             isVerifyAccount = userService.verifyTemporaryPassCode(bindSocialUserDTO.getPhoneNumber(), bindSocialUserDTO.getAccountTemporaryCode());
         }else{
             isVerifyAccount = userService.verifyTemporaryPassCode(bindSocialUserDTO.getEmailNumber(), bindSocialUserDTO.getAccountTemporaryCode());

@@ -149,7 +149,8 @@ public class CommonService {
                 + "<span style='font-size:900'>5分钟内有效!</span>";
         mail.setContent(htmlContent);
         mail.setSubject("CNI-TITAN国际论坛");
-
+//        storeCaptchaInRedis(redisKey, code, RedisConstant.EMAIL_TTL);
+//        return Response.success(CommonConstant.EMAIL_SEND_SUCCESS);
         String res = emailService.sendHtmlMail(mail);
         if(res.equals(CommonConstant.EMAIL_SEND_SUCCESS)){
             storeCaptchaInRedis(redisKey, code, RedisConstant.EMAIL_TTL);
