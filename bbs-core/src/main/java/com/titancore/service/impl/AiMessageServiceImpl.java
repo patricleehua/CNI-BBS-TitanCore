@@ -3,6 +3,7 @@ package com.titancore.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.titancore.domain.dto.AiMessageDTO;
+import com.titancore.domain.dto.AiMessageMediaDTO;
 import com.titancore.domain.entity.AiMessage;
 import com.titancore.domain.entity.AiMessageMedia;
 import com.titancore.domain.mapper.AiMessageMapper;
@@ -79,13 +80,13 @@ public class AiMessageServiceImpl extends ServiceImpl<AiMessageMapper, AiMessage
             throw new BizException(ResponseCodeEnum.AI_MESSAGE_TYPE_IS_ERROR);
         }
 
-        Map<String, String> medias = aiMessageDTO.getMedias();
+        List<AiMessageMediaDTO> medias = aiMessageDTO.getMedias();
         if (medias != null) {
             List<AiMessageMedia> mediaList = new ArrayList<>();
-            for (Map.Entry<String, String> entry : medias.entrySet()) {
+            for (AiMessageMedia aiMessageMedia : mediaList) {
                 AiMessageMedia media = new AiMessageMedia();
-                media.setType(entry.getKey());
-                media.setUrl(entry.getValue());
+                media.setType(aiMessageMedia.getType());
+                media.setUrl(aiMessageMedia.getUrl());
                 mediaList.add(media);
             }
             aiMessage.setMedias(mediaList);

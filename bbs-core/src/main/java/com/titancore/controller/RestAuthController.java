@@ -129,7 +129,7 @@ public class RestAuthController {
                             // 针对国外平台配置代理
                             .httpConfig(HttpConfig.builder()
                                     .timeout(authProperties.getProxy().getTimeout())
-                                    .proxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(authProperties.getProxy().getHost(), authProperties.getProxy().getPort())))
+//                                    .proxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(authProperties.getProxy().getHost(), authProperties.getProxy().getPort())))
                                     .build())
                             .build());
                 case WECHAT_OPEN ->
