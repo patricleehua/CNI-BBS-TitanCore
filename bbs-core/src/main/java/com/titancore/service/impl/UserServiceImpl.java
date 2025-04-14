@@ -326,6 +326,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return userToUserVo(user,false,null);
     }
 
+    @Override
+    public UserLoginVo getUserInfoByToken(long userId) {
+        StpUtil.login(userId);
+        SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
+        String token = tokenInfo.getTokenValue();
+        List<String> roleList = StpUtil.getRoleList();
+        User user = userMapper.selectById(userId);
+        List<String> permissionList = StpUtil.getPermissionList();
+        return UserLoginVo.builder()
+                .id(user.getUserId())
+                .username(user.getUserName())
+                .token(token)
+                .avatar(user.getAvatar())
+                .roles(roleList)
+                .build();
+    }
+
     public List<UserVo> recommendedUserByUserId(String userId) {
         AuthenticationUtil.checkUserId(userId);
         //查找关注度最多的10个用户
