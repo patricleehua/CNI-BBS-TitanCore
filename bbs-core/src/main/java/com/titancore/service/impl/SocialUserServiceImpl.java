@@ -77,6 +77,11 @@ public class SocialUserServiceImpl extends ServiceImpl<SocialUserMapper, SocialU
         return socialUserMapper.buildRelForSocialUserWithUserByUserIdAndSocialUserId(id,userId,socialUserId);
     }
 
+    @Override
+    public int countBindUser(String socialUserId) {
+        return socialUserMapper.countBindUser(socialUserId);
+    }
+
 }
 
 

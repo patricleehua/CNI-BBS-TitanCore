@@ -277,6 +277,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, emailNumber));
             }
         }else{
+            int count = socialUserService.countBindUser(bindSocialUserDTO.getSocialUserId());
+            if (count > 0) {
+                throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_HAS_BINDED);
+            }
             user = socialUserService.buildThirdUserFromSocialUser(bindSocialUserDTO.getSocialUserId());
             //生成临时密码随机
             String temporaryPassword = bindSocialUserDTO.getPassword().isEmpty() ? RandomUtil.randomString(10) : bindSocialUserDTO.getPassword();
@@ -309,7 +313,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (result > 0){
             dmlVo.setId(String.valueOf(snowflakeId));
             dmlVo.setStatus(true);
-            dmlVo.setMessage(CommonConstant.DML_CREATE_SUCCESS);
+            StpUtil.login(user.getUserId());
+            String token = StpUtil.getTokenValue();
+            dmlVo.setMessage(token);
         }else {
             dmlVo.setStatus(false);
             dmlVo.setMessage(CommonConstant.DML_CREATE_ERROR);

@@ -51,4 +51,6 @@ public interface SocialUserService extends IService<SocialUser> {
      * @return
      */
     int buildRelForSocialUserWithUserByUserIdAndSocialUserId(Long id, Long userId, String socialUserId);
+
+    int countBindUser(String socialUserId);
 }
