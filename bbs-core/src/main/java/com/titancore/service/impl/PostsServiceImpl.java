@@ -50,6 +50,7 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
     private final StringRedisTemplate stringRedisTemplate;
     private final FollowService followService;
     private final CommonService commonService;
+    private final ElasticSearch8Service elasticSearch16Service;
 
     @Override
     public PageResult queryPostList(PostParam postParam) {
@@ -139,6 +140,7 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
             dmlVo.setId(temporalPostId);
             dmlVo.setStatus(true);
             dmlVo.setMessage(CommonConstant.DML_CREATE_SUCCESS);
+            elasticSearch16Service.insertPostDoc("cni-post",temporalPostId);
             //删除redis缓存
             removeTemporaryPostId(authorId);
             stringRedisTemplate.delete(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + temporalPostId);
