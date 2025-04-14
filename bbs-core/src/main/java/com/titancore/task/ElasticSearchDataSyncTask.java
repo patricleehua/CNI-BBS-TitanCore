@@ -22,15 +22,14 @@ public class ElasticSearchDataSyncTask {
 
     //todo 关闭先置
 //    @Scheduled(cron = "0 */15 * * * ?")
+    @Scheduled(cron = "0/50 * * * * ?")
     public void pullEsSearchData() throws IOException {
-
-        if(elasticSearchService.checkIndexExists(CNI_POST_INDEX)){
-           return;
-       }else {
+        if(!elasticSearchService.checkIndexExists(CNI_POST_INDEX)){
            elasticSearchService.createIndexByReader(CNI_POST_INDEX, ElasticSearch8Service.CNI_POST_MAPPINGS);
        }
+        //todo 1为未审核，先放开
         Long postsDatabaseCount = postsMapper.selectCount(
-                new LambdaQueryWrapper<Posts>().eq(Posts::getIsPublish, "0"));
+                new LambdaQueryWrapper<Posts>().eq(Posts::getIsPublish, "1"));
 
         Long postsElasticSearchCount = elasticSearchService.countIndexData(CNI_POST_INDEX);
         //设定阈值
