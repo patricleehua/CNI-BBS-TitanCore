@@ -240,9 +240,9 @@ public class CommonService {
     public String createTemporaryUrl(FileDownloadDTO fileDownloadDTO) {
         var cloudStorageService = factory.createService();
         String folderName = CloudStorePath.BASE_PATH
-                + "/" + fileDownloadDTO.getUserId()
+                + fileDownloadDTO.getUserId()
                 + "/" + CloudStorePath.FOLDER_PATH;
-        String filePath = folderName +"/"+ fileDownloadDTO.getFileName();
+        String filePath = folderName + fileDownloadDTO.getFileName();
         return cloudStorageService.createTemplateUrlOfFile(filePath,fileDownloadDTO.getExpiresIn(),fileDownloadDTO.getIsPrivate().equals("0"));
     }
 

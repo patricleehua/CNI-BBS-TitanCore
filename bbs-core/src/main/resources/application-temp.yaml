@@ -42,7 +42,7 @@ titan:
   cloud:
     aliyun:
       aoss:  # 阿里云OSS
-        endpoint: oss-cn-guangzhou.aliyuncs.com
+        endpoint: https://oss-cn-guangzhou.aliyuncs.com
         access-key-id: here
         access-key-secret: here
         bucket-name-open: here
