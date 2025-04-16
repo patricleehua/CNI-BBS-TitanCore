@@ -24,9 +24,8 @@ jobs:
     - name: Generate application-docker.yml
       run: |
         mkdir -p bbs-core/src/main/resources
-        cat << EOF > bbs-core/src/main/resources/application-docker.yaml
-        ${{ secrets.DOCKER_YML }}
-        EOF
+        echo -e "${{ secrets.DOCKER_YML }}" > bbs-core/src/main/resources/application-docker.yaml
+
 
     - name: Build with Maven
       run: mvn package -B -Pdocker -DskipTests
