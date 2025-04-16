@@ -21,10 +21,11 @@ jobs:
         cache: 'maven'
         cache-dependency-path: '**/pom.xml' 
         
-    - name: Generate application-docker.yml
+    - name: Generate application-docker.properties
       run: |
         mkdir -p bbs-core/src/main/resources
-        echo -e "${{ secrets.DOCKER_YML }}" > bbs-core/src/main/resources/application-docker.yaml
+        echo "${{ secrets.DOCKER_PROPERTIES }}" > bbs-core/src/main/resources/application-docker.properties
+
 
 
     - name: Build with Maven
