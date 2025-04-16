@@ -74,6 +74,6 @@ jobs:
           sudo docker pull crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:latest
           sudo docker stop titan-core || true
           sudo docker rm titan-core || true
-          sudo docker run -d --name titan-core -p 8999:8080 crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:latest
+          sudo docker run -d --name titan-core -p 8999:8080 --network 1panel-network crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:latest
           sudo docker network connect es-net titan-core
 
