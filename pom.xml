@@ -167,6 +167,36 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <profiles>
+    <profile>
+      <id>dev</id>
+      <properties>
+        <spring.profiles.active>dev</spring.profiles.active>
+      </properties>
+    </profile>
+    <profile>
+      <id>docker</id>
+      <properties>
+        <spring.profiles.active>docker</spring.profiles.active>
+      </properties>
+    </profile>
+    <profile>
+      <id>prod</id>
+      <properties>
+        <spring.profiles.active>prod</spring.profiles.active>
+      </properties>
+    </profile>
+    <profile>
+      <id>temp</id>
+      <properties>
+        <spring.profiles.active>temp</spring.profiles.active>
+      </properties>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
+  </profiles>
   <build>
     <!-- 统一插件管理 -->
     <pluginManagement>
