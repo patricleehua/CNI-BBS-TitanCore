@@ -37,6 +37,15 @@ jobs:
     - name: Build with Maven
       run: mvn clean package -DskipTests
 
+    - name: Set up QEMU (for multiarch)
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        install: true
+
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
@@ -47,16 +56,16 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and push Docker image to Aliyun
+    - name: Build and push multi-arch Docker image to Aliyun
       uses: docker/build-push-action@v5
       with:
         context: .
         file: ./Dockerfile
+        platforms: linux/amd64,linux/arm64
         push: true
         tags: |
           crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:latest
           crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:${{ github.sha }}
-
 
           
     - name: Deploy to server via SSH
@@ -68,6 +77,7 @@ jobs:
         port: 221
         script: |
           sudo -i
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username=${{ secrets.DOCKER_USERNAME }} --password-stdin crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com
           docker pull crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:latest
           docker stop titan-core || true
           docker rm titan-core || true
