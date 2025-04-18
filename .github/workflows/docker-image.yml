@@ -10,8 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout to Main
       uses: actions/checkout@v4
+      with:
+        ref: main
+
 
     - name: Set up JDK 17 with Maven cache
       uses: actions/setup-java@v4
@@ -50,6 +53,13 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
+    - name: Get timestamp
+      id: timestamp
+      run: |
+        echo "IMAGE_TAG=$(date +%Y%m%d%H%M%S)" >> "$GITHUB_OUTPUT"
+        echo "SHORT_SHA=${GITHUB_SHA::6}" >> "$GITHUB_OUTPUT"
+
+
     - name: Build and push multi-arch Docker image to Aliyun
       uses: docker/build-push-action@v5
       with:
@@ -59,9 +69,8 @@ jobs:
         push: true
         tags: |
           crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:latest
-          crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:${{ github.sha }}
+          crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:${{ steps.timestamp.outputs.IMAGE_TAG }}${{ steps.timestamp.outputs.SHORT_SHA }}
 
-          
     - name: Deploy to server via SSH
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -71,9 +80,9 @@ jobs:
         port: 221
         script: |
           echo ${{ secrets.DOCKER_PASSWORD }} | sudo docker login --username=${{ secrets.DOCKER_USERNAME }} --password-stdin crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com
-          sudo docker pull crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:latest
+          sudo docker pull crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:${{ steps.timestamp.outputs.IMAGE_TAG }}${{ steps.timestamp.outputs.SHORT_SHA }}
           sudo docker stop titan-core || true
           sudo docker rm titan-core || true
-          sudo docker run -d --name titan-core -p 8999:8080 --network 1panel-network crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:latest
+          sudo docker run -d --name titan-core -p 8999:8080 --network 1panel-network crpi-3vi0uv2gxk2az3c0.cn-guangzhou.personal.cr.aliyuncs.com/patriclee/titan-core:${{ steps.timestamp.outputs.IMAGE_TAG }}${{ steps.timestamp.outputs.SHORT_SHA }}
           sudo docker network connect es-net titan-core
 

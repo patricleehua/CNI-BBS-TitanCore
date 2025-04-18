@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,24 +56,23 @@ public class CniWordReplace implements IWordReplace {
     private Map<String, String> loadReplaceWords() {
         Map<String, String> map = new HashMap<>();
         try {
-            // 读取 classpath 下的 ReplaceWords.txt 文件
             ClassPathResource resource = new ClassPathResource("sensitive/ReplaceWords.txt");
-            Path filePath = Path.of(resource.getFile().getPath());
-            List<String> lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
 
-            // 处理文件的每一行
-            for (String line : lines) {
-                line = line.trim();
-                if (line.isEmpty()) continue; // 忽略空行
-                String[] parts = line.split("=");
-                if (parts.length == 2) {
-                    String word = parts[0].trim();
-                    String replacement = parts[1].trim();
-                    map.put(word, replacement);
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    line = line.trim();
+                    if (line.isEmpty()) continue; // 忽略空行
+                    String[] parts = line.split("=");
+                    if (parts.length == 2) {
+                        map.put(parts[0].trim(), parts[1].trim());
+                    }
                 }
             }
-        } catch (IOException e) {
-            log.error("读取 ReplaceWords.txt 文件时发生错误: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("读取 ReplaceWords.txt 文件时发生错误: {}", e.getMessage(), e);
         }
         return map;
     }

@@ -28,11 +28,20 @@ public class CniWordDeny implements IWordDeny {
     public List<String> deny() {
         List<String> list = new ArrayList<>();
         try {
-            Resource mySensitiveWords = new ClassPathResource("sensitive/DenyWords.txt");
-            Path mySensitiveWordsPath = Paths.get(mySensitiveWords.getFile().getPath());
-            list =  Files.readAllLines(mySensitiveWordsPath, StandardCharsets.UTF_8);
-        } catch (IOException ioException) {
-            log.error("读取敏感词文件错误:{}",ioException.getMessage());
+            ClassPathResource resource = new ClassPathResource("sensitive/DenyWords.txt");
+            try (var inputStream = resource.getInputStream();
+                 var reader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    line = line.trim();
+                    if (!line.isEmpty()) {
+                        list.add(line);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("读取敏感词文件错误: {}", e.getMessage());
         }
         return list;
     }
