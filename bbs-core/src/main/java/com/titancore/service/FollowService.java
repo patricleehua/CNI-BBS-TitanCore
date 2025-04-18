@@ -42,4 +42,6 @@ public interface FollowService extends IService<Follow> {
      * @return
      */
     FollowStatus getUserFollowStatus(String targetUserId, String beFollowedUserId);
+
+    Boolean queryFollowStatus(String userId, String targetUserId);
 }

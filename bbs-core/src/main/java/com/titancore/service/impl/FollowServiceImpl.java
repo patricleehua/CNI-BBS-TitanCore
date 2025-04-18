@@ -22,6 +22,7 @@ import com.titancore.service.FollowService;
 import com.titancore.domain.mapper.FollowMapper;
 import com.titancore.util.AuthenticationUtil;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -243,6 +244,23 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
             return follow.getFollowStatus();
         }
     }
+    @Override
+    public Boolean queryFollowStatus(String userId, String targetUserId) {
+        if (StringUtils.isNotBlank(userId) && StringUtils.isNotBlank(targetUserId)) {
+            Long count = followMapper.selectCount(
+                    new LambdaQueryWrapper<Follow>()
+                            .and(wrapper -> wrapper
+                                    .eq(Follow::getUserId, userId).eq(Follow::getFollowerId, targetUserId)
+                                    .or()
+                                    .eq(Follow::getUserId, targetUserId).eq(Follow::getFollowerId, userId)
+                            )
+                            .eq(Follow::getFollowStatus, FollowStatus.CONFIRMED)
+            );
+            return count == 2;
+        }
+        return false;
+    }
+
 
     private List<FollowerVo> filterFollowListToFollowerVoList(List<Follow> follows, boolean isGroup,boolean isCheckFollower) {
         List<FollowerVo> followerVos = new ArrayList<>();

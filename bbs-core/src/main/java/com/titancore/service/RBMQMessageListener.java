@@ -8,6 +8,8 @@ import com.titancore.config.rabbitmq.RabbitMqConstant;
 import com.titancore.domain.dto.ChatMessageDTO;
 import com.titancore.domain.entity.ChatMessage;
 import com.titancore.domain.entity.User;
+import com.titancore.enums.MessageFormat;
+import com.titancore.enums.MessageType;
 import com.titancore.enums.SourceType;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 
 
 @Component
@@ -31,6 +34,10 @@ public class RBMQMessageListener {
     private ChatListService chatListService;
     @Autowired
     private WebSocketService webSocketService;
+    @Autowired
+    private FollowService followService;
+    @Autowired
+    private ChatGroupMemberService chatGroupMemberService;
 
     /**
      * 监听私聊用户队列
@@ -44,6 +51,22 @@ public class RBMQMessageListener {
             ChatMessageDTO chatMessageDTO = messageParseToChatMessageDTO(message);
             //获取发送方用户信息
             User user = userService.getById(chatMessageDTO.getFromId());
+            //检查关系
+            Boolean status = followService.queryFollowStatus(chatMessageDTO.getFromId(), chatMessageDTO.getToId());
+            if (!status) {
+                log.info("用户{}与用户{}关系为{}，发送失败", chatMessageDTO.getFromId(), chatMessageDTO.getToId(), status);
+                ChatMessage chatMessage = new ChatMessage();
+                chatMessage.setFromId(1L);
+                chatMessage.setToId(Long.valueOf(chatMessageDTO.getFromId()));
+                chatMessage.setMessageFormat(MessageFormat.TEXT);
+                chatMessage.setMessageType(MessageType.NOTIFY);
+                chatMessage.setCreateTime(LocalDateTime.now());
+                chatMessage.setUpdateTime(LocalDateTime.now());
+                chatMessage.setSourceType(SourceType.SYSTEM);
+                webSocketService.sendMsgToGroup(chatMessage, String.valueOf(chatMessage.getToId()));
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                return;
+            }
             //保存消息
             ChatMessage chatMessage = chatMessageService.saveChatMessage(user,chatMessageDTO);
             //更新聊天列表
@@ -89,6 +112,21 @@ public class RBMQMessageListener {
         try {
             log.debug("接收到群组队列的消息message:{},channel:{}", message, channel);
             ChatMessageDTO chatMessageDTO = messageParseToChatMessageDTO(message);
+            boolean exists = chatGroupMemberService.isMemberExists(chatMessageDTO.getToId(), chatMessageDTO.getFromId());
+            if (!exists) {
+                log.info("用户{}不在群组{}中，发送失败", chatMessageDTO.getFromId(), chatMessageDTO.getToId());
+                ChatMessage chatMessage = new ChatMessage();
+                chatMessage.setFromId(1L);
+                chatMessage.setToId(Long.valueOf(chatMessageDTO.getFromId()));
+                chatMessage.setMessageFormat(MessageFormat.TEXT);
+                chatMessage.setMessageType(MessageType.NOTIFY);
+                chatMessage.setCreateTime(LocalDateTime.now());
+                chatMessage.setUpdateTime(LocalDateTime.now());
+                chatMessage.setSourceType(SourceType.SYSTEM);
+                webSocketService.sendMsgToGroup(chatMessage, String.valueOf(chatMessage.getToId()));
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                return;
+            }
             //获取发送方用户信息
             User user = userService.getById(chatMessageDTO.getFromId());
             //保存消息

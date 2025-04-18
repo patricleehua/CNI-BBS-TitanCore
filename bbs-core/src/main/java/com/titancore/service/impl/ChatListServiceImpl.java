@@ -15,10 +15,13 @@ import com.titancore.domain.param.ChatListParam;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.vo.ChatListDmlVo;
 import com.titancore.domain.vo.ChatListVo;
+import com.titancore.enums.ResponseCodeEnum;
 import com.titancore.enums.SourceType;
+import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.ChatGroupMemberService;
 import com.titancore.service.ChatGroupService;
 import com.titancore.service.ChatListService;
+import com.titancore.service.FollowService;
 import com.titancore.util.AuthenticationUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
@@ -37,13 +40,32 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
     private  ChatGroupMemberService chatGroupMemberService;
     @Resource
     private  ChatGroupService cacheGroupService;
+    @Resource
+    private FollowService followService;
 
     @Override
     public void updateChatList(String fromId, String toId, ChatMessageContent chatMessageContent, SourceType sourceType) {
         //todo 判断聊天列表是否存在
         ChatList chatList = chatListMapper.selectOne(new LambdaQueryWrapper<ChatList>()
                 .eq(ChatList::getToId, toId).eq(ChatList::getFromId, fromId).eq(ChatList::getSourceType, sourceType));
-
+        //检查类型
+        switch (sourceType) {
+            case USER -> {
+                Boolean status = followService.queryFollowStatus(fromId, toId);
+                if (status) {
+                    throw new BizException(ResponseCodeEnum.FOLLOW_STATUS_ERROR);
+                }
+            }
+            case GROUP -> {
+                boolean status = chatGroupMemberService.isMemberExists(toId, fromId);
+                if (!status) {
+                    throw new BizException(ResponseCodeEnum.GROUP_MEMBER_STATUS_ERROR);
+                }
+            }
+            case SYSTEM -> {
+                //todo
+            }
+        }
         if (null == chatList) {
             //新建
             chatList = new ChatList();
