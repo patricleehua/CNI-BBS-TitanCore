@@ -52,7 +52,7 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
         switch (sourceType) {
             case USER -> {
                 Boolean status = followService.queryFollowStatus(fromId, toId);
-                if (status) {
+                if (!status) {
                     throw new BizException(ResponseCodeEnum.FOLLOW_STATUS_ERROR);
                 }
             }

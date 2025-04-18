@@ -7,6 +7,7 @@ import com.rabbitmq.client.Channel;
 import com.titancore.config.rabbitmq.RabbitMqConstant;
 import com.titancore.domain.dto.ChatMessageDTO;
 import com.titancore.domain.entity.ChatMessage;
+import com.titancore.domain.entity.ChatMessageContent;
 import com.titancore.domain.entity.User;
 import com.titancore.enums.MessageFormat;
 import com.titancore.enums.MessageType;
@@ -63,7 +64,10 @@ public class RBMQMessageListener {
                 chatMessage.setCreateTime(LocalDateTime.now());
                 chatMessage.setUpdateTime(LocalDateTime.now());
                 chatMessage.setSourceType(SourceType.SYSTEM);
-                webSocketService.sendMsgToGroup(chatMessage, String.valueOf(chatMessage.getToId()));
+                ChatMessageContent content = new ChatMessageContent();
+                content.setContent("用户" + user.getUserName() + "不在与您" + chatMessageDTO.getToId() + "的好友关系中，发送失败");
+                chatMessage.setChatMessageContent(content);
+                webSocketService.sendMsgToUser(chatMessage, String.valueOf(chatMessageDTO.getFromId()));
                 channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
                 return;
             }
@@ -123,7 +127,10 @@ public class RBMQMessageListener {
                 chatMessage.setCreateTime(LocalDateTime.now());
                 chatMessage.setUpdateTime(LocalDateTime.now());
                 chatMessage.setSourceType(SourceType.SYSTEM);
-                webSocketService.sendMsgToGroup(chatMessage, String.valueOf(chatMessage.getToId()));
+                ChatMessageContent content = new ChatMessageContent();
+                content.setContent("您不在群组" + chatMessageDTO.getToId() + "中，发送失败");
+                chatMessage.setChatMessageContent(content);
+                webSocketService.sendMsgToUser(chatMessage, String.valueOf(chatMessageDTO.getFromId()));
                 channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
                 return;
             }
@@ -133,7 +140,7 @@ public class RBMQMessageListener {
             ChatMessage chatMessage = chatMessageService.saveChatMessage(user,chatMessageDTO);
             //更新聊天列表
             if (chatMessage != null) {
-                chatListService.updateChatList(String.valueOf(chatMessage.getFromId()),String.valueOf( chatMessage.getToId()),chatMessage.getChatMessageContent(), SourceType.USER);
+                chatListService.updateChatList(String.valueOf(chatMessage.getFromId()),String.valueOf( chatMessage.getToId()),chatMessage.getChatMessageContent(), SourceType.GROUP);
             }
             //发送消息
             if (null != chatMessage) {
@@ -173,7 +180,7 @@ public class RBMQMessageListener {
             ChatMessage chatMessage = chatMessageService.saveChatMessage(user,chatMessageDTO);
             //更新聊天列表
             if (chatMessage != null) {
-                chatListService.updateChatList(String.valueOf(chatMessage.getFromId()),String.valueOf( chatMessage.getToId()),chatMessage.getChatMessageContent(), SourceType.USER);
+                chatListService.updateChatList(String.valueOf(chatMessage.getFromId()),String.valueOf( chatMessage.getToId()),chatMessage.getChatMessageContent(), SourceType.SYSTEM);
             }
             //发送消息
             if (null != chatMessage) {
