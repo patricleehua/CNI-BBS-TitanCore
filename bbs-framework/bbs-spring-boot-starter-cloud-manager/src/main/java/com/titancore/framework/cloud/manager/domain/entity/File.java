@@ -37,5 +37,9 @@ public class File implements Serializable {
      * 存储类型
      */
     private String storageClass;
+    /**
+     * 文件夹路径
+     */
+    private String filePath;
 
 }

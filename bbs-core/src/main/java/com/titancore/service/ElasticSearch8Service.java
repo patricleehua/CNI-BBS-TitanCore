@@ -165,7 +165,7 @@ public class ElasticSearch8Service {
             int page = 1, pageSize = 20;
             while (true){
                 Page<Posts> postsPage = postsMapper.selectPage(new Page<>(page, pageSize),
-                        new LambdaQueryWrapper<Posts>().eq(Posts::getIsPublish, "0"));
+                        new LambdaQueryWrapper<Posts>().eq(Posts::getIsPublish, "1"));
                 List<Posts> posts = postsPage.getRecords();
                 if (posts == null || posts.isEmpty()) {
                     return;
@@ -243,7 +243,7 @@ public class ElasticSearch8Service {
             }else{
                 boolQueryBuilder.must(MatchAllQuery.of(ma -> ma)._toQuery());
             }
-            if (postSearchParam.getAuthorName()!=null){
+            if (postSearchParam.getAuthorName()!=null && !postSearchParam.getAuthorName().isEmpty()){
                 boolQueryBuilder.must(ms ->
                         ms.match(MatchQuery.of(m ->
                                 m.query(postSearchParam.getAuthorName())
@@ -260,12 +260,12 @@ public class ElasticSearch8Service {
             boolQueryBuilder.should(scoreQuery.build()._toQuery());
 
             //条件过滤
-            if (postSearchParam.getCategoryId()!=null){
+            if (postSearchParam.getCategoryId()!=null && !(postSearchParam.getCategoryId() ==0)){
                 boolQueryBuilder.filter(TermQuery.of(t -> t
                         .field("categoryId").value(postSearchParam.getCategoryId()))
                         ._toQuery());
             }
-            if (postSearchParam.getTagList() != null){
+            if (postSearchParam.getTagList() != null && !postSearchParam.getTagList().isEmpty()){
                 //todo 多个标签
                 boolQueryBuilder.filter(TermQuery.of(t -> t
                         .field("tagsId").value(postSearchParam.getKeyword()))

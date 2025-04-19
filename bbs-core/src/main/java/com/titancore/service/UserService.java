@@ -104,5 +104,7 @@ public interface UserService  extends IService<User> {
      * @return
      */
     UserVo findUserInfoByUserId(Long userId);
+
+    UserLoginVo getUserInfoByToken(long userId);
 }
 

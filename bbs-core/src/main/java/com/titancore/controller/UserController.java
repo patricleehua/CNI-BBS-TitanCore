@@ -33,6 +33,13 @@ public class UserController {
         UserLoginVo userLoginVo = userService.login(userLoginDTO);
         return Response.success(userLoginVo);
     }
+    @GetMapping("/getUserInfoByToken")
+    @Operation(summary = "根据Token获取用户登入信息")
+    public Response<?> getUserInfoByToken(){
+        long userId = StpUtil.getLoginIdAsLong();
+        UserLoginVo userLoginVo = userService.getUserInfoByToken(userId);
+        return Response.success(userLoginVo);
+    }
 
     @GetMapping("/open/logout/{userId}")
     @ApiOperationLog

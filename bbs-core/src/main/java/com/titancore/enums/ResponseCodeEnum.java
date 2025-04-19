@@ -36,7 +36,7 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     AUTH_ACCOUNT_INVITE_CREATE_FAIL("AUTH-30017","用户链接创建失败!" ),
     AUTH_ACCOUNT_TEMPORARY_USER_CREATED_FAIL("AUTH-30018","临时用户创建失败!" ),
 
-    //code
+    AUTH_ACCOUNT_HAS_BINDED("AUTH-300019","第三方用户已被绑定！" ),//code
     APTCHACODE_IS_NOT_EXIST("APTCHACODE-10001","验证码不存在!"),
     APTCHACODE_IS_NOT_CORRECT("APTCHACODE-10002","验证码校验不通过!"),
     //passcode
@@ -93,8 +93,7 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     CHAT_GROUP_MEMBER_IS_NOT_EXIST("CHATGROUPMEMBER-10001","群成员不存在!"),
 
     //AiMessage
-    AI_MESSAGE_TYPE_IS_ERROR("AI-MESSAGE-10001","消息类型错误" )
-    ;
+    AI_MESSAGE_TYPE_IS_ERROR("AI-MESSAGE-10001","消息类型错误" );
 
     // ----------- 业务异常状态码 -----------
 

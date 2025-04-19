@@ -73,7 +73,7 @@ public class MinioStorageService implements CloudService {
 
     @Override
     public boolean deleteByPath(FileDelDTO fileDelDTO,boolean isPrivate) {
-        String path = fileDelDTO.getUserId() + "/" + fileDelDTO.getPath();
+        String path = fileDelDTO.getPath();
         if (fileDelDTO.getFileName() != null && !fileDelDTO.getFileName().isEmpty() ) {
             path = fileDelDTO.getPath().endsWith("/") ? path : path + "/";
             // 删除单个文件
@@ -92,10 +92,12 @@ public class MinioStorageService implements CloudService {
             // 找到最后一个斜杠的位置
             int lastSlashIndex = fNamePath.lastIndexOf('/');
             // 使用substring截取从最后一个斜杠位置开始到字符串末尾的部分
-            String result = fNamePath.substring(lastSlashIndex + 1);
+            String fileName =  fNamePath.substring(lastSlashIndex + 1);
+            String pathPart = fNamePath.substring(0, lastSlashIndex);
             File f = new File();
             f.setEtag(item.etag());
-            f.setFileName(result);
+            f.setFileName(fileName);
+            f.setFilePath(pathPart);
             String fileType = item.userMetadata() != null ? item.userMetadata().get("Content-Type") : null;
             f.setFileType(fileType);
             f.setFileSize(String.valueOf(item.size()));

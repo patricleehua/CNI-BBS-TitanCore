@@ -197,6 +197,8 @@
       </activation>
     </profile>
   </profiles>
+
+
   <build>
     <!-- 统一插件管理 -->
     <pluginManagement>

@@ -2,6 +2,7 @@ package com.titancore.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.titancore.domain.dto.CleanCoverDTO;
 import com.titancore.domain.dto.PostDTO;
 import com.titancore.domain.dto.PostUpdateDTO;
 import com.titancore.domain.entity.Posts;
@@ -42,4 +43,6 @@ public interface PostsService extends IService<Posts> {
     DMLVo updatePost(PostUpdateDTO postUpdateDTO);
 
     String createTemporaryPostId(String userId,String postId);
+
+    DMLVo cleanTemporaryCover(CleanCoverDTO cleanCoverDTO);
 }

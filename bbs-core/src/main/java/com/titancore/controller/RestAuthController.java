@@ -44,6 +44,8 @@ public class RestAuthController {
     @Autowired
     private UserService userService;
 
+    private final String FRONTURL = "http://localhost:3000";
+
     @GetMapping("/render/{source}")
     @Operation(summary = "向三方接口申请认证链接")
     public void renderAuth(@PathVariable("source") String source,HttpServletResponse response) throws IOException {
@@ -83,24 +85,24 @@ public class RestAuthController {
                 //系统用户为空(未绑定
                 //给用户生成临时通行码进行绑定邮箱 or 手机号 or 系统中存在的用户
                 int temporaryPassCode = userService.getTemporaryPassCode(String.valueOf(socialUser.getId()));
-                String redirectUrl = "http://localhost:3000/bind?passcode="+temporaryPassCode+"&socialUserId="+socialUser.getId();
+                String redirectUrl = FRONTURL+"/bind?passcode="+temporaryPassCode+"&socialUserId="+socialUser.getId();
                 response.sendRedirect(redirectUrl);
             }else if(systemUser.getDelFlag().equals("2")){
                 //账号被删除
-                String redirectUrl = "https://baidu.com/auth/callback?blocked=    ";
+                String redirectUrl = FRONTURL+"/callback?blocked=";
                 response.sendRedirect(redirectUrl);
             }
             else {
                 //用户登入
                 StpUtil.login(systemUser.getUserId());
                 String token = StpUtil.getTokenValue();
-                String redirectUrl = "http://localhost:3000/home?token="+token;
+                String redirectUrl = FRONTURL+"/home?token="+token;
                 response.sendRedirect(redirectUrl);
             }
             return null;
         } else{
             //重定向？
-            String redirectUrl = "https://error" ;
+            String redirectUrl =FRONTURL+"/error" ;
             response.sendRedirect(redirectUrl);
         }
         return null;
@@ -127,7 +129,7 @@ public class RestAuthController {
                             // 针对国外平台配置代理
                             .httpConfig(HttpConfig.builder()
                                     .timeout(authProperties.getProxy().getTimeout())
-                                    .proxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(authProperties.getProxy().getHost(), authProperties.getProxy().getPort())))
+//                                    .proxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(authProperties.getProxy().getHost(), authProperties.getProxy().getPort())))
                                     .build())
                             .build());
                 case WECHAT_OPEN ->

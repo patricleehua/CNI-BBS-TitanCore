@@ -18,5 +18,7 @@ public interface SocialUserMapper extends BaseMapper<SocialUser> {
     @Insert("INSERT INTO social_user_rel(id, user_id, social_user_id) VALUES (#{id}, #{user_id}, #{social_user_id})")
     int buildRelForSocialUserWithUserByUserIdAndSocialUserId(@Param("id") Long id, @Param("user_id") Long userId, @Param("social_user_id") String socialUserId);
 
+    @Select("SELECT COUNT(*) FROM social_user_rel WHERE social_user_id = #{socialUserId}")
+    int countBindUser(String socialUserId);
 }
 

@@ -141,7 +141,7 @@ public class AliyunOssUtilV2 {
         filePath = FileUtil.extractPathAfterKeyword(filePath,"aliyuncs.com/");
         OSS ossClient = createOssClient();
         try {
-            ossClient.deleteObject(bucketName, filePath);
+            VoidResult voidResult = ossClient.deleteObject(bucketName, filePath);
             log.info("Deleted file: {}", filePath);
             return true;
         }catch (OSSException oe) {
