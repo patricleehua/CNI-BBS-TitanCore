@@ -52,4 +52,11 @@ public interface ChatGroupMemberService extends IService<ChatGroupMember> {
      * @return
      */
     boolean isMemberExists(String groupId, String userId);
+
+    /**
+     * 查询userId所在的所有群组Id列表
+     * @param userId
+     * @return
+     */
+    List<Long> getGroupIdsByUserId(String userId);
 }

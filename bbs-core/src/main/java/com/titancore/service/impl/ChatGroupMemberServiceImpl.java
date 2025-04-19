@@ -93,6 +93,14 @@ public class ChatGroupMemberServiceImpl extends ServiceImpl<ChatGroupMemberMappe
         return this.count(queryWrapper) > 0;
     }
 
+    @Override
+    public List<Long> getGroupIdsByUserId(String userId) {
+        if (userId != null) {
+            return chatGroupMemberMapper.selectList(new LambdaQueryWrapper<ChatGroupMember>().eq(ChatGroupMember::getUserId, userId)).stream().map(ChatGroupMember::getChatGroupId).toList();
+        }
+        return List.of();
+    }
+
     private List<User> queryUserInfo(List<String> userIds){
         return userMapper.selectBatchIds(userIds);
     }

@@ -113,7 +113,13 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
         LambdaQueryWrapper<ChatList> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ChatList::getFromId, chatListParam.getFromId());
         //群组
-        queryWrapper.or().eq(ChatList::getToId,chatListParam.getFromId()).eq(ChatList::getSourceType, SourceType.GROUP);
+        List<Long> groupIdsByUserId = chatGroupMemberService.getGroupIdsByUserId(chatListParam.getFromId());
+        if (groupIdsByUserId != null && !groupIdsByUserId.isEmpty()) {
+            queryWrapper.or(wrapper ->
+                    wrapper.in(ChatList::getToId, groupIdsByUserId)
+                            .eq(ChatList::getSourceType, SourceType.GROUP)
+            );
+        }
         Page<ChatList> chatListPage = chatListMapper.selectPage(page, queryWrapper);
         PageResult pageResult = new PageResult();
         pageResult.setTotal(chatListPage.getTotal());
