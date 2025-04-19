@@ -201,7 +201,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         Page<ChatMessage> chatMessagePage = chatMessageMapper.selectPage(page, queryWrapper);
         List<ChatMessage> records = chatMessagePage.getRecords();
         //对结果进行升序
-        if(chatMessageParam.getIsDesc().equals(String.valueOf(StatusEnum.ENABLE.getValue()))) {
+        if(chatMessageParam.getIsDesc().equals(String.valueOf(StatusEnum.DISABLED.getValue()))) {
             records.sort(Comparator.comparing(ChatMessage::getCreateTime));
         }
         PageResult pageResult = new PageResult();
