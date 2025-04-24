@@ -1,5 +1,6 @@
 package com.titancore.service;
 
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
 import com.titancore.advisor.ContainsOffendingWords;
 import com.titancore.domain.entity.AiCheckOffendingWordsResponse;
 import com.titancore.enums.Functions;
@@ -20,10 +21,12 @@ public class AiDetectTextService {
 
     @Resource
     private OpenAiChatModel openAiChatModel;
+    @Resource
+    private DashScopeChatModel dashScopeChatModel;
     private ChatClient chatClient;
     @PostConstruct
     public void init() {
-        chatClient = chatClientFactory.createChatClient(Functions.DETECTTEXTAGENT, openAiChatModel);
+        chatClient = chatClientFactory.createChatClient(Functions.DETECTTEXTAGENT, dashScopeChatModel);
     }
 
     public AiCheckOffendingWordsResponse isContainsOffendingWords(String text, Set<String> offendingWords){

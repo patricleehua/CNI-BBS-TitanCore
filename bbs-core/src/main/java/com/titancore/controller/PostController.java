@@ -101,7 +101,7 @@ public class PostController {
      * @param postCommentParam
      * @return
      */
-    @PostMapping("/queryCommentListByPostId")
+    @PostMapping("/open/queryCommentListByPostId")
     @Operation(summary = "获取帖子评论分页")
     private Response<?> queryCommentListByPostId(@RequestBody PostCommentParam postCommentParam){
         PageResult pageResult = postCommentsService.queryCommentListByPostId(postCommentParam);
@@ -116,8 +116,7 @@ public class PostController {
     @DeleteMapping("/deletePostComment")
     @Operation(summary = "删除帖子评论")
     private Response<?> deletePostComment(@RequestBody PostCommentParam postCommentParam){
-
         DMLVo dmlVo = postCommentsService.deletePostComment(postCommentParam);
-        return Response.success();
+        return Response.success(dmlVo);
     }
 }

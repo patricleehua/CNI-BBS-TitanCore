@@ -82,8 +82,7 @@ public class PostCommentsServiceImpl extends ServiceImpl<PostCommentsMapper, Pos
         postComments.setContent(postCommentsDTO.getContent());
         // 如果该评论没有父评论则将该评论设为父评论，否则为子评论
         if (Long.parseLong(postCommentsDTO.getParentId()) == 0
-                && Long.parseLong(postCommentsDTO.getReplyCommentId()) == 0
-                && Long.parseLong(postCommentsDTO.getToUserId()) == posts.getAuthorId()) {
+                && Long.parseLong(postCommentsDTO.getReplyCommentId()) == 0) {
             //设置为父评论
             postComments.setLevel(1);
             postComments.setParentId(0L);
@@ -121,6 +120,11 @@ public class PostCommentsServiceImpl extends ServiceImpl<PostCommentsMapper, Pos
         // 检查用户权限
         if (isPostsAuthor || isCommentAuthor || isSuperPowerUser) {
             if (this.baseMapper.deleteById(postCommentId) > 0) {
+                //如果是父评论，删除所有子评论
+                LambdaQueryWrapper<PostComments> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(PostComments::getToUid, postCommentId);
+                this.baseMapper.delete(queryWrapper);
+
                 dmlVo.setStatus(true);
                 dmlVo.setMessage(CommonConstant.DML_DELETE_SUCCESS);
             } else {
