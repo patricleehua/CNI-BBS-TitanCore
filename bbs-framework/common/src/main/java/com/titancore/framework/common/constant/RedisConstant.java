@@ -74,4 +74,8 @@ public class RedisConstant {
      * 帖子更新分布式锁前缀
      */
     public static final String POST_UPDATE_LOCK_PRIX = "post_update_lock:";
+
+    public static final String PASSWORD_ERROR_PRIX = "password:error:";
+    public static final long PASSWORD_ERROR_TTL = 5L;
+    ;
 }

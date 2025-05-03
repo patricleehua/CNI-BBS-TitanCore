@@ -74,12 +74,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     if (user == null ) {
                         throw new BizException(ResponseCodeEnum.ACCOUNT_DELETE);
                     }
-                    //md5加密
+                    // 错误计数 Key
+                    String redisKey = RedisConstant.PASSWORD_ERROR_PRIX + user.getUserId();
+                    // 判断当前错误次数
+                    String errorStr = stringRedisTemplate.opsForValue().get(redisKey);
+                    int errorCount = errorStr == null ? 0 : Integer.parseInt(errorStr);
+
+                    // 如果已经达到或超过 5 次，直接抛异常（**关键：不要等到 INCR 后再判断**）
+                    if (errorCount >= 5) {
+                        throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_PASSWORD_ERROR_COUNT);
+                    }
+                    // 密码加密比对
                     String password = userLoginDto.getPassword() + md5Salt.getSalt();
                     String md5password = DigestUtils.md5DigestAsHex(password.getBytes());
 
-                    //密码
                     if (!md5password.equals(user.getPassword())) {
+                        // 密码错误，原子递增
+                        Long newErrorCount = stringRedisTemplate.opsForValue().increment(redisKey);
+
+                        // 第一次错误设置过期时间
+                        if (newErrorCount != null && newErrorCount == 1) {
+                            stringRedisTemplate.expire(redisKey, RedisConstant.PASSWORD_ERROR_TTL, TimeUnit.MINUTES);
+                        }
+
+                        // 再次检查：如果递增之后超过限制，也抛异常
+                        if (newErrorCount != null && newErrorCount >= 5) {
+                            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_PASSWORD_ERROR_COUNT);
+                        }
+
                         throw new BizException(ResponseCodeEnum.PASSWORD_ERROR);
                     }
                     //状态
