@@ -37,6 +37,7 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     AUTH_ACCOUNT_TEMPORARY_USER_CREATED_FAIL("AUTH-30018","临时用户创建失败!" ),
 
     AUTH_ACCOUNT_HAS_BINDED("AUTH-300019","第三方用户已被绑定！" ),//code
+    AUTH_ACCOUNT_PASSWORD_ERROR_COUNT("AUTH-300020","输入密码错误次数过多，账号被锁定!!" ),
     APTCHACODE_IS_NOT_EXIST("APTCHACODE-10001","验证码不存在!"),
     APTCHACODE_IS_NOT_CORRECT("APTCHACODE-10002","验证码校验不通过!"),
     //passcode
