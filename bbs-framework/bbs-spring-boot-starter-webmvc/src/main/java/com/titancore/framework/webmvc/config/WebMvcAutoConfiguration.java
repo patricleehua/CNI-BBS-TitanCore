@@ -57,7 +57,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
                             "/ws/**",
                             "/test/**",
                             "/chatroom/**",
-                            "v3/**"
+                            "/v3/**"
                     )
                     .check(r -> {
                         if (!"OPTIONS".equalsIgnoreCase(SaHolder.getRequest().getMethod())) {
