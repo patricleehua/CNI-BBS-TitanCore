@@ -1,20 +1,20 @@
 titan:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    host: =>your mysql host  # 配置mysql主机
-    port: 3306
-    database: titan-bbs
-    username: =>your mysql username # 配置mysql用户
-    password: =>your mysql password # 配置mysql密码
+    host: localhost  # MySQL主机（本地开发使用localhost，Docker部署使用容器名）
+    port: 13306      # MySQL端口（Docker映射端口，容器内为3306）
+    database: titan_bbs  # 数据库名
+    username: titan_bbs  # MySQL用户名
+    password: titan_bbs_2026  # MySQL密码（与.env配置保持一致）
     druid:
       url-pattern: /druid/* # 配置监控后台访问路径
       login-username: admin # 配置监控后台登录的用户名
       login-password: admin # 配置监控后台登录的密码
   redis:
-    host: host.docker.internal # 配置redis主机
-    port: 6379
+    host: localhost  # Redis主机（本地开发使用localhost，Docker部署使用容器名）
+    port: 6379       # Redis端口
     database: 1
-    password:
+    password: titan_bbs_2026  # Redis密码（与redis.conf配置保持一致）
     lettuce:
       pool:
         max-active: 8 #最大连接数
@@ -34,11 +34,11 @@ titan:
       host: 192.168.1.1
       port: 1081
   rabbitmq:
-    host: www.xxxx.cn # 消息队列主机地址
-    port: 9201  # 消息队列端口
-    virtual-host: /cni-bbs
-    username: cni-bbs # 消息队列用户名
-    password: 123456 # 消息队列密码
+    host: localhost  # RabbitMQ主机（本地开发使用localhost，Docker部署使用容器名）
+    port: 5672       # RabbitMQ AMQP端口（管理界面为15672）
+    virtual-host: /titan-bbs  # 虚拟主机（与.env配置保持一致）
+    username: titan_bbs       # RabbitMQ用户名
+    password: titan_bbs_2026  # RabbitMQ密码
   cloud:
     aliyun:
       aoss:  # 阿里云OSS
@@ -57,12 +57,12 @@ titan:
 
     tencent:
 
-    minio: # 本地云存储
-      endpoint: here
-      access-key-id: here
-      access-key-secret: here
-      bucket-name-open: here
-      bucket-name-private: here
+    minio: # 本地云存储（S3兼容）
+      endpoint: http://localhost:9000  # MinIO API端口（管理控制台为9001）
+      access-key-id: titan_bbs         # MinIO Root用户（与.env配置保持一致）
+      access-key-secret: titan_bbs_2026  # MinIO Root密码
+      bucket-name-open: titan-bbs-public    # 公开访问的bucket
+      bucket-name-private: titan-bbs-private # 私有bucket
   auth:
     proxy: # 第三方登入 代理
       host: 192.168.1.1
@@ -79,27 +79,23 @@ titan:
       clientId: here
       clientSecret: here
       redirectUri: here
-  es: # es配置
-    serverUrl: here
-    userName: here
-    password: here
+  es:
+    serverUrl: http://localhost:9200  # Elasticsearch服务地址（Docker映射端口）
+    userName: elastic                 # Elasticsearch用户名
+    password: titan_bbs_2026          # Elasticsearch密码（与.env配置保持一致）
 
-  ai: # Ai服务
-    openai: # OpenAi
-      api-key: here
-      base-url: here
-      chat:
-        options:
-          model: gpt-4o-mini
-      embedding:
-        options:
-          model: text-embedding-3-small
-    dashscope: # 通义
-      api-key: here
-      base-url: here
-      chat:
-        options:
-          model: qwen-max
-        embedding:
-          options:
-            model: text-embedding-v2
+  # AI Config
+  ai:
+    provider:
+      providers:
+        open-router:
+          base-url: https://dashscope.aliyuncs.com/compatible-mode/
+          api-keys:
+            - sk-xxxx
+          default-model: qwen-max
+          available-models:
+            - qwen-max
+            - qwen-plus
+          timeout: 30000
+          max-retries: 3
+          enabled: true

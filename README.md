@@ -20,7 +20,7 @@
 
 #### 2. Environment Preparation
 
-- **Backend Framework**: This system is based on Spring Boot 3.2.5. 🖥️
+- **Backend Framework**: This system is based on Spring Boot 3.5.7. 🖥️
 - **JDK Version**: Ensure you have JDK 17 or higher installed. ☕️
 
 ##### Required Services

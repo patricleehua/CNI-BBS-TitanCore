@@ -1,13 +1,200 @@
 
 
-#rabbit-mq-server
+services:
+  # Elasticsearch 8.16.1 - 全文搜索引擎（单节点，已安装 ik 分词器）
+  elasticsearch:
+    build:
+      context: ./elasticsearch
+      dockerfile: Dockerfile
+    image: titan-bbs-elasticsearch:8.16.1-ik
+    container_name: titan-bbs-es
+    restart: unless-stopped
+    environment:
+      # 节点配置
+      - node.name=${NODE_NAME:-titan-bbs-node}
+      - cluster.name=${CLUSTER_NAME:-titan-bbs-cluster}
+      # 单节点模式
+      - discovery.type=single-node
+      # 内存锁定
+      - bootstrap.memory_lock=true
+      # JVM 内存配置
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      # 设置初始密码
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-titan_bbs_2026}
+      # 安全配置 - 启用认证但禁用 SSL（开发环境）
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      # 许可证类型
+      - xpack.license.self_generated.type=basic
+    volumes:
+      # 数据持久化到宿主机目录
+      - /docker/titan-bbs/elasticsearch/data:/usr/share/elasticsearch/data
+      - /docker/titan-bbs/elasticsearch/logs:/usr/share/elasticsearch/logs
+      - /docker/titan-bbs/elasticsearch/plugins:/usr/share/elasticsearch/plugins
+    ports:
+      - "${ES_PORT:-9200}:9200"
+      - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    networks:
+      - titan-bbs-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -u elastic:${ELASTIC_PASSWORD:-titan_bbs_2026} http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
-# elasticsearch8.X
+  # RabbitMQ 3.12 - 消息队列（已启用管理界面、Prometheus 监控和延迟消息队列插件）
+  rabbitmq:
+    build:
+      context: ./rabbitmq
+      dockerfile: Dockerfile
+    image: titan-bbs-rabbitmq:3.12-management-delayed
+    container_name: titan-bbs-rabbitmq
+    restart: unless-stopped
+    hostname: titan-bbs-rabbitmq
+    environment:
+      # 默认用户名和密码
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-titan_bbs}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-titan_bbs_2026}
+      # 默认虚拟主机
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/titan-bbs}
+      # 时区设置
+      TZ: Asia/Shanghai
+    volumes:
+      # 数据持久化 - 使用命名卷（Docker自动管理权限，避免UID 999权限问题）
+      - rabbitmqdata:/var/lib/rabbitmq
+      - rabbitmqlogs:/var/log/rabbitmq
+    ports:
+      # Erlang 发现端口
+      - "${RABBITMQ_ERLANG_PORT:-4369}:4369"
+      # AMQPS 协议端口（加密）
+      - "${RABBITMQ_AMQPS_PORT:-5671}:5671"
+      # AMQP 协议端口
+      - "${RABBITMQ_PORT:-5672}:5672"
+      # HTTPS 管理界面端口
+      - "${RABBITMQ_MANAGEMENT_HTTPS_PORT:-15671}:15671"
+      # HTTP 管理界面端口
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+      # Prometheus 监控端口
+      - "15692:15692"
+      # 集群内部通信端口
+      - "${RABBITMQ_CLUSTER_PORT:-25672}:25672"
+    networks:
+      - titan-bbs-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
-# mysql
+  # MySQL 8.0 - 关系型数据库（已配置字符集、时区和慢查询日志）
+  mysql:
+    image: mysql:8.0
+    container_name: titan-bbs-mysql
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      # Root 密码
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-titan_bbs_root_2026}
+      # 自动创建数据库
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-titan_bbs}
+      # 应用数据库用户
+      MYSQL_USER: ${MYSQL_USER:-titan_bbs}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-titan_bbs_2026}
+      # 时区设置
+      TZ: Asia/Shanghai
+    volumes:
+      # MySQL 配置文件
+      - ./mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      # 初始化脚本（仅首次启动时执行）
+      - ./mysql/initdb:/docker-entrypoint-initdb.d:ro
+      # 数据持久化到宿主机目录
+      - /docker/titan-bbs/mysql/data:/var/lib/mysql
+      # 日志目录
+      - /docker/titan-bbs/mysql/logs:/var/log/mysql
+    ports:
+      - "${MYSQL_PORT:-13306}:3306"
+    networks:
+      - titan-bbs-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-titan_bbs_root_2026}"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
 
-# redis
+  # Redis 7.x - 缓存数据库（已配置密码和持久化）
+  redis:
+    image: redis:7-alpine
+    container_name: titan-bbs-redis
+    restart: unless-stopped
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      # 时区设置
+      - TZ=Asia/Shanghai
+    volumes:
+      # Redis 配置文件
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      # 数据持久化到宿主机目录（RDB + AOF）
+      - /docker/titan-bbs/redis/data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - titan-bbs-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-titan_bbs_2026}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
-# minio
+  # MinIO - 对象存储（S3 兼容，用于文件上传）
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    container_name: titan-bbs-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      # Root 用户凭证
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-titan_bbs}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-titan_bbs_2026}
+      # 时区设置
+      TZ: Asia/Shanghai
+    volumes:
+      # 数据持久化到宿主机目录
+      - /docker/titan-bbs/minio/data:/data
+      # 配置目录
+      - /docker/titan-bbs/minio/config:/root/.minio
+    ports:
+      # API 端口（S3 兼容接口）
+      - "${MINIO_API_PORT:-9000}:9000"
+      # 管理控制台端口
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    networks:
+      - titan-bbs-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
+# 统一的中间件网络
+networks:
+  titan-bbs-network:
+    driver: bridge
 
+volumes:
+  rabbitmqdata:
+    driver: local
+  rabbitmqlogs:
+    driver: local

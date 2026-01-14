@@ -40,7 +40,7 @@
     <guava.version>33.0.0-jre</guava.version>
     <hutool.version>5.8.26</hutool.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
-    <knife4j.version>4.5.0</knife4j.version>
+    <springdoc.version>2.8.8</springdoc.version>
     <minio.version>8.5.12</minio.version>
     <aliyun.oss.version>3.18.1</aliyun.oss.version>
     <aliyun.sms.version>2.2.1</aliyun.sms.version>
@@ -54,19 +54,20 @@
   </properties>
   <!-- 统一依赖管理 -->
   <dependencyManagement>
+
+
     <dependencies>
+      <!-- SpringDoc OpenAPI -->
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+        <version>${springdoc.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>com.titancore.framework.rabbitmq</groupId>
         <artifactId>bbs-spring-boot-starter-rabbitmq</artifactId>
         <version>${revision}</version>
-      </dependency>
-
-      <!--swagger3-->
-      <dependency>
-        <groupId>com.github.xiaoymin</groupId>
-        <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
-        <version>${knife4j.version}</version>
       </dependency>
 
       <dependency>

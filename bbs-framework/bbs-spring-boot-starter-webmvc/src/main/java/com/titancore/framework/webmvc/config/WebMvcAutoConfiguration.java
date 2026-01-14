@@ -57,7 +57,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer {
                             "/ws/**",
                             "/test/**",
                             "/chatroom/**",
-                            "/favicon.ico","/swagger-resources/**", "/webjars/**", "/v3/**", "/doc.html"
+                            "v3/**"
                     )
                     .check(r -> {
                         if (!"OPTIONS".equalsIgnoreCase(SaHolder.getRequest().getMethod())) {
