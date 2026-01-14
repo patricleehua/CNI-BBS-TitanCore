@@ -25,6 +25,7 @@ import com.titancore.service.PostsService;
 import com.titancore.service.UserService;
 import com.titancore.util.AuthenticationUtil;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,7 @@ import java.util.*;
 * @createDate 2024-12-12 13:07:11
 */
 @Service
+@Slf4j
 public class PostCommentsServiceImpl extends ServiceImpl<PostCommentsMapper, PostComments>
     implements PostCommentsService {
     @Resource
@@ -72,6 +74,7 @@ public class PostCommentsServiceImpl extends ServiceImpl<PostCommentsMapper, Pos
         //setup3 Ai智能审核
         AiCheckOffendingWordsResponse response = aiDetectTextService.isContainsOffendingWords(postCommentContent, badWordSet);
         if(response.isViolation()){
+            log.info("用户{}评论内容包含敏感词，评论内容：{}", userId, postCommentContent);
             map.put("badWord",response.getReason());
             return map;
         }

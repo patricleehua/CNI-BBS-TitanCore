@@ -24,7 +24,7 @@
 
 #### 2. 环境准备
 
-- **后端框架**：基于 Spring Boot 3.2.5. 🖥️
+- **后端框架**：基于 Spring Boot 3.5.7. 🖥️
 - **JDK 版本**：确保已安装 JDK 17 或更高版本. ☕️
 
 ##### 必需服务
@@ -64,6 +64,17 @@ docker build -t cni-bbs-core:1.0 .
 
 ```bash
 docker run -d -p 8080:8080 --name cni-bbs-core cni-bbs-core:1.0
+docker run -d -p 8999:8080 --network 1panel-network  -e "SPRING_PROFILES_ACTIVE=docker"  --name cni-bbs-core patricleee/cni-bbs-core:1.0
+
+docker rm -f  cni-bbs-core
+
+docker pull  patricleee/cni-bbs-core:1.0
+
+docker run -d -p 8999:8080 -p 9100:9100 --network 1panel-network   -e "SPRING_PROFILES_ACTIVE=docker"  --name cni-bbs-core patricleee/cni-bbs-core:1.0
+
+docker network connect es-net cni-bbs-core
+
+
 ```
 
 - **使用主机网络**：

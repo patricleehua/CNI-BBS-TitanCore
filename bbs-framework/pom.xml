@@ -19,7 +19,7 @@
         <module>bbs-spring-boot-starter-biz-operationlog</module>
         <module>bbs-spring-boot-starter-cloud-manager</module>
         <module>bbs-spring-boot-starter-rabbitmq</module>
-        <module>bbs-spring-ai-starter-aimanager</module>
+        <module>bbs-spring-boot-starter-ai-provider-starter</module>
     </modules>
     <dependencies>
 

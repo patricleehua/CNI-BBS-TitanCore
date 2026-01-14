@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.5</version>
+    <version>3.5.7</version>
   </parent>
   <packaging>pom</packaging>
 
@@ -28,11 +28,11 @@
     <!-- 项目编码 -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Maven 相关版本号 -->
-    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
     <!-- 依赖包版本 -->
-    <spring-boot.version>3.2.5</spring-boot.version>
-    <lombok.version>1.18.30</lombok.version>
-    <mybatis.plus>3.5.7</mybatis.plus>
+    <spring-boot.version>3.5.7</spring-boot.version>
+    <lombok.version>1.18.36</lombok.version>
+    <mybatis.plus>3.5.12</mybatis.plus>
     <druid.version>1.2.21</druid.version>
     <mysql>8.0.33</mysql>
     <jackson.version>2.16.1</jackson.version>
@@ -46,8 +46,8 @@
     <aliyun.sms.version>2.2.1</aliyun.sms.version>
     <justAuth.version>1.16.6</justAuth.version>
     <elasticsearch.version>8.13.3</elasticsearch.version>
-    <spring-ai.version>1.0.0-M3</spring-ai.version>
-    <spring-ai-alibaba.version>1.0.0-M3.2</spring-ai-alibaba.version>
+    <spring-ai.version>1.1.0</spring-ai.version>
+    <spring-ai-alibaba.version>1.1.0.0-M5</spring-ai-alibaba.version>
     <markdown.version>0.42.14</markdown.version>
     <toolgood-words.version>3.1.0.1</toolgood-words.version>
 
@@ -55,14 +55,6 @@
   <!-- 统一依赖管理 -->
   <dependencyManagement>
     <dependencies>
-      <!--Spring AI-->
-      <dependency>
-        <groupId>org.springframework.ai</groupId>
-        <artifactId>spring-ai-bom</artifactId>
-        <version>${spring-ai.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
 
       <dependency>
         <groupId>com.titancore.framework.rabbitmq</groupId>
@@ -127,8 +119,8 @@
       </dependency>
 
       <dependency>
-        <groupId>com.titancore</groupId>
-        <artifactId>bbs-spring-ai-starter-aimanager</artifactId>
+        <groupId>com.titancore.framework.biz.ai</groupId>
+        <artifactId>bbs-spring-boot-starter-ai-provider-starter</artifactId>
         <version>${revision}</version>
       </dependency>
 
@@ -174,6 +166,9 @@
       <properties>
         <spring.profiles.active>dev</spring.profiles.active>
       </properties>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
     </profile>
     <profile>
       <id>docker</id>
@@ -192,9 +187,6 @@
       <properties>
         <spring.profiles.active>temp</spring.profiles.active>
       </properties>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
     </profile>
   </profiles>
 

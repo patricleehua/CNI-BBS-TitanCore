@@ -22,7 +22,7 @@ public class ElasticSearchDataSyncTask {
 
     //todo 关闭先置
 //    @Scheduled(cron = "0 */15 * * * ?")
-    @Scheduled(cron = "0/50 * * * * ?")
+//    @Scheduled(cron = "0/50 * * * * ?")
     public void pullEsSearchData() throws IOException {
         if(!elasticSearchService.checkIndexExists(CNI_POST_INDEX)){
            elasticSearchService.createIndexByReader(CNI_POST_INDEX, ElasticSearch8Service.CNI_POST_MAPPINGS);

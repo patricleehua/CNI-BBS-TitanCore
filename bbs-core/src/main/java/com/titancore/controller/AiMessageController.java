@@ -2,8 +2,8 @@ package com.titancore.controller;
 
 import com.titancore.domain.dto.AiMessageDTO;
 import com.titancore.domain.vo.AiMessageVo;
-import com.titancore.service.AiMessageChatMemory;
 import com.titancore.service.AiMessageService;
+import com.titancore.service.impl.AiMessageChatMemoryRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -21,7 +21,7 @@ public class AiMessageController {
     @Resource
     private AiMessageService aiMessageService;
     @Resource
-    private AiMessageChatMemory chatMemory;
+    private AiMessageChatMemoryRepository aiMessageChatMemoryRepository;
     @PostMapping("/save")
     @Operation(summary = "保存消息")
     public void save(@RequestBody AiMessageDTO aiMessageDTO) {
@@ -37,6 +37,6 @@ public class AiMessageController {
     @DeleteMapping("/history/{sessionId}")
     @Operation(summary = "清空历史消息")
     public void deleteHistory(@PathVariable String sessionId) {
-        chatMemory.clear(sessionId);
+        aiMessageChatMemoryRepository.deleteByConversationId(sessionId);
     }
 }

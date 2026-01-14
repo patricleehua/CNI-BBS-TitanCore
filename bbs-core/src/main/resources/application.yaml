@@ -100,33 +100,6 @@ spring:
         acknowledge-mode: manual #默认情况下消息消费者是自动确认消息的，如果要手动确认消息则需要修改确认模式为manual
         prefetch: 1 # 消费者每次从队列获取的消息数量。此属性当不设置时为：轮询分发，设置为1为：公平分发
 
-  #AI配置
-  ai:
-    openai:
-      api-key: ${titan.ai.openai.api-key}
-      base-url: ${titan.ai.openai.base-url}
-      chat:
-        options:
-          model: ${titan.ai.openai.chat.options.model}
-      embedding:
-        options:
-          model: ${titan.ai.openai.embedding.options.model}
-        enabled: true
-    dashscope:
-      api-key: ${titan.ai.dashscope.api-key}
-      base-url: ${titan.ai.dashscope.base-url}
-      chat:
-        options:
-          model: ${titan.ai.dashscope.chat.options.model}
-      embedding:
-        options:
-          model: ${titan.ai.openai.embedding.options.model}
-        enabled: false
-#  vectorstore:
-#    redis:
-#      initialize-schema: true
-
-
 titan:
   md5:
     salt: ${titan.md5.salt} #默认数据库提供的为shumei:)
@@ -180,8 +153,32 @@ titan:
       clientId: ${titan.auth.google.clientId}
       clientSecret: ${titan.auth.google.clientSecret}
       redirectUri: ${titan.auth.google.redirectUri}
-
-
+# AI Config
+  ai:
+    provider:
+      providers:
+        open-router:
+          base-url: ${titan.ai.provider.providers.open-router.base-url:https://dashscope.aliyuncs.com/compatible-mode/}
+          api-keys:
+            - ${titan.ai.provider.providers.open-router.api-keys[0]:sk-xxx}
+          default-model: ${titan.ai.provider.providers.open-router.default-model:openai/gpt-4o}
+          available-models:
+            - openai/gpt-4o
+            - openai/gpt-4o-mini
+            - openai/gpt-5-mini
+            - openai/gpt-3.5-turbo
+            - anthropic/claude-3-5-sonnet
+            - anthropic/claude-3-haiku
+            - anthropic/claude-sonnet-4.5
+            - google/gemini-2.0-flash-exp
+            - google/gemini-pro
+            - meta-llama/llama-3.1-8b-instruct:free
+            - meta-llama/llama-3.1-70b-instruct
+            - mistralai/mixtral-8x7b-instruct:nitro
+            - mistralai/mistral-7b-instruct:free
+          timeout: ${titan.ai.provider.providers.open-router.timeout:30000}
+          max-retries: ${titan.ai.provider.providers.open-router.max-retries:3}
+          enabled: ${titan.ai.provider.providers.open-router.enabled:true}
 
 # MyBatis配置
 mybatis-plus:

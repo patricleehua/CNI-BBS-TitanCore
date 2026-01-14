@@ -100,7 +100,7 @@ public class AiMessageServiceImpl extends ServiceImpl<AiMessageMapper, AiMessage
     public AiMessage convertToAiMessage(Message message) {
         if (message != null){
             AiMessage aiMessage = new AiMessage();
-            aiMessage.setTextContent(message.getContent());
+            aiMessage.setTextContent(message.getText());
             MessageType messageType = message.getMessageType();
             switch(messageType) {
                 case USER -> aiMessage.setType(AiMessageType.USER);
