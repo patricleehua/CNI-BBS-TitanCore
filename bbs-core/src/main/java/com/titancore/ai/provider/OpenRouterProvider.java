@@ -102,7 +102,7 @@ public class OpenRouterProvider implements ChatModelProvider {
         try {
             log.debug("OpenRouter流式聊天开始 - 模型: {}, 消息: {}", request.getModel(), request.getMessage());
 
-            return chatClient.prompt()
+            return chatClient.prompt(request.getSystemPrompt())
                 .user(request.getMessage())
                 .advisors(advisorSpec -> {
                     chatProviderAdvisorHelper.addChatHistoryAdvisor(advisorSpec, request.getSessionId(), request.getHistorySize());
@@ -131,7 +131,7 @@ public class OpenRouterProvider implements ChatModelProvider {
         try {
             log.debug("OpenRouter同步聊天开始 - 模型: {}, 消息长度: {}", request.getModel(), request.getMessage().length());
 
-            String responseContent = chatClient.prompt()
+            String responseContent = chatClient.prompt(request.getSystemPrompt())
                 .user(request.getMessage())
                 .advisors(advisorSpec -> {
                     chatProviderAdvisorHelper.addChatHistoryAdvisor(advisorSpec, request.getSessionId(), request.getHistorySize());

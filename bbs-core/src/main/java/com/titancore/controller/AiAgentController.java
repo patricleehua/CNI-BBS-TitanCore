@@ -20,7 +20,7 @@ public class AiAgentController {
     private AiChatService AiChatService;
     @PostMapping(value = "/chatAgent", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "智能客服聊天接口" )
-    public Flux<ServerSentEvent<String>> chatStreamWithHistory(@RequestBody AiMessageDTO aiMessageDTO) {
+    public Flux<ServerSentEvent<String>> chatAgent(@RequestBody AiMessageDTO aiMessageDTO) {
         return AiChatService.chatWithAgent(aiMessageDTO);
     }
 }
