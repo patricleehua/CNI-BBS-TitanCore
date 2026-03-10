@@ -1,93 +1,236 @@
+<div align="center">
+
 # CNI-BBS-TitanCore
 
-**Welcome to CNI-BBS-TitanCore! / 欢迎使用 CNI-BBS-TitanCore！** 🚀
+**现代化企业级论坛系统**
 
-#### 🌏 [English](https://github.com/patricleehua/CNI-BBS-TitanCore/blob/main/README.md)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.7-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-17-orange?logo=java)](https://openjdk.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-------
+[English](./README.md) | 简体中文
 
-## 中文
+</div>
 
-### 如何运行？
+---
 
-#### 1. 创建数据库
+## 项目简介
 
-- **数据库设置**：为 Titan-BBS 配置基于 MySQL 的数据库，执行 `titan-bbs.sql` 脚本以创建必要的表结构和数据。 🗄️
-- **Redis 配置**：配置 Redis 数据库. ⚡
-- **Elasticsearch 设置**：部署 Elasticsearch 服务. 🔍
-- **邮箱服务**：配置 SMTP 服务以支持邮件发送功能. 📧
-- **RabbitMQ 设置**：部署 RabbitMQ 消息队列服务. 🐇
-- **存储服务**：获取阿里云 OSS 或设置 MinIO 本地存储服务. ☁️
-- **短信服务**：获取阿里云 SMS 服务. 📱
-- **第三方登录**：配置第三方登录功能. 🔑
-- **AI 服务**：获取 AI 服务（如 OpenAI 或通义千问）. 🤖
+CNI-BBS-TitanCore 是一个基于 **Spring Boot 3.5.7** 和 **Java 17** 构建的现代化企业级论坛/BBS系统。采用模块化架构设计，集成自定义 Spring Boot Starter，支持 WebSocket 实时通信、Elasticsearch 全文检索以及 AI 智能对话等功能。
 
-#### 2. 环境准备
+## 功能特性
 
-- **后端框架**：基于 Spring Boot 3.5.7. 🖥️
-- **JDK 版本**：确保已安装 JDK 17 或更高版本. ☕️
+- **认证与安全**
+  - 基于 Sa-Token 的 JWT 认证（72小时会话超时）
+  - 登录失败限制（5次失败锁定5分钟）
+  - AES 敏感数据加密
+  - 敏感词过滤与内容审核
 
-##### 必需服务
+- **核心论坛功能**
+  - 帖子发布、评论、分类与标签
+  - 用户关注关系
+  - 积分与奖励系统
+  - WebSocket 实时聊天
 
-- **MySQL**：版本 8.0 或更高. 🛠️
-- **Redis**：版本 5.0 或更高. ⚙️
+- **AI 智能集成**
+  - OpenAI API 支持
+  - 阿里云通义千问集成
+  - AI 对话会话与消息管理
 
-##### 配置文件
+- **云存储服务**
+  - 阿里云 OSS 支持
+  - MinIO（S3兼容）支持
+  - 腾讯云 COS & 七牛云支持
 
-编辑 `resources` 目录下的 `application-temp.yml` 文件，配置本地数据源。
+- **第三方登录**
+  - Google OAuth
+  - Gitee OAuth
 
-完成以上步骤后，启动后端服务，即可开始使用 CNI-BBS-TitanCore！ 🎉
+## 技术栈
 
-------
+| 分类 | 技术 |
+|------|------|
+| 核心框架 | Spring Boot 3.5.7 |
+| 运行环境 | Java 17+ |
+| 数据库 | MySQL 8.0+ / MyBatis-Plus |
+| 缓存 | Redis 5.0+ / Lettuce |
+| 搜索引擎 | Elasticsearch 8.13.3 + IK分词器 |
+| 消息队列 | RabbitMQ |
+| 实时通信 | Netty WebSocket Server |
+| 接口文档 | Knife4j (Swagger 3) |
+| 认证框架 | Sa-Token |
 
-### 如何使用 Dockerfile？
+## 项目结构
 
-> 以下命令均在项目根目录`CNI-BBS-TitanCore`下执行
+```
+CNI-BBS-TitanCore/
+├── bbs-core/                          # 主应用模块
+│   ├── src/main/java/com/titancore/
+│   │   ├── controller/                # REST API 控制器
+│   │   ├── service/impl/              # 业务逻辑实现
+│   │   ├── domain/                    # 实体、DTO、VO、Mapper
+│   │   ├── websocket/                 # Netty WebSocket 服务
+│   │   ├── task/                      # 定时任务
+│   │   ├── config/                    # 配置类
+│   │   └── util/                      # 工具类
+│   └── src/main/resources/
+│       └── application-{profile}.yaml # 环境配置文件
+│
+├── bbs-framework/                     # 自定义 Spring Boot Starter
+│   ├── common/                        # 公共工具与基础类
+│   ├── bbs-spring-boot-starter-webmvc/
+│   ├── bbs-spring-boot-starter-jackson/
+│   ├── bbs-spring-boot-starter-cloud-manager/
+│   ├── bbs-spring-boot-starter-rabbitmq/
+│   ├── bbs-spring-boot-starter-biz-operationlog/
+│   └── bbs-spring-boot-starter-ai-provider-starter/
+│
+├── docker/                            # Docker 部署文件
+│   └── docker-compose-middleware.yml
+│
+└── sql/                               # 数据库脚本
+```
 
-#### 打包应用
+## 快速开始
+
+### 环境要求
+
+- JDK 17+
+- Maven 3.6+
+- MySQL 8.0+
+- Redis 5.0+
+- （可选）Elasticsearch 8.x、RabbitMQ、MinIO
+
+### 1. 克隆与构建
+
+```bash
+git clone https://github.com/patricleehua/CNI-BBS-TitanCore.git
+cd CNI-BBS-TitanCore
+mvn clean package -DskipTests
+```
+
+### 2. 数据库初始化
+
+```bash
+# 创建数据库并导入表结构
+mysql -u root -p -e "CREATE DATABASE titan_bbs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p titan_bbs < sql/all-titan-bbs-202504190057.sql
+```
+
+### 3. 配置文件
+
+复制并编辑配置模板：
+
+```bash
+cp bbs-core/src/main/resources/application-temp.yaml \
+   bbs-core/src/main/resources/application-dev.yaml
+```
+
+在 `application-dev.yaml` 中配置以下内容：
+
+```yaml
+titan:
+  datasource:
+    url: jdbc:mysql://localhost:3306/titan_bbs
+    username: your_username
+    password: your_password
+  redis:
+    host: localhost
+    password: your_redis_password
+```
+
+### 4. 启动项目
+
+```bash
+# 开发模式启动（默认）
+mvn spring-boot:run -pl bbs-core
+
+# 指定环境启动
+mvn spring-boot:run -pl bbs-core -Dspring-boot.run.profiles=dev
+```
+
+访问地址：
+- API接口：`http://localhost:8080`
+- 接口文档：`http://localhost:8080/swagger-ui`（Basic认证：user/123456）
+- Druid监控：`http://localhost:8080/druid/`
+
+## Docker 部署
+
+### 构建镜像
 
 ```bash
 mvn clean package
-```
-
-#### 构建 Docker 镜像
-
-```bash
 docker build -t cni-bbs-core:1.0 .
 ```
 
-如果你需要运行在Arm机器上，你需要使用`Docker buildx`进行构建
-
-#### 运行 Docker 容器
-
-- **使用默认网络**：
+### 运行容器
 
 ```bash
+# 基础运行
 docker run -d -p 8080:8080 --name cni-bbs-core cni-bbs-core:1.0
-docker run -d -p 8999:8080 --network 1panel-network  -e "SPRING_PROFILES_ACTIVE=docker"  --name cni-bbs-core patricleee/cni-bbs-core:1.0
 
-docker rm -f  cni-bbs-core
-
-docker pull  patricleee/cni-bbs-core:1.0
-
-docker run -d -p 8999:8080 -p 9100:9100 --network 1panel-network   -e "SPRING_PROFILES_ACTIVE=docker"  --name cni-bbs-core patricleee/cni-bbs-core:1.0
-
-docker network connect es-net cni-bbs-core
-
-
+# 使用 docker 环境配置
+docker run -d -p 8080:8080 -p 9100:9100 \
+  -e "SPRING_PROFILES_ACTIVE=docker" \
+  --name cni-bbs-core cni-bbs-core:1.0
 ```
 
-- **使用主机网络**：
+### Docker Compose（中间件一键部署）
+
+一键部署所有中间件服务：
 
 ```bash
-docker run -d -p 8080:8080 --network host --name cni-bbs-core cni-bbs-core:1.0
+cd docker
+docker-compose -f docker-compose-middleware.yml up -d
 ```
 
-#### 注意事项
+将启动：MySQL、Redis、Elasticsearch（含IK分词器）、RabbitMQ、MinIO
 
-- 确保配置文件已正确设置，Docker 镜像能够成功构建。 ✅
-- 确保 Docker 网络允许访问 MySQL、Redis、Elasticsearch 等服务。 🔒
+详细配置请参考 [docker/README.md](docker/README.md)
 
-------
+## 环境配置
 
-最后更新：2025.02.15
+| Profile | 描述 |
+|---------|------|
+| `dev` | 开发环境（默认） |
+| `docker` | Docker 容器部署 |
+| `prod` | 生产环境 |
+| `temp` | 配置模板（新建环境时参考） |
+
+## 接口文档
+
+启动应用后访问 `/swagger-ui` 查看 Swagger 文档。
+
+**认证方式**：Basic Auth
+- 用户名：`user`
+- 密码：`123456`
+
+## 贡献指南
+
+欢迎提交 Pull Request 参与贡献！
+
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 提交 Pull Request
+
+## 开源许可
+
+本项目基于 MIT 协议开源，详见 [LICENSE](LICENSE) 文件。
+
+## 致谢
+
+- [Spring Boot](https://spring.io/projects/spring-boot)
+- [MyBatis-Plus](https://baomidou.com/)
+- [Sa-Token](https://sa-token.cc/)
+- [Knife4j](https://doc.xiaominfo.com/)
+
+---
+
+<div align="center">
+
+**[⬆ 返回顶部](#cni-bbs-titancore)**
+
+</div>
