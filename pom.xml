@@ -192,6 +192,19 @@
   </profiles>
 
 
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/patricleehua/CNI-BBS-TitanCore</url>
+    </repository>
+    <snapshotRepository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/patricleehua/CNI-BBS-TitanCore</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <build>
     <!-- 统一插件管理 -->
     <pluginManagement>
