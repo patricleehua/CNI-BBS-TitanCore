@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 
 @Component
 @Slf4j
+@ConditionalOnProperty(prefix = "titan.middleware.rabbitmq", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class RBMQMessageListener {
 
     @Autowired

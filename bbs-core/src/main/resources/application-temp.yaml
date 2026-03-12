@@ -84,6 +84,25 @@ titan:
     userName: elastic                 # Elasticsearch用户名
     password: titan_bbs_2026          # Elasticsearch密码（与.env配置保持一致）
 
+  # 可选中间件开关配置（禁用后可在无对应中间件环境下启动）
+  middleware:
+    # Elasticsearch 开关 - 关闭后帖子搜索功能将不可用
+    elasticsearch:
+      enabled: true
+    # RabbitMQ 开关 - 关闭后聊天消息队列功能将不可用
+    rabbitmq:
+      enabled: true
+    # MinIO 开关 - 关闭后需改用其他云存储provider（如aliyun）
+    minio:
+      enabled: true
+
+  # 接口加密配置
+  encryption:
+    # 是否启用请求体解密（接收前端加密数据）
+    request-enabled: true
+    # 是否启用响应体加密（返回加密数据给前端）
+    response-enabled: true
+
   # AI Config
   ai:
     provider:

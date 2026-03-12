@@ -8,6 +8,7 @@ import com.titancore.framework.common.exception.BizException;
 import com.titancore.framework.rabbitmq.util.RabbitMqHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
@@ -15,13 +16,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class RBMQProducerService {
 
-    @Autowired
+    @Autowired(required = false)
     private RabbitMqHelper rabbitMqHelper;
+
+    @Value("${titan.middleware.rabbitmq.enabled:true}")
+    private boolean rabbitmqEnabled;
 
     /**
      * 发送可重试消息给用户
      */
     public void sendMsgToUser(ChatMessageDTO chatMessageDTO) {
+        if (!rabbitmqEnabled) {
+            log.warn("RabbitMQ已禁用，跳过发送消息给用户");
+            return;
+        }
         try {
             String jsonMessage = JSON.toJSONString(chatMessageDTO);
             rabbitMqHelper.sendMessageRetry(RabbitMqConstant.EXCHANGE_TOPIC, RabbitMqConstant.ROUTING_TOPIC_PRIVATE_CHAT, jsonMessage);
@@ -35,6 +43,10 @@ public class RBMQProducerService {
      * 发送可重试消息给群组
      */
     public void sendMsgToGroup(ChatMessageDTO chatMessageDTO) {
+        if (!rabbitmqEnabled) {
+            log.warn("RabbitMQ已禁用，跳过发送消息给群组");
+            return;
+        }
         try {
             String jsonMessage = JSON.toJSONString(chatMessageDTO);
             rabbitMqHelper.sendMessageRetry(RabbitMqConstant.EXCHANGE_TOPIC, RabbitMqConstant.ROUTING_TOPIC_GROUP_CHAT, jsonMessage);
@@ -47,6 +59,10 @@ public class RBMQProducerService {
      * 发送可重试消息给系统消息
      */
     public void sendMsgToSystem(ChatMessageDTO chatMessageDTO) {
+        if (!rabbitmqEnabled) {
+            log.warn("RabbitMQ已禁用，跳过发送系统消息");
+            return;
+        }
         try {
             String jsonMessage = JSON.toJSONString(chatMessageDTO);
             rabbitMqHelper.sendMessageRetry(RabbitMqConstant.EXCHANGE_TOPIC, RabbitMqConstant.ROUTING_TOPIC_BROAD_CAST, jsonMessage);

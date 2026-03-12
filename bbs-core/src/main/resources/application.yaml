@@ -180,6 +180,25 @@ titan:
           max-retries: ${titan.ai.provider.providers.open-router.max-retries:3}
           enabled: ${titan.ai.provider.providers.open-router.enabled:true}
 
+  # 可选中间件开关配置
+  middleware:
+    # Elasticsearch 开关
+    elasticsearch:
+      enabled: ${titan.middleware.elasticsearch.enabled:true}
+    # RabbitMQ 开关
+    rabbitmq:
+      enabled: ${titan.middleware.rabbitmq.enabled:true}
+    # MinIO 开关
+    minio:
+      enabled: ${titan.middleware.minio.enabled:true}
+
+  # 接口加密配置
+  encryption:
+    # 是否启用请求体解密（接收前端加密数据）
+    request-enabled: ${ENCRYPTION_REQUEST_ENABLED:true}
+    # 是否启用响应体加密（返回加密数据给前端）
+    response-enabled: ${ENCRYPTION_RESPONSE_ENABLED:true}
+
 # MyBatis配置
 mybatis-plus:
   # 搜索指定包别名

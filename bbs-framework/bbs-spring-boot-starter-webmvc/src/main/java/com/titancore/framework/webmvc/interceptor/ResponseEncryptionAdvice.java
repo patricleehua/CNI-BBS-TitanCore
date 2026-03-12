@@ -6,6 +6,7 @@ import com.titancore.framework.common.properties.AESKey;
 import com.titancore.framework.common.util.AesUtils;
 import com.titancore.framework.common.util.Base64UrlUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -26,6 +27,9 @@ public class ResponseEncryptionAdvice implements ResponseBodyAdvice<Object> {
     @Autowired
     private AESKey aesKey;
 
+    @Value("${titan.encryption.response-enabled:true}")
+    private boolean responseEncryptionEnabled;
+
     // 白名单路径集合
     private static final Set<String> WHITELIST_PATHS = new HashSet<>();
 
@@ -45,7 +49,7 @@ public class ResponseEncryptionAdvice implements ResponseBodyAdvice<Object> {
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         // 决定是否需要加密响应体
-        return true;
+        return responseEncryptionEnabled;
     }
 
     @Override

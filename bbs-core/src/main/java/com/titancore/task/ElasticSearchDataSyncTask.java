@@ -7,6 +7,7 @@ import com.titancore.service.ElasticSearch8Service;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import java.io.IOException;
 @Component
 @Slf4j
 @AllArgsConstructor
+@ConditionalOnProperty(prefix = "titan.middleware.elasticsearch", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class ElasticSearchDataSyncTask {
     private final ElasticSearch8Service elasticSearchService;
     private final PostsMapper postsMapper;

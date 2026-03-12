@@ -19,6 +19,7 @@ import jakarta.annotation.PostConstruct;
 @Slf4j
 @Configuration
 @EnableConfigurationProperties(CloudProperties.class)
+@ConditionalOnProperty(prefix = "titan.middleware.minio", name = "enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnProperty(prefix = "titan.cloud", name = "provider", havingValue = "minio")
 public class MinioStartupConfig {
 

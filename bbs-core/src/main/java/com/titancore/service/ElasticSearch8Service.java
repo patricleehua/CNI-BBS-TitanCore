@@ -36,9 +36,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Service
 @Slf4j
 public class ElasticSearch8Service {
+
+    @Value("${titan.middleware.elasticsearch.enabled:true}")
+    private boolean elasticsearchEnabled;
 
     @Resource
     private ElasticsearchClient client;
@@ -214,6 +219,10 @@ public class ElasticSearch8Service {
      */
     @SneakyThrows
     public PageResult searchPostPage(PostSearchParam postSearchParam) {
+        if (!elasticsearchEnabled) {
+            log.warn("Elasticsearch已禁用，无法执行搜索");
+            return new PageResult(0, null);
+        }
         String CNI_POST_INDEX = "cni-post";
         try {
 

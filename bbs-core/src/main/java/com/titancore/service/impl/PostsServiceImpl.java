@@ -26,8 +26,11 @@ import com.titancore.framework.common.constant.RedisConstant;
 import com.titancore.framework.common.exception.BizException;
 import com.titancore.service.*;
 import com.titancore.util.AuthenticationUtil;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +41,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Slf4j
 public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements PostsService {
     private final PostsMapper postMapper;
     private final UserMapper userMapper;
@@ -50,7 +54,12 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
     private final StringRedisTemplate stringRedisTemplate;
     private final FollowService followService;
     private final CommonService commonService;
-    private final ElasticSearch8Service elasticSearch16Service;
+
+    @Value("${titan.middleware.elasticsearch.enabled:true}")
+    private boolean elasticsearchEnabled;
+
+    @Autowired(required = false)
+    private ElasticSearch8Service elasticSearch16Service;
 
     @Override
     public PageResult queryPostList(PostParam postParam) {
@@ -140,7 +149,9 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
             dmlVo.setId(temporalPostId);
             dmlVo.setStatus(true);
             dmlVo.setMessage(CommonConstant.DML_CREATE_SUCCESS);
-            elasticSearch16Service.insertPostDoc("cni-post",temporalPostId);
+            if (elasticsearchEnabled && elasticSearch16Service != null) {
+                elasticSearch16Service.insertPostDoc("cni-post",temporalPostId);
+            }
             //删除redis缓存
             removeTemporaryPostId(authorId);
             stringRedisTemplate.delete(RedisConstant.TEMPORARYPOSTMEDIA_PRIX + temporalPostId);

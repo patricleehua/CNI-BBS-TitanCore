@@ -10,6 +10,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -41,10 +42,20 @@ public class GlobalFilter implements Filter {
     @Autowired
     private AESKey aesKey;
 
+    @Value("${titan.encryption.request-enabled:true}")
+    private boolean requestEncryptionEnabled;
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
+
+        // 如果请求解密未启用，直接放行
+        if (!requestEncryptionEnabled) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         String contentType = httpRequest.getHeader("Content-Type");
         // 上传文件不做解密处理
         if (contentType!=null && contentType.startsWith("multipart/form-data")) {
