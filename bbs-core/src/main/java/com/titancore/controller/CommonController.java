@@ -1,9 +1,9 @@
 package com.titancore.controller;
 
 import com.titancore.domain.dto.CaptchaCodeDTO;
-import com.titancore.domain.vo.FileListVo;
 import com.titancore.framework.cloud.manager.domain.dto.FileDelDTO;
 import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
+import com.titancore.framework.cloud.manager.domain.vo.FileListVo;
 import com.titancore.framework.cloud.manager.urils.MinioUtil;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.CommonService;
