@@ -50,7 +50,7 @@ public class ChatMessageController {
      */
     @PostMapping("/send")
     @Operation(summary = "发送消息")
-    public Response<?> sendMessage(@RequestBody ChatMessageDTO chatMessageDTO) {
+    public Response<DMLVo> sendMessage(@RequestBody ChatMessageDTO chatMessageDTO) {
         DMLVo DMLVo = chatMessageService.sendMessage(chatMessageDTO);
         return Response.success(DMLVo);
     }
@@ -62,7 +62,7 @@ public class ChatMessageController {
      */
     @PostMapping("/retraction")
     @Operation(summary = "撤回消息")
-    public Response<?> retractionMsg(@RequestBody RetractionDTO retractionDTO) {
+    public Response<ChatMessage> retractionMsg(@RequestBody RetractionDTO retractionDTO) {
         ChatMessage result = chatMessageService.retractionMessage(retractionDTO);
         return Response.success(result);
     }
@@ -74,7 +74,7 @@ public class ChatMessageController {
      */
     @PostMapping("/reedit")
     @Operation(summary = "重新编辑")
-    public Response<?> reeditMessage(@RequestBody ReeditDTO reeditDTO) {
+    public Response<ChatMessageRetractionVo> reeditMessage(@RequestBody ReeditDTO reeditDTO) {
         ChatMessageRetractionVo result = chatMessageService.reeditMessage(reeditDTO);
         return Response.success(result);
     }
@@ -86,7 +86,7 @@ public class ChatMessageController {
      */
     @PostMapping("/record")
     @Operation(summary = "历史聊天记录")
-    public Response<?> messageRecord(@RequestBody ChatMessageParam chatMessageParam) {
+    public Response<PageResult> messageRecord(@RequestBody ChatMessageParam chatMessageParam) {
         PageResult result = chatMessageService.messageRecord(chatMessageParam);
         return Response.success(result);
     }
@@ -100,7 +100,7 @@ public class ChatMessageController {
      */
     @PostMapping("/send/file")
     @Operation(summary = "发送文件")
-    public Response<?> sendFile(MultipartFile file, String userId, String msgId) {
+    public Response<String> sendFile(MultipartFile file, String userId, String msgId) {
         String url = chatMessageService.sendFileOnMsgId(file,userId,msgId);
         return Response.success(url);
     }
@@ -114,7 +114,7 @@ public class ChatMessageController {
      */
     @PostMapping("/send/media")
     @Operation(summary = "发送媒体")
-    public Response<?> sendImage(MultipartFile file, String userId, String msgId) {
+    public Response<String> sendImage(MultipartFile file, String userId, String msgId) {
         String url = chatMessageService.sendMediaOnMsgId(file,userId,msgId);
         return Response.success(url);
     }
@@ -202,7 +202,7 @@ public class ChatMessageController {
      */
     @GetMapping("/get/media")
     @Operation(summary = "获取媒体")
-    public Response<?> getMedia(@RequestParam("userId") String userId, @RequestParam("msgId") String msgId) {
+    public Response<String> getMedia(@RequestParam("userId") String userId, @RequestParam("msgId") String msgId) {
         String url = chatMessageService.getMedia(userId, msgId);
         return Response.success(url);
     }

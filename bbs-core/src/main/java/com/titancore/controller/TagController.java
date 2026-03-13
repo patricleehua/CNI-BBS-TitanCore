@@ -22,27 +22,27 @@ public class TagController {
 
     @PostMapping("/open/list")
     @Operation(summary = "获取标签列表")
-    public Response<?> queryList(@RequestBody TagParam tagParam) {
+    public Response<PageResult> queryList(@RequestBody TagParam tagParam) {
         PageResult pageResult = tagService.queryList(tagParam);
         return Response.success(pageResult);
     }
 
     @PostMapping("/createTag")
     @Operation(summary = "创建标签")
-    public Response<?> createTag(@RequestBody TagDTO tagDTO) {
+    public Response<DMLVo> createTag(@RequestBody TagDTO tagDTO) {
         DMLVo dmlVo = tagService.createTag(tagDTO);
         return Response.success(dmlVo);
     }
 
     @DeleteMapping("/deleteTag")
     @Operation(summary = "删除标签")
-    public Response<?> deleteTag(@RequestParam String tagId){
+    public Response<DMLVo> deleteTag(@RequestParam String tagId){
         DMLVo dmlVo = tagService.deleteTagByTagId(tagId);
         return Response.success(dmlVo);
     }
     @PutMapping("/updateTag")
     @Operation(summary = "更新标签")
-    public Response<?> updateTag(@RequestBody TagDTO tagDTO){
+    public Response<DMLVo> updateTag(@RequestBody TagDTO tagDTO){
         DMLVo dmlVo = tagService.updateTagById(tagDTO);
         return Response.success(dmlVo);
     }

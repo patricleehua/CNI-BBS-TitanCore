@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @Slf4j
@@ -24,40 +25,40 @@ public class FollowController {
 
     @PostMapping("/list")
     @Operation(summary = "获取关注列表")
-    public Response<?> queryList(@RequestBody FollowParam followParam){
+    public Response<PageResult> queryList(@RequestBody FollowParam followParam){
         PageResult page =followService.queryList(followParam);
         return Response.success(page);
     }
 
     @PostMapping("/buildFollow")
     @Operation(summary = "建立关注")
-    public Response<?> buildFollow(@RequestBody FollowDTO followDTO){
+    public Response<DMLVo> buildFollow(@RequestBody FollowDTO followDTO){
         DMLVo dmlVo = followService.buildFollow(followDTO);
         return Response.success(dmlVo);
     }
 
     @PostMapping("/changeFollowStatus")
     @Operation(summary = "改变关注状态")
-    public Response<?> changeFollowStatus(@RequestBody FollowDTO followDTO){
+    public Response<DMLVo> changeFollowStatus(@RequestBody FollowDTO followDTO){
         DMLVo dmlVo = followService.changeFollowStatus(followDTO);
         return Response.success(dmlVo);
     }
 
     @PostMapping("/changeBlockStatus")
     @Operation(summary = "改变单向拉黑状态")
-    public Response<?> blockFollower(@RequestBody FollowDTO followDTO){
+    public Response<DMLVo> blockFollower(@RequestBody FollowDTO followDTO){
         DMLVo dmlVo = followService.changeBlockStatus(followDTO);
         return Response.success(dmlVo);
     }
     @PostMapping("/removeFollow")
     @Operation(summary = "取消关注彼此")
-    public Response<?> removeFollow(@RequestBody FollowDTO followDTO){
+    public Response<DMLVo> removeFollow(@RequestBody FollowDTO followDTO){
         DMLVo dmlVo = followService.removeFollow(followDTO);
         return Response.success(dmlVo);
     }
     @GetMapping("/queryFollowCount/{userId}")
     @Operation(summary = "查询统计关注数")
-    public Response<?> queryFollowCount(@PathVariable String userId){
+    public Response<Map<String,Long>> queryFollowCount(@PathVariable String userId){
         HashMap<String,Long> followCount = followService.queryFollowCount(userId);
         return Response.success(followCount);
     }

@@ -30,14 +30,14 @@ public class PointsController {
     @PostMapping("/addPointsRole")
     @SaCheckOr(role = {@SaCheckRole("superpower_user"),@SaCheckRole("admin_user")})
     @Operation(summary = "新增积分规则")
-    public Response<?> addPointsRole(@RequestBody PointsRuleDTO pointsRuleDTO){
+    public Response<DMLVo> addPointsRole(@RequestBody PointsRuleDTO pointsRuleDTO){
         DMLVo dmlVo = pointsRuleService.addPointsRole(pointsRuleDTO);
         return Response.success(dmlVo);
     }
 
     @PostMapping("/addPointsRecord")
     @Operation(summary = "新增用户积分记录")
-    public Response<?> addPointsRecord(@RequestBody PointsRecordDTO pointsRecordDTO){
+    public Response<DMLVo> addPointsRecord(@RequestBody PointsRecordDTO pointsRecordDTO){
         DMLVo dmlVo = pointsRecordService.addPointsRecord(pointsRecordDTO);
         return Response.success(dmlVo);
     }

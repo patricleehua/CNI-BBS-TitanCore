@@ -27,7 +27,7 @@ public class ChatGroupController {
      */
     @PostMapping("/open/list")
     @Operation(summary = "聊天群组列表")
-    public Response<?> chatGroupList(@RequestBody ChatGroupParam chatGroupParam) {
+    public Response<PageResult> chatGroupList(@RequestBody ChatGroupParam chatGroupParam) {
         PageResult result = chatGroupService.chatGroupList(chatGroupParam);
         return Response.success(result);
     }
@@ -37,7 +37,7 @@ public class ChatGroupController {
      */
     @PostMapping("/create")
     @Operation(summary = "创建群聊")
-    public Response<?> createChatGroup(@RequestBody ChatGroupDTO chatGroupDTO) {
+    public Response<ChatGroupVo> createChatGroup(@RequestBody ChatGroupDTO chatGroupDTO) {
         ChatGroupVo chatGroupVo = chatGroupService.createChatGroup(chatGroupDTO);
         return Response.success(chatGroupVo);
     }
@@ -49,7 +49,7 @@ public class ChatGroupController {
      */
     @PostMapping("/update")
     @Operation(summary = "更新群聊信息")
-    public Response<?> updateChatGroup(@RequestBody ChatGroupUpdateDTO chatGroupUpdateDTO) {
+    public Response<DMLVo> updateChatGroup(@RequestBody ChatGroupUpdateDTO chatGroupUpdateDTO) {
         DMLVo dmlVo = chatGroupService.updateChatGroup(chatGroupUpdateDTO);
         return Response.success(dmlVo);
     }
@@ -61,7 +61,7 @@ public class ChatGroupController {
      */
     @PostMapping("/invite")
     @Operation(summary = "成员邀请")
-    public Response<?> inviteMember(@RequestBody ChatGroupInviteMemberDTO chatGroupInviteMemberDTO) {
+    public Response<DMLVo> inviteMember(@RequestBody ChatGroupInviteMemberDTO chatGroupInviteMemberDTO) {
         DMLVo dmlVo = chatGroupService.inviteMember(chatGroupInviteMemberDTO);
         return Response.success(dmlVo);
     }
@@ -73,7 +73,7 @@ public class ChatGroupController {
      */
     @PostMapping("/quit")
     @Operation(summary = "退出群聊")
-    public Response<?> quitChatGroup(@RequestBody ChatGroupQuitDTO chatGroupQuitDTO) {
+    public Response<DMLVo> quitChatGroup(@RequestBody ChatGroupQuitDTO chatGroupQuitDTO) {
         DMLVo dmlVo = chatGroupService.quitChatGroup(chatGroupQuitDTO);
         return Response.success(dmlVo);
     }
@@ -86,7 +86,7 @@ public class ChatGroupController {
      */
     @PostMapping("/kick")
     @Operation(summary = "踢出群聊")
-    public Response<?>  kickChatGroup(@RequestBody ChatGroupKickDTO chatGroupKickDTO) {
+    public Response<Boolean> kickChatGroup(@RequestBody ChatGroupKickDTO chatGroupKickDTO) {
         boolean result = chatGroupService.kickChatGroup(chatGroupKickDTO);
         return Response.success(result);
     }
@@ -97,7 +97,7 @@ public class ChatGroupController {
      */
     @PostMapping("/dissolve")
     @Operation(summary = "解散群聊")
-    public Response<?> dissolveChatGroup(@RequestBody ChatGroupDTO chatGroupDTO) {
+    public Response<ChatGroupVo> dissolveChatGroup(@RequestBody ChatGroupDTO chatGroupDTO) {
         ChatGroupVo chatGroupVo = chatGroupService.dissolveChatGroup(chatGroupDTO);
         return Response.success(chatGroupVo);
     }
@@ -109,7 +109,7 @@ public class ChatGroupController {
      */
     @PostMapping("/transfer")
     @Operation(summary = "转让群聊")
-    public Response<?> transferChatGroup(@RequestBody ChatGroupTransferDTO chatGroupTransferDTO) {
+    public Response<ChatGroupVo> transferChatGroup(@RequestBody ChatGroupTransferDTO chatGroupTransferDTO) {
         ChatGroupVo chatGroupVo = chatGroupService.transferChatGroup(chatGroupTransferDTO);
         return Response.success(chatGroupVo);
     }
@@ -121,7 +121,7 @@ public class ChatGroupController {
      */
     @GetMapping("/open/details/{groupId}")
     @Operation(summary = "群详情")
-    public Response<?> detailsChatGroup(@PathVariable String groupId) {
+    public Response<ChatGroupDetailsVo> detailsChatGroup(@PathVariable String groupId) {
         ChatGroupDetailsVo chatGroupDetailsVo = chatGroupService.detailsChatGroup(groupId);
         return Response.success(chatGroupDetailsVo);
     }

@@ -1,6 +1,7 @@
 package com.titancore.controller;
 
 import com.titancore.domain.dto.CaptchaCodeDTO;
+import com.titancore.domain.vo.FileListVo;
 import com.titancore.framework.cloud.manager.domain.dto.FileDelDTO;
 import com.titancore.framework.cloud.manager.domain.dto.FileDownloadDTO;
 import com.titancore.framework.cloud.manager.urils.MinioUtil;
@@ -118,29 +119,29 @@ public class CommonController {
     }*/
     @PostMapping("/upload/media")
     @Operation(summary = "帖子媒体上传(图片/视频)")
-    public Response<?> uploadMedia(MultipartFile file,String userId,String type){
+    public Response<String> uploadMedia(MultipartFile file,String userId,String type){
         return Response.success(commonService.uploadMedia(file, userId, type));
     }
     @PostMapping("/upload/file")
     @Operation(summary = "文件上传")
-    public Response<?> uploadFile(MultipartFile file,String userId){
+    public Response<String> uploadFile(MultipartFile file,String userId){
         return Response.success(commonService.uploadFile(file, userId));
     }
 
     @PostMapping("/file/createTemporaryUrl")
     @Operation(summary = "生成文件临时Url(供下载使用)")
-    public Response<?> generateTemporaryUrl(@RequestBody FileDownloadDTO fileDownloadDTO){
+    public Response<String> generateTemporaryUrl(@RequestBody FileDownloadDTO fileDownloadDTO){
         String temporaryUrl = commonService.createTemporaryUrl(fileDownloadDTO);
         return Response.success(temporaryUrl);
     }
     @PostMapping("/deleteFile")
     @Operation(summary = "删除文件")
-    public Response<?> deleteFile(@RequestBody FileDelDTO fileDelDTO){
+    public Response<Boolean> deleteFile(@RequestBody FileDelDTO fileDelDTO){
         return Response.success(commonService.deleteFile(fileDelDTO));
     }
     @GetMapping("/queryFileList/{userId}")
     @Operation(summary = "根据用户ID查询文件列表")
-    public Response<?> queryFileListByUserId(@PathVariable String userId){
+    public Response<FileListVo> queryFileListByUserId(@PathVariable String userId){
         return Response.success(commonService.queryFileListByUserId(userId));
     }
 

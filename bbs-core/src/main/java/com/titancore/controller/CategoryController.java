@@ -21,26 +21,26 @@ public class CategoryController {
     private CategoryService categoryService;
     @PostMapping("/open/list")
     @Operation(summary = "获取板块列表" )
-    public Response<?> queryList(@RequestBody CategoryParam categoryParam){
+    public Response<PageResult> queryList(@RequestBody CategoryParam categoryParam){
        PageResult pageResult =  categoryService.queryList(categoryParam);
        return Response.success(pageResult);
     }
 
     @PostMapping("/createCategory")
     @Operation(summary = "创建板块" )
-    public Response<?> createTag(@RequestBody CategoryDTO categoryDTO){
+    public Response<DMLVo> createTag(@RequestBody CategoryDTO categoryDTO){
         DMLVo DMLVo = categoryService.createCategory(categoryDTO);
         return Response.success(DMLVo);
     }
     @DeleteMapping("/deleteCategory")
     @Operation(summary = "删除板块" )
-    public Response<?> deleteCategory(@RequestParam String categoryId){
+    public Response<DMLVo> deleteCategory(@RequestParam String categoryId){
         DMLVo dmlVo = categoryService.deleteCategoryByCategoryId(categoryId);
         return Response.success(dmlVo);
     }
     @PutMapping("/updateCategory")
     @Operation(summary = "更新板块")
-    public Response<?> updateTag(@RequestBody CategoryDTO categoryDTO){
+    public Response<DMLVo> updateTag(@RequestBody CategoryDTO categoryDTO){
         DMLVo dmlVo = categoryService.updateCategoryById(categoryDTO);
         return Response.success(dmlVo);
     }

@@ -26,7 +26,7 @@ public class ChatGroupNoticeController {
      */
     @PostMapping("/create")
     @Operation(summary = "创建/编辑群公告")
-    public Response<?> createNotice(@RequestBody ChatNoticeDTO chatNoticeDTO) {
+    public Response<Boolean> createNotice(@RequestBody ChatNoticeDTO chatNoticeDTO) {
         boolean result = chatGroupNoticeService.createNotice(chatNoticeDTO);
         return Response.success(result);
     }
@@ -38,7 +38,7 @@ public class ChatGroupNoticeController {
      */
     @PostMapping("/list")
     @Operation(summary = "获取指定群公告列表（含历史）")
-    public Response<?>  noticeList(@RequestBody ChatGroupNoticeParam chatGroupNoticeParam) {
+    public Response<PageResult> noticeList(@RequestBody ChatGroupNoticeParam chatGroupNoticeParam) {
         PageResult result = chatGroupNoticeService.noticeList(chatGroupNoticeParam);
         return Response.success(result);
     }
@@ -50,7 +50,7 @@ public class ChatGroupNoticeController {
      */
     @DeleteMapping("/delete/{noticeId}")
     @Operation(summary = "删除指定群公告")
-    public  Response<?> deleteNotice( @PathVariable("noticeId") @Parameter(description = "公告ID") String noticeId) {
+    public Response<Boolean> deleteNotice(@PathVariable("noticeId") @Parameter(description = "公告ID") String noticeId) {
         boolean result = chatGroupNoticeService.deleteNotice(noticeId);
         return Response.success(result);
     }

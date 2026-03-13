@@ -22,7 +22,7 @@ public class ChatGroupMemberController {
 
     @PostMapping("/list")
     @Operation(summary = "根据群号分组查询群成员列表")
-    public Response<?> memberList(@RequestBody ChatMemberParam chatMemberParam) {
+    public Response<PageResult> memberList(@RequestBody ChatMemberParam chatMemberParam) {
         PageResult page = chatGroupMemberService.memberList(chatMemberParam);
         return Response.success(page);
     }

@@ -27,7 +27,7 @@ public class ChatListController {
      */
     @PostMapping("/list")
     @Operation(summary = "获取聊天列表")
-    public Response<?> getChatList(@RequestBody ChatListParam chatListParam) {
+    public Response<PageResult> getChatList(@RequestBody ChatListParam chatListParam) {
         PageResult page = chatListService.queryChatList(chatListParam);
         return Response.success(page);
     }
@@ -39,7 +39,7 @@ public class ChatListController {
      */
     @PostMapping("/createChatList")
     @Operation(summary = "创建聊天会话")
-    public Response<?> createChatList(@RequestBody ChatListDTO chatListDTO) {
+    public Response<ChatListDmlVo> createChatList(@RequestBody ChatListDTO chatListDTO) {
         ChatListDmlVo result = chatListService.createChatList(chatListDTO);
         return Response.success(result);
     }
@@ -51,7 +51,7 @@ public class ChatListController {
      */
     @PostMapping("/deleteChatList")
     @Operation(summary = "删除聊天会话")
-    public Response<?> deleteChatList(@RequestBody ChatListDTO chatListDTO) {
+    public Response<ChatListDmlVo> deleteChatList(@RequestBody ChatListDTO chatListDTO) {
         ChatListDmlVo result = chatListService.deleteChatList(chatListDTO);
         return Response.success(result);
     }
@@ -63,7 +63,7 @@ public class ChatListController {
      */
     @PostMapping("/setTopChatList")
     @Operation(summary = "置顶会话")
-    public Response<?> setTopChatList(@RequestBody SetTopForChatListDTO setTopChatListDTO) {
+    public Response<ChatListDmlVo> setTopChatList(@RequestBody SetTopForChatListDTO setTopChatListDTO) {
         ChatListDmlVo result = chatListService.setTopChatList(setTopChatListDTO);
         return Response.success(result);
     }
@@ -76,7 +76,7 @@ public class ChatListController {
      */
     @GetMapping("/read/{fromId}/{toId}")
     @Operation(summary = "消息已读")
-    public Response<?> messageRead(@PathVariable String fromId,@PathVariable String toId) {
+    public Response<ChatListDmlVo> messageRead(@PathVariable String fromId,@PathVariable String toId) {
         ChatListDmlVo result = chatListService.messageRead(fromId, toId);
         return Response.success(result);
     }
@@ -88,7 +88,7 @@ public class ChatListController {
      */
     @GetMapping("/read/all")
     @Operation(summary = "全部已读")
-    public Response<?> messageReadAll(@RequestParam String userId) {
+    public Response<ChatListDmlVo> messageReadAll(@RequestParam String userId) {
         ChatListDmlVo result = chatListService.messageReadAll(userId);
         return Response.success(result);
     }
@@ -100,7 +100,7 @@ public class ChatListController {
      */
     @PostMapping("/detail")
     @Operation(summary = "获取聊天列表详细信息")
-    public Response<?> detailChatList(@RequestBody ChatListDTO chatListDTO) {
+    public Response<ChatListVo> detailChatList(@RequestBody ChatListDTO chatListDTO) {
         ChatListVo chatListVo = chatListService.detailChartList(chatListDTO);
         return Response.success(chatListVo);
     }

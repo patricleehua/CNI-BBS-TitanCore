@@ -25,7 +25,7 @@ public class ElasticSearchController {
 
     @PostMapping("/postSearch")
     @Operation(summary = "es全文检索查询")
-    public Response<?> postSearch(@RequestBody PostSearchParam postSearchParam){
+    public Response<PageResult> postSearch(@RequestBody PostSearchParam postSearchParam){
         PageResult pageResult = elasticSearchService.searchPostPage(postSearchParam);
         return Response.success(pageResult);
     }

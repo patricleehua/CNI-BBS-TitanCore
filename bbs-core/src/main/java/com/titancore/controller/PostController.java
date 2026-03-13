@@ -35,7 +35,7 @@ public class PostController {
     private PostCommentsService postCommentsService;
     @PostMapping("/open/queryPostList")
     @Operation(summary = "查询帖子列表" , description = "支持分页查询")
-    public Response<?> queryPostList(@RequestBody PostParam postParam ){
+    public Response<PageResult> queryPostList(@RequestBody PostParam postParam ){
         log.info("postParam:{}",postParam);
         PageResult postListVo = postsService.queryPostList(postParam);
         return Response.success(postListVo);
@@ -43,43 +43,43 @@ public class PostController {
 
     @GetMapping("/open/{postId}")
     @Operation(summary = "根据帖子Id查询帖子信息")
-    public Response<?> queryPostDetaisById(@PathVariable("postId") String postId){
+    public Response<PostVo> queryPostDetaisById(@PathVariable("postId") String postId){
         PostVo postVo = postsService.queryPostDetaisById(postId);
         return Response.success(postVo);
     }
     @PostMapping("/createPost")
     @Operation(summary ="创建帖子(第二步)")
-    public Response<?> createPost(@RequestBody PostDTO postDTO){
+    public Response<DMLVo> createPost(@RequestBody PostDTO postDTO){
         DMLVo dmlVo = postsService.createPost(postDTO);
         return Response.success(dmlVo);
     }
     @PostMapping("/cleanTemporaryCover")
     @Operation(summary ="清除创建帖子中反复上传的封面")
-    public Response<?> cleanTemporaryCover(@RequestBody CleanCoverDTO cleanCoverDTO) {
+    public Response<DMLVo> cleanTemporaryCover(@RequestBody CleanCoverDTO cleanCoverDTO) {
         DMLVo dmlVo = postsService.cleanTemporaryCover(cleanCoverDTO);
         return Response.success(dmlVo);
     }
     @GetMapping("/createTemporaryPostId")
     @Operation(summary ="创建获取临时帖子ID用作新增/更新(必须第一步)")
-    public Response<?> createTemporaryPostId(@RequestParam String userId, @RequestParam(required = false) String postId){
+    public Response<String> createTemporaryPostId(@RequestParam String userId, @RequestParam(required = false) String postId){
         String temporaryPostId = postsService.createTemporaryPostId(userId,postId);
         return Response.success(temporaryPostId);
     }
     @GetMapping("/getUpdatePostInfo")
     @Operation(summary ="获取需要更新帖子的原始信息(第二步)")
-    public Response<?> getUpdatePostInfo(@RequestParam String postId,@RequestParam String userId){
+    public Response<PostUpdateInfoVo> getUpdatePostInfo(@RequestParam String postId,@RequestParam String userId){
         PostUpdateInfoVo postUpdateInfoVo = postsService.getUpdatePostInfo(postId,userId);
         return Response.success(postUpdateInfoVo);
     }
     @PostMapping("/updatePost")
     @Operation(summary ="更新帖子(第三步)")
-    public Response<?> updatePost(@RequestBody PostUpdateDTO postUpdateDTO){
+    public Response<DMLVo> updatePost(@RequestBody PostUpdateDTO postUpdateDTO){
         DMLVo dmlVo = postsService.updatePost(postUpdateDTO);
         return Response.success(dmlVo);
     }
     @DeleteMapping("/deletePost/{postId}")
     @Operation(summary ="删除帖子")
-    public Response<?> deletePost(@PathVariable("postId") String postId){
+    public Response<DMLVo> deletePost(@PathVariable("postId") String postId){
         DMLVo dmlVo = postsService.deletePost(postId);
         return Response.success(dmlVo);
     }
@@ -91,7 +91,7 @@ public class PostController {
      */
     @GetMapping("/frequency")
     @Operation(summary ="用户发帖频率数据")
-    public Response<?> getPostFrequency(@RequestParam String userId) {
+    public Response<List<PostFrequencyVo>> getPostFrequency(@RequestParam String userId) {
         List<PostFrequencyVo> frequencyData = postsService.getPostFrequency(userId);
         return Response.success(frequencyData);
     }
@@ -103,19 +103,19 @@ public class PostController {
      */
     @PostMapping("/open/queryCommentListByPostId")
     @Operation(summary = "获取帖子评论分页")
-    private Response<?> queryCommentListByPostId(@RequestBody PostCommentParam postCommentParam){
+    private Response<PageResult> queryCommentListByPostId(@RequestBody PostCommentParam postCommentParam){
         PageResult pageResult = postCommentsService.queryCommentListByPostId(postCommentParam);
         return Response.success(pageResult);
     }
     @PostMapping("/addPostComment")
     @Operation(summary = "新增帖子评论")
-    private Response<?> addPostComment(@RequestBody PostCommentsDTO postCommentsDTO){
+    private Response<Map<String,String>> addPostComment(@RequestBody PostCommentsDTO postCommentsDTO){
         Map<String,String> map=postCommentsService.addPostComment(postCommentsDTO);
         return Response.success(map);
     }
     @DeleteMapping("/deletePostComment")
     @Operation(summary = "删除帖子评论")
-    private Response<?> deletePostComment(@RequestBody PostCommentParam postCommentParam){
+    private Response<DMLVo> deletePostComment(@RequestBody PostCommentParam postCommentParam){
         DMLVo dmlVo = postCommentsService.deletePostComment(postCommentParam);
         return Response.success(dmlVo);
     }
