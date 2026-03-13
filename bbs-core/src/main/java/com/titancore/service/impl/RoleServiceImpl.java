@@ -73,7 +73,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public List<RoleVO> listAllRoles() {
         LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Role::getIsDeleted, false)
-               .eq(Role::getStatus, 0)
+               .eq(Role::getStatus, 1)
                .orderByAsc(Role::getSort);
         return list(wrapper).stream().map(this::toVO).collect(Collectors.toList());
     }
@@ -116,7 +116,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         role.setCreateTime(LocalDateTime.now());
         role.setUpdateTime(LocalDateTime.now());
         if (role.getStatus() == null) {
-            role.setStatus(0);
+            role.setStatus(1);
         }
         return save(role);
     }
@@ -181,7 +181,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
         }
 
-        role.setStatus(role.getStatus() == 0 ? 1 : 0);
+        role.setStatus(role.getStatus() == 1 ? 0 : 1);
         role.setUpdateTime(LocalDateTime.now());
         return updateById(role);
     }

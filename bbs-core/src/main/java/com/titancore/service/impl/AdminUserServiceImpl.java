@@ -119,7 +119,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
         if (StringUtils.isBlank(user.getStatus())) {
-            user.setStatus("0");
+            user.setStatus("1");
         }
         if (StringUtils.isBlank(user.getUserType())) {
             user.setUserType("01");
@@ -176,12 +176,12 @@ public class AdminUserServiceImpl implements AdminUserService {
             throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
         }
 
-        String newStatus = "0".equals(user.getStatus()) ? "1" : "0";
+        String newStatus = "1".equals(user.getStatus()) ? "0" : "1";
         user.setStatus(newStatus);
         user.setUpdateTime(LocalDateTime.now());
 
         // 如果禁用用户，踢出登录态
-        if ("1".equals(newStatus)) {
+        if ("0".equals(newStatus)) {
             StpUtil.kickout(userId);
         }
 

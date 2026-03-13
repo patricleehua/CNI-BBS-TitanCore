@@ -69,7 +69,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     public List<PermissionTreeVO> getPermissionTree() {
         LambdaQueryWrapper<Permission> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Permission::getIsDeleted, false)
-               .eq(Permission::getStatus, 0)
+               .eq(Permission::getStatus, 1)
                .orderByAsc(Permission::getSort);
         List<Permission> allPermissions = list(wrapper);
         return buildTree(allPermissions, 0L);
@@ -101,7 +101,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         permission.setCreateTime(LocalDateTime.now());
         permission.setUpdateTime(LocalDateTime.now());
         if (permission.getStatus() == null) {
-            permission.setStatus(0);
+            permission.setStatus(1);
         }
         if (permission.getParentId() == null) {
             permission.setParentId(0L);

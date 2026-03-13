@@ -55,7 +55,7 @@ public class Permission {
     private String permissionKey;
 
     /**
-     * 状态(0：启用；1：禁用)
+     * 状态(1：启用；0：禁用)
      */
     private Integer status;
 
