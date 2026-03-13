@@ -11,5 +11,17 @@
     <insert id="buildUserRoleRelByUserId" parameterType="map">
         insert into user_role_rel(id,user_id,role_id) values(#{id},#{userId},#{roleId})
     </insert>
+
+    <delete id="deleteUserRoleByUserId">
+        DELETE FROM user_role_rel WHERE user_id = #{userId}
+    </delete>
+
+    <insert id="batchInsertUserRole" parameterType="java.util.List">
+        INSERT INTO user_role_rel(id, user_id, role_id, create_time, update_time, is_deleted)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id}, #{item.userId}, #{item.roleId}, #{item.createTime}, #{item.updateTime}, #{item.isDeleted})
+        </foreach>
+    </insert>
 </mapper>
 

@@ -27,5 +27,15 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
      * @return
      */
     int buildUserRoleRelByUserId(@Param("id") Long id,@Param("userId") Long userId,@Param("roleId") Long roleId);
+
+    /**
+     * 删除用户的所有角色关系
+     */
+    int deleteUserRoleByUserId(@Param("userId") Long userId);
+
+    /**
+     * 批量插入用户角色关系
+     */
+    int batchInsertUserRole(@Param("list") List<UserRole> list);
 }
 
