@@ -72,7 +72,18 @@ public class AdminUserServiceImpl implements AdminUserService {
         Page<User> page = new Page<>(param.getPageNo(), param.getPageSize());
         Page<User> result = userMapper.selectPage(page, wrapper);
 
-        List<AdminUserVO> voList = result.getRecords().stream().map(this::toVO).collect(Collectors.toList());
+        List<AdminUserVO> voList = result.getRecords().stream().map(user -> {
+            AdminUserVO vo = toVO(user);
+            // 查询用户角色
+            List<Role> roles = userRoleMapper.queryRoleByUserId(user.getUserId());
+            List<RoleVO> roleVOs = roles.stream().map(role -> {
+                RoleVO roleVO = new RoleVO();
+                BeanUtils.copyProperties(role, roleVO);
+                return roleVO;
+            }).collect(Collectors.toList());
+            vo.setRoles(roleVOs);
+            return vo;
+        }).collect(Collectors.toList());
 
         PageResult pageResult = new PageResult();
         pageResult.setTotal(result.getTotal());
