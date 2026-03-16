@@ -15,6 +15,7 @@ import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.mapper.UserRoleMapper;
 import com.titancore.domain.param.AdminUserParam;
 import com.titancore.domain.param.PageResult;
+import com.titancore.domain.vo.AdminUserStatisticsVO;
 import com.titancore.domain.vo.AdminUserVO;
 import com.titancore.domain.vo.RoleVO;
 import com.titancore.enums.ResponseCodeEnum;
@@ -256,5 +257,26 @@ public class AdminUserServiceImpl implements AdminUserService {
         AdminUserVO vo = new AdminUserVO();
         BeanUtils.copyProperties(user, vo);
         return vo;
+    }
+
+    @Override
+    public AdminUserStatisticsVO getUserStatistics() {
+        AdminUserStatisticsVO statistics = new AdminUserStatisticsVO();
+
+        // 用户总数（未删除的）
+        LambdaQueryWrapper<User> totalWrapper = new LambdaQueryWrapper<>();
+        totalWrapper.eq(User::getDelFlag, "0");
+        statistics.setTotalUsers(userMapper.selectCount(totalWrapper));
+
+        // 当前在线用户数（Sa-Token 统计）
+        //statistics.setOnlineUsers((long) StpUtil.get());
+        statistics.setOnlineUsers(0L);
+
+        // 已封禁账户数（status = 0 表示禁用）
+        LambdaQueryWrapper<User> bannedWrapper = new LambdaQueryWrapper<>();
+        bannedWrapper.eq(User::getDelFlag, "0").eq(User::getStatus, "0");
+        statistics.setBannedUsers(userMapper.selectCount(bannedWrapper));
+
+        return statistics;
     }
 }

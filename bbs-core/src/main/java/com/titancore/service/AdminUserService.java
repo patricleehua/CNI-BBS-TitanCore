@@ -5,6 +5,7 @@ import com.titancore.domain.dto.AdminUserUpdateDTO;
 import com.titancore.domain.dto.AssignRoleDTO;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.AdminUserParam;
+import com.titancore.domain.vo.AdminUserStatisticsVO;
 import com.titancore.domain.vo.AdminUserVO;
 
 public interface AdminUserService {
@@ -48,4 +49,9 @@ public interface AdminUserService {
      * 重置用户密码
      */
     boolean resetPassword(Long userId, String newPassword);
+
+    /**
+     * 获取用户统计数据
+     */
+    AdminUserStatisticsVO getUserStatistics();
 }

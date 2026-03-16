@@ -6,6 +6,7 @@ import com.titancore.domain.dto.AdminUserUpdateDTO;
 import com.titancore.domain.dto.AssignRoleDTO;
 import com.titancore.domain.param.AdminUserParam;
 import com.titancore.domain.param.PageResult;
+import com.titancore.domain.vo.AdminUserStatisticsVO;
 import com.titancore.domain.vo.AdminUserVO;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.AdminUserService;
@@ -26,6 +27,13 @@ import javax.validation.Valid;
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
+
+    @GetMapping("/statistics")
+    @Operation(summary = "获取用户统计数据")
+    public Response<AdminUserStatisticsVO> getStatistics() {
+        AdminUserStatisticsVO statistics = adminUserService.getUserStatistics();
+        return Response.success(statistics);
+    }
 
     @PostMapping("/list")
     @Operation(summary = "分页查询用户列表")
