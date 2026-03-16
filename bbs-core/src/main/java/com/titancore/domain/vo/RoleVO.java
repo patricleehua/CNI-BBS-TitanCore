@@ -1,5 +1,6 @@
 package com.titancore.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 public class RoleVO implements Serializable {
 
     @Schema(description = "角色ID")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
     @Schema(description = "角色名称")

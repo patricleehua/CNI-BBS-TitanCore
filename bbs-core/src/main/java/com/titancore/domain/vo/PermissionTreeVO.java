@@ -1,5 +1,6 @@
 package com.titancore.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -11,6 +12,7 @@ import java.util.List;
 public class PermissionTreeVO implements Serializable {
 
     @Schema(description = "权限ID")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
     @Schema(description = "父ID")

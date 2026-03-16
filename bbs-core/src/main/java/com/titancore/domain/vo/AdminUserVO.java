@@ -1,5 +1,6 @@
 package com.titancore.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -12,6 +13,7 @@ import java.util.List;
 public class AdminUserVO implements Serializable {
 
     @Schema(description = "用户ID")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
 
     @Schema(description = "登录账号")
