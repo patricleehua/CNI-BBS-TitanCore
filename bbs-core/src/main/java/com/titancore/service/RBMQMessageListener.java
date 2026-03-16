@@ -66,7 +66,7 @@ public class RBMQMessageListener {
                 chatMessage.setUpdateTime(LocalDateTime.now());
                 chatMessage.setSourceType(SourceType.SYSTEM);
                 ChatMessageContent content = new ChatMessageContent();
-                content.setContent("用户" + user.getUserName() + "不在与您" + chatMessageDTO.getToId() + "的好友关系中，发送失败");
+                content.setContent("用户" + user.getNickName() + "不在与您" + chatMessageDTO.getToId() + "的好友关系中，发送失败");
                 chatMessage.setChatMessageContent(content);
                 webSocketService.sendMsgToUser(chatMessage, String.valueOf(chatMessageDTO.getFromId()));
                 channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);

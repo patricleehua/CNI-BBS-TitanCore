@@ -58,8 +58,8 @@ public class SocialUserServiceImpl extends ServiceImpl<SocialUserMapper, SocialU
         //todo 异常处理
         SocialUser socialUser = socialUserMapper.selectById(socialUserId);
         User user = new User();
-        user.setLoginName(socialUser.getUsername());
-        user.setUserName(socialUser.getNickname());
+        user.setPublicUsername(socialUser.getUsername());
+        user.setNickName(socialUser.getNickname());
         user.setAvatar(socialUser.getAvatar());
         user.setBio(socialUser.getRemark());
         user.setSex(socialUser.getGender());

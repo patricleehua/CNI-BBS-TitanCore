@@ -106,5 +106,13 @@ public interface UserService  extends IService<User> {
     UserVo findUserInfoByUserId(Long userId);
 
     UserLoginVo getUserInfoByToken(long userId);
+
+    /**
+     * 获取用户资料（包含关注数、粉丝数、积分等）
+     * @param userId 目标用户ID
+     * @param currentUserId 当前登录用户ID（用于判断关注状态）
+     * @return
+     */
+    UserProfileVo getUserProfile(String userId, String currentUserId);
 }
 

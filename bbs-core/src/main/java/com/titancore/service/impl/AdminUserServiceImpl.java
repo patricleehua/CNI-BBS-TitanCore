@@ -50,11 +50,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getDelFlag, "0");
 
-        if (StringUtils.isNotBlank(param.getLoginName())) {
-            wrapper.like(User::getLoginName, param.getLoginName());
+        if (StringUtils.isNotBlank(param.getPublicUsername())) {
+            wrapper.like(User::getPublicUsername, param.getPublicUsername());
         }
-        if (StringUtils.isNotBlank(param.getUserName())) {
-            wrapper.like(User::getUserName, param.getUserName());
+        if (StringUtils.isNotBlank(param.getNickName())) {
+            wrapper.like(User::getNickName, param.getNickName());
         }
         if (StringUtils.isNotBlank(param.getEmail())) {
             wrapper.like(User::getEmail, param.getEmail());
@@ -115,10 +115,10 @@ public class AdminUserServiceImpl implements AdminUserService {
     public boolean createUser(AdminUserCreateDTO dto) {
         // 检查账号是否已存在
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(User::getLoginName, dto.getLoginName())
+        wrapper.eq(User::getPublicUsername, dto.getPublicUsername())
                .eq(User::getDelFlag, "0");
         if (userMapper.selectCount(wrapper) > 0) {
-            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_LOGINNAME_IS_ALLERY_EXIST);
+            throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_PUBLIC_USERNAME_IS_ALLERY_EXIST);
         }
 
         User user = new User();

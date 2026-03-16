@@ -9,13 +9,13 @@ import jakarta.validation.constraints.NotBlank;
 @Schema(name = "AdminUserCreateDTO", description = "管理员创建用户DTO")
 public class AdminUserCreateDTO {
 
-    @NotBlank(message = "登录账号不能为空")
-    @Schema(description = "登录账号", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String loginName;
+    @NotBlank(message = "对外公开的用户名不能为空")
+    @Schema(description = "对外公开的用户名（唯一标识）", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String publicUsername;
 
     @NotBlank(message = "用户昵称不能为空")
-    @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String userName;
+    @Schema(description = "用户昵称（显示名称）", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String nickName;
 
     @NotBlank(message = "密码不能为空")
     @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -13,6 +13,9 @@ import com.titancore.constant.PointsRuleUniqueKey;
 import com.titancore.domain.dto.*;
 import com.titancore.domain.entity.User;
 import com.titancore.domain.entity.UserInvite;
+import com.titancore.domain.mapper.PointsRecordMapper;
+import com.titancore.domain.mapper.PostCommentsMapper;
+import com.titancore.domain.mapper.PostsMapper;
 import com.titancore.domain.mapper.UserInviteMapper;
 import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.mapper.UserRoleMapper;
@@ -52,6 +55,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final PointsRecordService pointsRecordService;
     private final EmailService emailService;
     private final SocialUserService socialUserService;
+    private final PostsMapper postsMapper;
+    private final PostCommentsMapper postCommentsMapper;
+    private final PointsRecordMapper pointsRecordMapper;
 
     public UserLoginVo login(UserLoginDTO userLoginDto) {
         LoginEnum loginType = LoginEnum.valueOfAll(userLoginDto.getLoginType());
@@ -63,7 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                             .eq(User::getDelFlag, "0")
                             .last("limit 1");
                     if (!userLoginDto.getUsername().isEmpty()){
-                        queryWrapper.eq(User::getLoginName, userLoginDto.getUsername());
+                        queryWrapper.eq(User::getPublicUsername, userLoginDto.getUsername());
                     }else if(!userLoginDto.getEmailNumber().isEmpty()){
                         queryWrapper.eq(User::getEmail, userLoginDto.getEmailNumber());
                     }else if(!userLoginDto.getPhoneNumber().isEmpty()){
@@ -177,7 +183,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         log.info("permissionList：{}", permissionList);
         return UserLoginVo.builder()
                 .id(user.getUserId())
-                .username(user.getUserName())
+                .username(user.getNickName())
                 .token(token)
                 .avatar(user.getAvatar())
                 .roles(roleList)
@@ -209,8 +215,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<User> users = userMapper.selectList(new LambdaQueryWrapper<User>()
                 .eq(User::getEmail, account)
                 .or().eq(User::getPhoneNumber, account)
-                .or().eq(User::getLoginName, account)
-                .or().eq(User::getUserName, account));
+                .or().eq(User::getPublicUsername, account)
+                .or().eq(User::getNickName, account));
         return !users.isEmpty();
     }
 
@@ -364,7 +370,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<String> permissionList = StpUtil.getPermissionList();
         return UserLoginVo.builder()
                 .id(user.getUserId())
-                .username(user.getUserName())
+                .username(user.getNickName())
                 .token(token)
                 .avatar(user.getAvatar())
                 .roles(roleList)
@@ -428,17 +434,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         //判断账户 是否存在
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getLoginName, registerUserDTO.getLoginName()).or()
-                .eq(User::getUserName, registerUserDTO.getUserName()).or()
+        queryWrapper.eq(User::getPublicUsername, registerUserDTO.getPublicUsername()).or()
+                .eq(User::getNickName, registerUserDTO.getNickName()).or()
                 .eq(User::getPhoneNumber, registerUserDTO.getPhoneNumber()).or()
                 .eq(User::getEmail, registerUserDTO.getEmailNumber());
         List<User> existingUsers = userMapper.selectList(queryWrapper);
         if (!existingUsers.isEmpty()) {
             existingUsers.forEach(user -> {
-                if (user.getLoginName().equals(registerUserDTO.getLoginName())) {
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_LOGINNAME_IS_ALLERY_EXIST);
-                } else if (user.getUserName().equals(registerUserDTO.getUserName())) {
-                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_USERNAME_IS_ALLERY_EXIST);
+                if (user.getPublicUsername().equals(registerUserDTO.getPublicUsername())) {
+                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_PUBLIC_USERNAME_IS_ALLERY_EXIST);
+                } else if (user.getNickName().equals(registerUserDTO.getNickName())) {
+                    throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_NICKNAME_IS_ALLERY_EXIST);
                 } else if (user.getPhoneNumber().equals(registerUserDTO.getPhoneNumber())) {
                     throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_PHONE_IS_ALLERY_EXIST);
                 } else if (user.getEmail().equals(registerUserDTO.getEmailNumber())) {
@@ -447,7 +453,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             });
         }
         //分布式锁
-        String userRegisterRedisKey = RedisConstant.USER_REGISTER_INFO_PRIX + registerUserDTO.getLoginName();
+        String userRegisterRedisKey = RedisConstant.USER_REGISTER_INFO_PRIX + registerUserDTO.getPublicUsername();
         String lockKey = RedisConstant.USER_REGISTER_LOCK_PRIX + userRegisterRedisKey;
         String lockValue = UUID.randomUUID().toString();
         try {
@@ -629,6 +635,54 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!(result > 0)) {
             throw new BizException(ResponseCodeEnum.AUTH_ACCOUNT_INVITE_CREATE_FAIL);
         }
+    }
+
+    @Override
+    public UserProfileVo getUserProfile(String userId, String currentUserId) {
+        if (StringUtils.isEmpty(userId)) {
+            throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
+        }
+
+        Long uid = Long.valueOf(userId);
+        User user = userMapper.selectById(uid);
+        if (user == null) {
+            throw new BizException(ResponseCodeEnum.ACCOUNT_CAN_NOT_FOUND);
+        }
+
+        UserProfileVo profileVo = new UserProfileVo();
+        profileVo.setUserId(String.valueOf(user.getUserId()));
+        profileVo.setPublicUsername(user.getPublicUsername());
+        profileVo.setNickName(user.getNickName());
+        profileVo.setAvatar(user.getAvatar());
+        profileVo.setBio(user.getBio());
+
+        // 关注数和粉丝数
+        profileVo.setFollowingCount((long) followService.followNumCount(uid, false));
+        profileVo.setFollowersCount((long) followService.followNumCount(uid, true));
+
+        // 关注状态
+        if (StringUtils.isNotEmpty(currentUserId)) {
+            FollowStatus followStatus = followService.getUserFollowStatus(userId, currentUserId);
+            if (userId.equals(currentUserId)) {
+                profileVo.setFollowStatus(FollowStatus.CONFIRMED.getValue());
+            } else {
+                profileVo.setFollowStatus(followStatus.getValue());
+            }
+        }
+
+        // 用户声望/积分
+        Long reputation = pointsRecordMapper.selectTotalPointsByUserId(uid);
+        profileVo.setReputation(reputation != null ? reputation : 0L);
+
+        // 帖子数量
+        Long postsCount = postsMapper.selectCountByUserId(uid);
+        profileVo.setPostsCount(postsCount != null ? postsCount : 0L);
+
+        // 评论数量
+        Long commentsCount = postCommentsMapper.selectCountByUserId(uid);
+        profileVo.setCommentsCount(commentsCount != null ? commentsCount : 0L);
+
+        return profileVo;
     }
 
 }

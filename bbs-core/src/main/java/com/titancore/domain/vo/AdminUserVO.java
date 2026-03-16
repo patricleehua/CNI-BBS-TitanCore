@@ -16,11 +16,11 @@ public class AdminUserVO implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
 
-    @Schema(description = "登录账号")
-    private String loginName;
+    @Schema(description = "对外公开的用户名")
+    private String publicUsername;
 
     @Schema(description = "用户昵称")
-    private String userName;
+    private String nickName;
 
     @Schema(description = "用户类型")
     private String userType;

@@ -3,6 +3,8 @@ package com.titancore.domain.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.titancore.domain.entity.PostComments;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 /**
 * @author leehua
@@ -13,6 +15,13 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface PostCommentsMapper extends BaseMapper<PostComments> {
 
+    /**
+     * 查询用户的评论数量
+     * @param userId
+     * @return
+     */
+    @Select("SELECT COUNT(*) FROM post_comments WHERE user_id = #{userId} AND is_delete = 0")
+    Long selectCountByUserId(@Param("userId") Long userId);
 }
 
 

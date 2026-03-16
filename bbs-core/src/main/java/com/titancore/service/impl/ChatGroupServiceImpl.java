@@ -224,14 +224,14 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         chatMessageContent.setType(MessageContentType.Quit);
         chatMessageContent.setFormUserId(userId);
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, userId));
-        chatMessageContent.setFormUserName(user.getUserName());
+        chatMessageContent.setFormUserName(user.getNickName());
 
         NotifyDTO notifyDTO = new NotifyDTO();
         notifyDTO.setId(chatGroupQuitDTO.getGroupId());
         notifyDTO.setType(MessageContentType.Quit);
         NotifyDTO.NotifyContent notifyContent = new NotifyDTO.NotifyContent();
                 notifyContent.setTitle(MessageContent.USER_QUIET_TITLE);
-                notifyContent.setText(String.format("%s%s", user.getUserName(), MessageContent.USER_QUIET_INFO));
+                notifyContent.setText(String.format("%s%s", user.getNickName(), MessageContent.USER_QUIET_INFO));
         notifyDTO.setContent(notifyContent);
 
         chatMessageContent.setContent(JSON.toJSONString(notifyDTO));
@@ -262,7 +262,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         chatMessageContent.setType(MessageContentType.Quit);
         chatMessageContent.setFormUserId(managerId);
         User manager = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, managerId));
-        chatMessageContent.setFormUserName(manager.getUserName());
+        chatMessageContent.setFormUserName(manager.getNickName());
 
         NotifyDTO notifyDTO = new NotifyDTO();
         notifyDTO.setId(groupId);
@@ -270,7 +270,7 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         NotifyDTO.NotifyContent notifyContent = new NotifyDTO.NotifyContent();
                 notifyContent.setTitle(MessageContent.USER_KICK_TITLE);
         User kickUser = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, managerId));
-                notifyContent.setText(String.format("%s%s", kickUser.getUserName(), MessageContent.USER_KICK_INFO));
+                notifyContent.setText(String.format("%s%s", kickUser.getNickName(), MessageContent.USER_KICK_INFO));
         notifyDTO.setContent(notifyContent);
 
         chatMessageContent.setContent(JSON.toJSONString(notifyDTO));
@@ -318,8 +318,8 @@ public class ChatGroupServiceImpl extends ServiceImpl<ChatGroupMapper, ChatGroup
         chatGroupDetailsVo.setGroupName(chatGroup.getName());
         chatGroupDetailsVo.setGroupId(String.valueOf(chatGroup.getId()));
         chatGroupDetailsVo.setMemberNum(String.valueOf(chatGroup.getMemberNum()));
-        chatGroupDetailsVo.setCreateUserName(userMapper.selectById(chatGroup.getUserId()).getUserName());
-        chatGroupDetailsVo.setOwnerUserName(userMapper.selectById(chatGroup.getOwnerUserId()).getUserName());
+        chatGroupDetailsVo.setCreateUserName(userMapper.selectById(chatGroup.getUserId()).getNickName());
+        chatGroupDetailsVo.setOwnerUserName(userMapper.selectById(chatGroup.getOwnerUserId()).getNickName());
         return chatGroupDetailsVo;
     }
 

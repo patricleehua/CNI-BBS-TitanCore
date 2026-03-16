@@ -44,7 +44,7 @@ public class ChatGroupMemberServiceImpl extends ServiceImpl<ChatGroupMemberMappe
         ChatGroupMember chatGroupMember = new ChatGroupMember();
         chatGroupMember.setUserId(Long.valueOf(chatMemberDTO.getUserId()));
         chatGroupMember.setChatGroupId(Long.valueOf(chatMemberDTO.getChatGroupId()));
-        chatGroupMember.setGroupName(user.getUserName());
+        chatGroupMember.setGroupName(user.getNickName());
         int result = chatGroupMemberMapper.insert(chatGroupMember);
         return result > 0;
     }
@@ -67,7 +67,7 @@ public class ChatGroupMemberServiceImpl extends ServiceImpl<ChatGroupMemberMappe
         List<ChatGroupMember> chatGroupMemberList = queryUserInfo(newUserIds).stream().map(user -> {
             ChatGroupMember chatGroupMember = new ChatGroupMember();
             chatGroupMember.setChatGroupId(Long.valueOf(chatGroupId));
-            chatGroupMember.setGroupName(user.getUserName());
+            chatGroupMember.setGroupName(user.getNickName());
             chatGroupMember.setUserId(user.getUserId());
             return chatGroupMember;
         }).toList();

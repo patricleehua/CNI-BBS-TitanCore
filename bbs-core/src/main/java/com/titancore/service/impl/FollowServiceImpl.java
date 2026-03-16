@@ -278,7 +278,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, userId));
 
         followerVo.setFollowerId(userId);
-        followerVo.setFollowerName(user.getUserName());
+        followerVo.setFollowerName(user.getNickName());
         followerVo.setRemark(follow.getRemark());
         followerVo.setCreateTime(follow.getCreateTime());
         followerVo.setFollowStatus(follow.getFollowStatus().getValue());

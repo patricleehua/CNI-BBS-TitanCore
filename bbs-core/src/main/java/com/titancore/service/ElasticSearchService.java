@@ -270,7 +270,7 @@
 //        postDoc.setUpdateTime(post.getUpdateTime().atZone(ZoneId.of("UTC")).toInstant().toEpochMilli());
 //        //authorName
 //        String authorName= Optional.ofNullable(userMapper.selectById(post.getAuthorId()))
-//                .map(User::getUserName)
+//                .map(User::getNickName)
 //                .orElse("未知作者");
 //        postDoc.setAuthorName(authorName);
 //        postDoc.setAuthorId(post.getAuthorId());
@@ -525,7 +525,7 @@
 //            User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, postDoc.getAuthorId()));
 //            UserVo userVo = new UserVo();
 //            userVo.setUserId(String.valueOf(user.getUserId()));
-//            userVo.setUserName(user.getUserName());
+//            userVo.setNickName(user.getNickName());
 //            userVo.setAvatar(user.getAvatar());
 //            userVo.setBio(user.getBio());
 //            postViewVo.setUserVo(userVo);

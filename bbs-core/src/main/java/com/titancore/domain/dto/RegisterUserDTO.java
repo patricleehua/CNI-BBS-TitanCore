@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @Schema(name = "RegisterUserDTO", description = "用户注册数据传输对象")
 public class RegisterUserDTO extends BaseDTO {
 
-    @Schema(description = "登入名称", example = "123456aa", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String loginName;
+    @Schema(description = "对外公开的用户名（唯一标识）", example = "john_doe", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String publicUsername;
 
-    @Schema(description = "用户名称", example = "test", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String userName;
+    @Schema(description = "用户昵称（显示名称）", example = "John Doe", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String nickName;
 
     @Schema(description = "性别", example = "0/1/-1", requiredMode = Schema.RequiredMode.REQUIRED)
     private int sex;

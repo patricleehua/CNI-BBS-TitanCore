@@ -26,8 +26,8 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     AUTH_ACCOUNT_IS_DIFFERENT("AUTH-30010","操作者与当前线程用户不一致!"),
     AUTH_ACCOUNT_IS_MISSED("AUTH-30011","操作者信息丢失或有误!"),
 
-    AUTH_ACCOUNT_LOGINNAME_IS_ALLERY_EXIST("AUTH-30012","用户登入名已存在,不能重复!"),
-    AUTH_ACCOUNT_USERNAME_IS_ALLERY_EXIST("AUTH-30012","用户名已存在,不能重复!"),
+    AUTH_ACCOUNT_PUBLIC_USERNAME_IS_ALLERY_EXIST("AUTH-30012","对外公开的用户名已存在,不能重复!"),
+    AUTH_ACCOUNT_NICKNAME_IS_ALLERY_EXIST("AUTH-30019","用户昵称已存在,不能重复!"),
     AUTH_ACCOUNT_EMAIL_IS_ALLERY_EXIST("AUTH-30013","用户邮箱已存在,不能重复!"),
     AUTH_ACCOUNT_PHONE_IS_ALLERY_EXIST("AUTH-30014","用户手机号已存在,不能重复!"),
 

@@ -10,11 +10,11 @@ import lombok.EqualsAndHashCode;
 @Schema(name = "AdminUserParam", description = "管理员用户分页查询参数")
 public class AdminUserParam extends PageParams {
 
-    @Schema(description = "登录账号")
-    private String loginName;
+    @Schema(description = "对外公开的用户名")
+    private String publicUsername;
 
     @Schema(description = "用户昵称")
-    private String userName;
+    private String nickName;
 
     @Schema(description = "邮箱")
     private String email;

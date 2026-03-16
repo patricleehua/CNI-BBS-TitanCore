@@ -9,7 +9,8 @@ import java.io.Serializable;
 public class UserVo implements Serializable {
 
     private String userId;
-    private String userName;
+    private String publicUsername;
+    private String nickName;
     private String avatar;
     private String bio;
     private String followingCount;

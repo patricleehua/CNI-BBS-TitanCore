@@ -74,6 +74,13 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
             queryWrapper.eq(Posts::getCategoryId, postParam.getCategoryId());
         }
 
+        if (StringUtils.isNotBlank(postParam.getAuthorId())) {
+            queryWrapper.eq(Posts::getAuthorId, postParam.getAuthorId());
+        }
+
+        queryWrapper.eq(Posts::getDelFlag, 0);
+        queryWrapper.orderByDesc(Posts::getCreateTime);
+
         Page<Posts> postsPage = postMapper.selectPage(page, queryWrapper);
         PageResult pageResult = new PageResult();
         pageResult.setTotal(postsPage.getTotal());
@@ -472,7 +479,7 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
                 }
             }
             userVo.setUserId(String.valueOf(user.getUserId()));
-            userVo.setUserName(user.getUserName());
+            userVo.setNickName(user.getNickName());
             userVo.setAvatar(user.getAvatar());
             userVo.setBio(user.getBio());
             HashMap<String, Long> map = followService.queryFollowCount(String.valueOf(user.getUserId()));
@@ -520,7 +527,7 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
             User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, posts.getAuthorId()));
             UserVo userVo = new UserVo();
             userVo.setUserId(String.valueOf(user.getUserId()));
-            userVo.setUserName(user.getUserName());
+            userVo.setNickName(user.getNickName());
             userVo.setAvatar(user.getAvatar());
             userVo.setBio(user.getBio());
             HashMap<String, Long> map = followService.queryFollowCount(String.valueOf(user.getUserId()));

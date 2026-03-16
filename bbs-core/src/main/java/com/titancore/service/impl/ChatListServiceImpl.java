@@ -159,7 +159,7 @@ public class ChatListServiceImpl extends ServiceImpl<ChatListMapper, ChatList>
                     case USER -> {
                         User user = userMapper.selectById(chatList.getToId());
                         if (user != null) {
-                            chatListVo.setToName(user.getUserName());
+                            chatListVo.setToName(user.getNickName());
                             chatListVo.setToPortrait(user.getAvatar());
                         }
                     }

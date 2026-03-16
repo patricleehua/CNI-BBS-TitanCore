@@ -111,4 +111,15 @@ public class UserController {
         return Response.success();
     }
 
+    @GetMapping({"/open/profile/{userId}", "/profile/{userId}"})
+    @Operation(summary = "获取用户资料")
+    public Response<UserProfileVo> getUserProfile(@PathVariable String userId){
+        String currentUserId = null;
+        if (StpUtil.isLogin()) {
+            currentUserId = StpUtil.getLoginIdAsString();
+        }
+        UserProfileVo profileVo = userService.getUserProfile(userId, currentUserId);
+        return Response.success(profileVo);
+    }
+
 }

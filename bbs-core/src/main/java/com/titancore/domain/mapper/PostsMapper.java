@@ -37,6 +37,14 @@ public interface PostsMapper extends BaseMapper<Posts> {
             "GROUP BY post_date " +
             "ORDER BY post_date ASC")
      List<PostFrequencyVo> getPostCountByDate(@Param("userId")Long userId, @Param("startDate") String startDate,@Param("endDate") String endDate);
+
+    /**
+     * 查询用户的帖子数量
+     * @param userId
+     * @return
+     */
+    @Select("SELECT COUNT(*) FROM posts WHERE author_id = #{userId} AND deleted = 0")
+    Long selectCountByUserId(@Param("userId") Long userId);
 }
 
 

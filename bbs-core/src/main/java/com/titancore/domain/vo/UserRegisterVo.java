@@ -8,7 +8,8 @@ import lombok.Data;
 public class UserRegisterVo{
 
     private String userId;
-    private String userName;
+    private String publicUsername;
+    private String nickName;
     private String email;
     private String avatar;
     private String status;

@@ -25,13 +25,13 @@ public class User  {
     @TableId(type = IdType.ASSIGN_ID)
     private Long userId;
     /**
-     * 登录账号
+     * 对外公开的用户名（唯一标识）
      */
-    private String loginName;
+    private String publicUsername;
     /**
-     * 用户昵称
+     * 用户昵称（显示名称）
      */
-    private String userName;
+    private String nickName;
     /**
      * 用户类型（00系统用户 01注册用户 02第三方平台注册用户）
      */
