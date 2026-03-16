@@ -20,7 +20,7 @@ public interface PostCommentsMapper extends BaseMapper<PostComments> {
      * @param userId
      * @return
      */
-    @Select("SELECT COUNT(*) FROM post_comments WHERE user_id = #{userId} AND is_delete = 0")
+    @Select("SELECT COUNT(*) FROM post_comments WHERE user_id = #{userId}")
     Long selectCountByUserId(@Param("userId") Long userId);
 }
 

@@ -8,7 +8,9 @@ import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostCommentParam;
 import com.titancore.domain.param.PostParam;
 import com.titancore.domain.vo.DMLVo;
+import com.titancore.domain.vo.PostCommentVo;
 import com.titancore.domain.vo.PostFrequencyVo;
+import com.titancore.domain.vo.UserRecentCommentVo;
 import com.titancore.domain.vo.PostUpdateInfoVo;
 import com.titancore.domain.vo.PostVo;
 import com.titancore.framework.common.response.Response;
@@ -118,5 +120,20 @@ public class PostController {
     private Response<DMLVo> deletePostComment(@RequestBody PostCommentParam postCommentParam){
         DMLVo dmlVo = postCommentsService.deletePostComment(postCommentParam);
         return Response.success(dmlVo);
+    }
+
+    /**
+     * 获取用户最近的评论列表
+     * @param userName 用户公开用户名
+     * @param limit 限制条数（默认10条）
+     * @return 评论列表
+     */
+    @GetMapping("/open/recentComments/{userName}")
+    @Operation(summary = "获取用户最近评论", description = "根据用户名获取用户最近的评论列表，包含帖子信息")
+    public Response<List<UserRecentCommentVo>> getRecentCommentsByUserName(
+            @PathVariable("userName") String userName,
+            @RequestParam(required = false, defaultValue = "10") Integer limit) {
+        List<UserRecentCommentVo> comments = postCommentsService.queryRecentCommentsByUserName(userName, limit);
+        return Response.success(comments);
     }
 }

@@ -1,6 +1,7 @@
 package com.titancore.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
@@ -9,12 +10,15 @@ import com.titancore.domain.dto.PostCommentsDTO;
 import com.titancore.domain.entity.AiCheckOffendingWordsResponse;
 import com.titancore.domain.entity.PostComments;
 import com.titancore.domain.entity.Posts;
+import com.titancore.domain.entity.User;
 import com.titancore.domain.mapper.PostCommentsMapper;
 import com.titancore.domain.mapper.PostsMapper;
+import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.param.PageResult;
 import com.titancore.domain.param.PostCommentParam;
 import com.titancore.domain.vo.DMLVo;
 import com.titancore.domain.vo.PostCommentVo;
+import com.titancore.domain.vo.UserRecentCommentVo;
 import com.titancore.domain.vo.UserVo;
 import com.titancore.enums.ResponseCodeEnum;
 import com.titancore.framework.common.constant.CommonConstant;
@@ -48,6 +52,8 @@ public class PostCommentsServiceImpl extends ServiceImpl<PostCommentsMapper, Pos
     private AiDetectTextService aiDetectTextService;
     @Resource
     private SensitiveWordBs sensitiveWordBs;
+    @Resource
+    private UserMapper userMapper;
     @Override
     public PageResult queryCommentListByPostId(PostCommentParam postCommentParam) {
         Page<PostComments> page = new Page<>(postCommentParam.getPageNo(), postCommentParam.getPageSize());
@@ -177,6 +183,51 @@ public class PostCommentsServiceImpl extends ServiceImpl<PostCommentsMapper, Pos
         queryWrapper.eq(PostComments::getParentId,id);
         queryWrapper.eq(PostComments::getLevel,2);
         return postCommentsListToPostCommentVoList(this.baseMapper.selectList(queryWrapper));
+    }
+
+    @Override
+    public List<UserRecentCommentVo> queryRecentCommentsByUserName(String publicUsername, Integer limit) {
+        // 通过publicUsername查询用户
+        User user = userMapper.selectOne(new QueryWrapper<User>().eq("public_username", publicUsername));
+        if (user == null) {
+            return new ArrayList<>();
+        }
+        Long userId = user.getUserId();
+
+        // 查询用户最近的评论
+        LambdaQueryWrapper<PostComments> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(PostComments::getUserId, userId)
+                .orderByDesc(PostComments::getCommentTime)
+                .last("limit " + limit);
+        List<PostComments> comments = this.baseMapper.selectList(queryWrapper);
+
+        // 转换为UserRecentCommentVo并填充帖子信息
+        List<UserRecentCommentVo> result = new ArrayList<>();
+        for (PostComments comment : comments) {
+            UserRecentCommentVo vo = new UserRecentCommentVo();
+            vo.setCommentId(String.valueOf(comment.getId()));
+            vo.setContent(comment.getContent());
+            vo.setCommentTime(comment.getCommentTime());
+            vo.setLevel(comment.getLevel());
+
+            // 查询帖子信息
+            Long postId = comment.getPostId();
+            if (postId != null) {
+                vo.setPostId(String.valueOf(postId));
+                Posts post = postsMapper.selectById(postId);
+                if (post != null) {
+                    vo.setPostTitle(post.getTitle());
+                    vo.setPostSummary(post.getSummary());
+                    // 查询帖子作者信息
+                    UserVo authorVo = userService.findUserInfoByUserId(post.getAuthorId());
+                    vo.setPostAuthor(authorVo);
+                }
+            }
+
+            result.add(vo);
+        }
+
+        return result;
     }
 }
 

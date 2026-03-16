@@ -638,17 +638,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public UserProfileVo getUserProfile(String userId, String currentUserId) {
-        if (StringUtils.isEmpty(userId)) {
+    public UserProfileVo getUserProfile(String userName, String currentUserId) {
+        if (StringUtils.isEmpty(userName)) {
             throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
         }
-
-        Long uid = Long.valueOf(userId);
-        User user = userMapper.selectById(uid);
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getPublicUsername, userName));
         if (user == null) {
             throw new BizException(ResponseCodeEnum.ACCOUNT_CAN_NOT_FOUND);
         }
-
+        Long uid = user.getUserId();
         UserProfileVo profileVo = new UserProfileVo();
         profileVo.setUserId(String.valueOf(user.getUserId()));
         profileVo.setPublicUsername(user.getPublicUsername());
@@ -662,8 +660,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 关注状态
         if (StringUtils.isNotEmpty(currentUserId)) {
-            FollowStatus followStatus = followService.getUserFollowStatus(userId, currentUserId);
-            if (userId.equals(currentUserId)) {
+            FollowStatus followStatus = followService.getUserFollowStatus(uid.toString(), currentUserId);
+            if (uid.toString().equals(currentUserId)) {
                 profileVo.setFollowStatus(FollowStatus.CONFIRMED.getValue());
             } else {
                 profileVo.setFollowStatus(followStatus.getValue());

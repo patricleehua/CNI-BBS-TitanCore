@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import java.lang.reflect.Type;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -74,8 +75,14 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
             queryWrapper.eq(Posts::getCategoryId, postParam.getCategoryId());
         }
 
-        if (StringUtils.isNotBlank(postParam.getAuthorId())) {
-            queryWrapper.eq(Posts::getAuthorId, postParam.getAuthorId());
+        // 通过作者用户名查询作者ID
+        String authorId = null;
+        if (StringUtils.isNotBlank(postParam.getAuthorName())) {
+            User author = userMapper.selectOne(new QueryWrapper<User>().eq("public_username", postParam.getAuthorName()));
+            if (author != null) {
+                authorId = String.valueOf(author.getUserId());
+                queryWrapper.eq(Posts::getAuthorId, authorId);
+            }
         }
 
         queryWrapper.eq(Posts::getDelFlag, 0);
@@ -84,9 +91,21 @@ public class PostsServiceImpl extends ServiceImpl<PostsMapper, Posts> implements
         Page<Posts> postsPage = postMapper.selectPage(page, queryWrapper);
         PageResult pageResult = new PageResult();
         pageResult.setTotal(postsPage.getTotal());
+        // 通过当前登录用户名查询用户ID
+        String userId;
+        if (StringUtils.isNotBlank(postParam.getUserName())) {
+            User user = userMapper.selectOne(new QueryWrapper<User>().eq("public_username", postParam.getUserName()));
+            if (user != null) {
+                userId = String.valueOf(user.getUserId());
+            } else {
+                userId = null;
+            }
+        } else {
+            userId = null;
+        }
         //过滤
         List<PostViewVo> postViewVos = postsPage.getRecords().stream()
-                .map(posts-> PostsToPostViewVo(posts,true,true,true,true,postParam.getUserId())).collect(Collectors.toList());
+                .map(posts-> PostsToPostViewVo(posts,true,true,true,true, userId)).collect(Collectors.toList());
         pageResult.setRecords(postViewVos);
         return pageResult;
     }

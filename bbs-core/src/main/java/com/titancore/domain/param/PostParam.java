@@ -17,8 +17,8 @@ public class PostParam extends PageParams {
     private String categoryId;
     @Schema(description = "帖子携带的标签id列表")
     private List<String> tagIds;
-    @Schema(description = "当前登入用户id(主要给关注功能提供)")
-    private String userId;
-    @Schema(description = "作者id(用于查询特定用户的帖子)")
-    private String authorId;
+    @Schema(description = "当前登入用户名(主要给关注功能提供)")
+    private String userName;
+    @Schema(description = "作者用户名(用于查询特定用户的帖子)")
+    private String authorName;
 }

@@ -111,14 +111,14 @@ public class UserController {
         return Response.success();
     }
 
-    @GetMapping({"/open/profile/{userId}", "/profile/{userId}"})
+    @GetMapping({"/open/profile/{userName}", "/profile/{userName}"})
     @Operation(summary = "获取用户资料")
-    public Response<UserProfileVo> getUserProfile(@PathVariable String userId){
+    public Response<UserProfileVo> getUserProfile(@PathVariable String userName){
         String currentUserId = null;
         if (StpUtil.isLogin()) {
             currentUserId = StpUtil.getLoginIdAsString();
         }
-        UserProfileVo profileVo = userService.getUserProfile(userId, currentUserId);
+        UserProfileVo profileVo = userService.getUserProfile(userName, currentUserId);
         return Response.success(profileVo);
     }
 

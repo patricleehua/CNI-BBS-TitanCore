@@ -43,7 +43,7 @@ public interface PostsMapper extends BaseMapper<Posts> {
      * @param userId
      * @return
      */
-    @Select("SELECT COUNT(*) FROM posts WHERE author_id = #{userId} AND deleted = 0")
+    @Select("SELECT COUNT(*) FROM posts WHERE author_id = #{userId} ")
     Long selectCountByUserId(@Param("userId") Long userId);
 }
 

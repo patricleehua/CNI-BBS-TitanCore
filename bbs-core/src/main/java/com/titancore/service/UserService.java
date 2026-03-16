@@ -109,10 +109,10 @@ public interface UserService  extends IService<User> {
 
     /**
      * 获取用户资料（包含关注数、粉丝数、积分等）
-     * @param userId 目标用户ID
+     * @param userName 目标用户UserName
      * @param currentUserId 当前登录用户ID（用于判断关注状态）
      * @return
      */
-    UserProfileVo getUserProfile(String userId, String currentUserId);
+    UserProfileVo getUserProfile(String userName, String currentUserId);
 }
 

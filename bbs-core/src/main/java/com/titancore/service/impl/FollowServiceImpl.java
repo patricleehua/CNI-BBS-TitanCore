@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.titancore.domain.dto.FollowDTO;
 import com.titancore.domain.entity.Follow;
 import com.titancore.domain.entity.User;
+import com.titancore.domain.mapper.PostsMapper;
 import com.titancore.domain.mapper.UserMapper;
 import com.titancore.domain.param.FollowParam;
 import com.titancore.domain.param.PageResult;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 //todo 异常处理
 @Service
@@ -38,6 +40,8 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
     private FollowMapper followMapper;
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private PostsMapper postsMapper;
     @Override
     public PageResult queryList(FollowParam followParam) {
         Page<Follow> page = new Page<>(followParam.getPageNo(), followParam.getPageSize());
@@ -273,17 +277,46 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 
     private FollowerVo filterFollowToFollowerVo(Follow follow, boolean isGroup, boolean isCheckFollower) {
         FollowerVo followerVo = new FollowerVo();
-        Long userId = isCheckFollower ? follow.getFollowerId() : follow.getUserId();
+        Long targetUserId = isCheckFollower ? follow.getFollowerId() : follow.getUserId();
+        Long currentUserId = isCheckFollower ? follow.getUserId() : follow.getFollowerId();
 
-        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, userId));
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUserId, targetUserId));
+        if (user == null) {
+            return followerVo;
+        }
 
-        followerVo.setFollowerId(userId);
-        followerVo.setFollowerName(user.getNickName());
+        // 基础用户信息
+        followerVo.setUserId(targetUserId);
+        followerVo.setPublicUsername(user.getPublicUsername());
+        followerVo.setNickName(user.getNickName());
+        followerVo.setAvatar(user.getAvatar());
+        followerVo.setBio(user.getBio());
         followerVo.setRemark(follow.getRemark());
         followerVo.setCreateTime(follow.getCreateTime());
+        followerVo.setIsPublicAccount(user.getIsPrivate() == StatusEnum.DISABLED.getValue());
+        followerVo.setIsBlocked(StatusEnum.ENABLE.getValue().equals(follow.getIsBlocked()));
+
+        // 统计信息
+        followerVo.setFollowingCount(followMapper.selectCount(
+                new LambdaQueryWrapper<Follow>().eq(Follow::getFollowerId, targetUserId)));
+        followerVo.setFollowersCount(followMapper.selectCount(
+                new LambdaQueryWrapper<Follow>().eq(Follow::getUserId, targetUserId)));
+
+        // 查询用户帖子数量
+        followerVo.setPostsCount((long) postsMapper.selectCount(
+                new LambdaQueryWrapper<com.titancore.domain.entity.Posts>()
+                        .eq(com.titancore.domain.entity.Posts::getAuthorId, targetUserId)));
+
+        // 关注状态
         followerVo.setFollowStatus(follow.getFollowStatus().getValue());
 
-        followerVo.setIsBacked(follow.getIsBlocked());
+        // 检查是否互相关注（对方也关注了当前用户）
+        Follow mutualFollow = followMapper.selectOne(new LambdaQueryWrapper<Follow>()
+                .eq(Follow::getUserId, currentUserId)
+                .eq(Follow::getFollowerId, targetUserId)
+                .eq(Follow::getFollowStatus, FollowStatus.CONFIRMED));
+        followerVo.setIsMutualFollow(mutualFollow != null);
+
         if (isGroup) {
             // todo 处理group 信息
         }
