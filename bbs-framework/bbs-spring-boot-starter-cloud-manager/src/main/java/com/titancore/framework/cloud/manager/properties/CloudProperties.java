@@ -30,6 +30,10 @@ public class CloudProperties {
             private String accessKeySecret;
             private String bucketNameOpen;
             private String bucketNamePrivate;
+            /** CDN 加速域名 */
+            private String cdnDomain;
+            /** 图片处理样式分隔符 */
+            private String imageProcessStyle = "x-oss-process";
         }
 
         @Getter
@@ -68,5 +72,7 @@ public class CloudProperties {
         private String accessKeySecret;
         private String bucketNameOpen;
         private String bucketNamePrivate;
+        /** CDN 加速域名 */
+        private String cdnDomain;
     }
 }

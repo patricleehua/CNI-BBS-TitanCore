@@ -683,5 +683,69 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return profileVo;
     }
 
+    @Override
+    public DMLVo updateUserInfo(Long userId, UserUpdateDTO userUpdateDTO) {
+        DMLVo dmlVo = new DMLVo();
+        if (userId == null || userUpdateDTO == null) {
+            dmlVo.setStatus(false);
+            dmlVo.setMessage("参数不能为空");
+            return dmlVo;
+        }
+
+        // 查询用户是否存在
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            dmlVo.setStatus(false);
+            dmlVo.setMessage("用户不存在");
+            return dmlVo;
+        }
+
+        // 检查昵称是否已被其他用户使用
+        if (StringUtils.isNotEmpty(userUpdateDTO.getNickName()) && !userUpdateDTO.getNickName().equals(user.getNickName())) {
+            Long count = userMapper.selectCount(
+                new LambdaQueryWrapper<User>()
+                    .eq(User::getNickName, userUpdateDTO.getNickName())
+                    .ne(User::getUserId, userId)
+            );
+            if (count > 0) {
+                dmlVo.setStatus(false);
+                dmlVo.setMessage("昵称已被使用");
+                return dmlVo;
+            }
+        }
+
+        // 构建更新条件
+        LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(User::getUserId, userId);
+
+        // 更新字段
+        if (StringUtils.isNotEmpty(userUpdateDTO.getNickName())) {
+            updateWrapper.set(User::getNickName, userUpdateDTO.getNickName());
+        }
+        if (StringUtils.isNotEmpty(userUpdateDTO.getSex())) {
+            updateWrapper.set(User::getSex, userUpdateDTO.getSex());
+        }
+        if (StringUtils.isNotEmpty(userUpdateDTO.getAvatar())) {
+            updateWrapper.set(User::getAvatar, userUpdateDTO.getAvatar());
+        }
+        if (StringUtils.isNotEmpty(userUpdateDTO.getBio())) {
+            updateWrapper.set(User::getBio, userUpdateDTO.getBio());
+        }
+        if (userUpdateDTO.getIsPrivate() != null) {
+            updateWrapper.set(User::getIsPrivate, userUpdateDTO.getIsPrivate());
+        }
+
+        int result = userMapper.update(updateWrapper);
+        if (result > 0) {
+            dmlVo.setId(String.valueOf(userId));
+            dmlVo.setStatus(true);
+            dmlVo.setMessage("更新成功");
+        } else {
+            dmlVo.setStatus(false);
+            dmlVo.setMessage("更新失败");
+        }
+        return dmlVo;
+    }
+
 }
 

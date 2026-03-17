@@ -1,8 +1,19 @@
 package com.titancore.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
-import com.titancore.domain.dto.*;
-import com.titancore.domain.vo.*;
+import com.titancore.domain.dto.BindSocialUserDTO;
+import com.titancore.domain.dto.RegisterUserDTO;
+import com.titancore.domain.dto.ResetPasswordUserDTO;
+import com.titancore.domain.dto.UserLoginDTO;
+import com.titancore.domain.dto.UserUpdateDTO;
+import com.titancore.domain.dto.VerificationCodeForUserDTO;
+import com.titancore.domain.vo.DMLVo;
+import com.titancore.domain.vo.UserLoginVo;
+import com.titancore.domain.vo.UserProfileVo;
+import com.titancore.domain.vo.UserRegisterVo;
+import com.titancore.domain.vo.UserResetPasswordVo;
+import com.titancore.domain.vo.UserVerificationCodeVo;
+import com.titancore.domain.vo.UserVo;
 import com.titancore.framework.biz.operationlog.aspect.ApiOperationLog;
 import com.titancore.framework.common.response.Response;
 import com.titancore.service.UserService;
@@ -120,6 +131,15 @@ public class UserController {
         }
         UserProfileVo profileVo = userService.getUserProfile(userName, currentUserId);
         return Response.success(profileVo);
+    }
+
+    @PutMapping("/update")
+    @ApiOperationLog
+    @Operation(summary = "更新当前登录用户信息")
+    public Response<DMLVo> updateUserInfo(@RequestBody UserUpdateDTO userUpdateDTO){
+        long userId = StpUtil.getLoginIdAsLong();
+        DMLVo dmlVo = userService.updateUserInfo(userId, userUpdateDTO);
+        return Response.success(dmlVo);
     }
 
 }

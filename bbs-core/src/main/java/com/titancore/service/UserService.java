@@ -114,5 +114,13 @@ public interface UserService  extends IService<User> {
      * @return
      */
     UserProfileVo getUserProfile(String userName, String currentUserId);
+
+    /**
+     * 更新当前登录用户信息
+     * @param userId 当前登录用户ID
+     * @param userUpdateDTO 更新信息
+     * @return
+     */
+    DMLVo updateUserInfo(Long userId, UserUpdateDTO userUpdateDTO);
 }
 
